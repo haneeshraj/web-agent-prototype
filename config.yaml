@@ -1,0 +1,5 @@
+agent:
+  reader-agent:
+    model: "jina-api"
+    max_tokens: 2048
+    temperature: 0.3
