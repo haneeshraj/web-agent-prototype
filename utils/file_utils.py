@@ -4,51 +4,57 @@ import uuid
 import os
 import re
 
-def load_website_data() -> str:
+def load_website_data() -> tuple:
     """
     Load website data from a file.
 
-    Args:
-        file_path (str): The path to the file containing website data.
-
     Returns:
-        str: The file path of the processed website data
+        tuple: (json_file_path, workspace_path) or ("", "") if error
     """
     
     script_dir = os.path.dirname(os.path.abspath(__file__))
     file_path = os.path.join(script_dir, "..", 'data', 'load_websites.txt')
     
     try:
-        
         websites = []
         
         with open(file_path, 'r') as file:
             websites = [website.strip() for website in file if website.strip()]
+        
+        if not websites:
+            print("No websites found in load_websites.txt")
+            return ("", "")
             
         processed_data = []
+        timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        
+        # Create workspace directory structure
+        workspace_path = os.path.join(script_dir, "..", 'data', 'runs', f"run_{timestamp}")
+        json_file_path = os.path.join(workspace_path, f"websites_data_{timestamp}.json")
+        
+        # Create the workspace directory
+        os.makedirs(workspace_path, exist_ok=True)
 
         for website in websites:
             ws_uuid = str(uuid.uuid4())
-            timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
             
             processed_data.append({
                 "id": ws_uuid,
                 "url": website,
             })
-            
-            # create a directory called 'websites_timestamp' and inside that dirr create a file with the name website_data_timestamp.json which contains the website id and URL as a list of jsons
-
-            json_file_path = os.path.join(script_dir, "..", 'data', 'websites', f"websites_{timestamp}", f"websites_data_{timestamp}.json")
-            workspace_path =  os.path.join(script_dir, "..", 'data', 'websites', f"websites_{timestamp}")
-            os.makedirs(os.path.dirname(json_file_path), exist_ok=True)
-            
-            with open(json_file_path, 'w') as json_file:
-                json.dump(processed_data, json_file, indent=2)
+        
+        # Save the processed data to JSON file
+        with open(json_file_path, 'w') as json_file:
+            json.dump(processed_data, json_file, indent=2)
 
         return (json_file_path, workspace_path)
+        
     except FileNotFoundError:
         print(f"Error: The file {file_path} does not exist.")
-        return ""
+        return ("", "")
+    except Exception as e:
+        print(f"Error loading website data: {e}")
+        return ("", "")
 
 
 def parse_json_from_markdown(response_content: str) -> dict:
@@ -106,4 +112,3 @@ def parse_json_from_markdown(response_content: str) -> dict:
     
     # If all patterns fail, raise an error
     raise ValueError(f"Could not extract valid JSON from response: {response_content[:200]}...")
-
