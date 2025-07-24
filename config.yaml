@@ -1,5 +1,5 @@
 agent:
-  reader-agent:
-    model: "jina-api"
+  classifier-agent:
+    model: "gemini-2.5-pro"
     max_tokens: 2048
     temperature: 0.3

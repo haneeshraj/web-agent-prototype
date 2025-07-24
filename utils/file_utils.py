@@ -4,51 +4,67 @@ import uuid
 import os
 import re
 
-def load_website_data() -> str:
+def load_website_data() -> tuple:
     """
-    Load website data from a file.
-
-    Args:
-        file_path (str): The path to the file containing website data.
+    Load website data from a file, remove duplicates, and return processed data.
 
     Returns:
-        str: The file path of the processed website data
+        tuple: (json_file_path, workspace_path) for the processed website data
     """
     
     script_dir = os.path.dirname(os.path.abspath(__file__))
     file_path = os.path.join(script_dir, "..", 'data', 'load_websites.txt')
     
     try:
-        
         websites = []
         
         with open(file_path, 'r') as file:
-            websites = [website.strip() for website in file if website.strip()]
-            
+            # Read all websites and strip whitespace
+            raw_websites = [website.strip() for website in file if website.strip()]
+        
+        # Remove duplicates while preserving order
+        seen = set()
+        for website in raw_websites:
+            # Normalize URL for duplicate checking (convert to lowercase, remove trailing slash)
+            normalized_url = website.lower().rstrip('/')
+            if normalized_url not in seen:
+                seen.add(normalized_url)
+                websites.append(website)  # Keep original case
+        
+        if len(raw_websites) > len(websites):
+            print(f"Removed {len(raw_websites) - len(websites)} duplicate URLs")
+        
         processed_data = []
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
         for website in websites:
             ws_uuid = str(uuid.uuid4())
-            timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
             
             processed_data.append({
                 "id": ws_uuid,
                 "url": website,
             })
-            
-            # create a directory called 'websites_timestamp' and inside that dirr create a file with the name website_data_timestamp.json which contains the website id and URL as a list of jsons
-
-            json_file_path = os.path.join(script_dir, "..", 'data', 'websites', f"websites_{timestamp}", f"websites_data_{timestamp}.json")
-            workspace_path =  os.path.join(script_dir, "..", 'data', 'websites', f"websites_{timestamp}")
-            os.makedirs(os.path.dirname(json_file_path), exist_ok=True)
-            
-            with open(json_file_path, 'w') as json_file:
-                json.dump(processed_data, json_file, indent=2)
-
-        return (json_file_path, workspace_path)
+        
+        # Create comprehensive directory structure under data/runs/
+        # This matches the scraper's run directory structure
+        run_data_dir = os.path.join(script_dir, "..", 'data', 'runs', f"run_{timestamp}")
+        os.makedirs(run_data_dir, exist_ok=True)
+        
+        # Save the processed website data in the same run directory
+        json_file_path = os.path.join(run_data_dir, f"websites_data_{timestamp}.json")
+        
+        with open(json_file_path, 'w') as json_file:
+            json.dump(processed_data, json_file, indent=2)
+        
+        print(f"Loaded {len(websites)} unique websites for processing")
+        return (json_file_path, run_data_dir)
+        
     except FileNotFoundError:
         print(f"Error: The file {file_path} does not exist.")
-        return ""
+        return ("", "")
+    except Exception as e:
+        print(f"Error loading website data: {e}")
+        return ("", "")
 
 
 def parse_json_from_markdown(response_content: str) -> dict:
@@ -106,4 +122,3 @@ def parse_json_from_markdown(response_content: str) -> dict:
     
     # If all patterns fail, raise an error
     raise ValueError(f"Could not extract valid JSON from response: {response_content[:200]}...")
-
