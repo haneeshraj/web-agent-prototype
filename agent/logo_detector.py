@@ -43,7 +43,7 @@ RESPONSE FORMAT:
 Return a JSON object with this exact structure:
 {
     "logo_found": true/false,
-    "confidence": "high|medium|low",
+    "confidence": "range - [0.0, 1.0]",
     "selected_image": {
         // If logo found, include the exact image object from the images array
         // If not found, use empty object {}

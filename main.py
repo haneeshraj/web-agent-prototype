@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-
-
 import sys
 from pathlib import Path
 
@@ -16,6 +13,8 @@ def main():
     try:
         scraper = WebsiteScraper()
         scraper.run()
+        
+        
         
     except KeyboardInterrupt:
         print("\nScraping interrupted by user")

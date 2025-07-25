@@ -3,6 +3,7 @@ import json
 import uuid
 import os
 import re
+import requests
 
 def load_website_data() -> tuple:
     """
@@ -122,3 +123,4 @@ def parse_json_from_markdown(response_content: str) -> dict:
     
     # If all patterns fail, raise an error
     raise ValueError(f"Could not extract valid JSON from response: {response_content[:200]}...")
+

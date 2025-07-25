@@ -30,6 +30,7 @@ class WebsiteScraper:
         self.run_timestamp = None  # Will be set from loaded data
         self.base_data_dir = None  # Will be set from loaded data
         self.summary_data = []
+        self.download_images_dir = None  # Will be set when needed
         
         # Initialize logo detector
         self.logo_detector = LogoDetector()
@@ -357,6 +358,54 @@ class WebsiteScraper:
         except Exception as e:
             return ""
     
+    def download_logo_image(self, logo_url: str, domain_name: str, timestamp: str) -> str:
+        """
+        Download logo image from URL and save it locally.
+        
+        Args:
+            logo_url (str): URL of the logo image
+            domain_name (str): Domain name for filename
+            timestamp (str): Timestamp for filename
+            
+        Returns:
+            str: Local path where image was saved, empty string if failed
+        """
+        if not logo_url or not logo_url.startswith(('http://', 'https://')):
+            return ""
+        
+        try:
+            # Create download_images directory if it doesn't exist
+            if not self.download_images_dir:
+                self.download_images_dir = os.path.join(self.base_data_dir, "download_images")
+                os.makedirs(self.download_images_dir, exist_ok=True)
+            
+            # Create filename: domain_name_timestamp.png
+            filename = f"{domain_name}_{timestamp}.png"
+            local_path = os.path.join(self.download_images_dir, filename)
+            
+            # Download the image
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            }
+            
+            response = requests.get(logo_url, headers=headers, timeout=30, stream=True)
+            response.raise_for_status()
+            
+            # Save the image
+            with open(local_path, 'wb') as f:
+                for chunk in response.iter_content(chunk_size=8192):
+                    f.write(chunk)
+            
+            # Return relative path from base_data_dir
+            return local_path
+            
+        except requests.exceptions.RequestException as e:
+            warning(f"Failed to download logo from {logo_url}: {e}")
+            return ""
+        except Exception as e:
+            warning(f"Error saving logo image: {e}")
+            return ""
+    
     def scrape_website(self, url: str) -> Dict[str, Any]:
         """Scrape a single website"""
         start_time = time.time()
@@ -380,7 +429,8 @@ class WebsiteScraper:
             "total_images": 0,
             "load_time_seconds": 0,
             "screenshot_path": "",
-            "logo_detection": {}  # Will store logo detection results
+            "logo_detection": {},  # Will store logo detection results
+            "downloaded_logo_path": ""  # New field for downloaded logo path
         }
         
         try:
@@ -427,6 +477,18 @@ class WebsiteScraper:
             # Perform logo detection using all three files (screenshot, HTML, images)
             logo_result = self.logo_detector.detect_logo(domain_dir, domain_name)
             scrape_data["logo_detection"] = logo_result
+            
+            # Download logo image if one was detected
+            if logo_result.get('logo_found') and logo_result.get('selected_image'):
+                logo_url = logo_result['selected_image'].get('src', '')
+                if logo_url:
+                    info(f"   📥 Downloading logo: {logo_url}")
+                    downloaded_path = self.download_logo_image(logo_url, domain_name, timestamp)
+                    if downloaded_path:
+                        scrape_data["downloaded_logo_path"] = downloaded_path
+                        success(f"   ✅ Logo saved: {downloaded_path}")
+                    else:
+                        warning("   ❌ Failed to download logo")
             
             # Add delay to respect rate limits
             info("   ⏳ Rate limit delay...")
@@ -479,6 +541,7 @@ class WebsiteScraper:
             "failed_scrapes": sum(1 for site in self.summary_data if site["status"] == "failed"),
             "total_images_found": sum(site.get("total_images", 0) for site in self.summary_data),
             "logos_detected": sum(1 for site in self.summary_data if site.get("logo_detection", {}).get("logo_found", False)),
+            "logos_downloaded": sum(1 for site in self.summary_data if site.get("downloaded_logo_path", "")),
             "average_load_time": round(sum(site.get("load_time_seconds", 0) for site in self.summary_data) / len(self.summary_data), 2) if self.summary_data else 0,
             "websites": self.summary_data
         }
@@ -507,10 +570,14 @@ class WebsiteScraper:
             if logo_detection.get("logo_found") and logo_detection.get("selected_image"):
                 logo_url = logo_detection["selected_image"].get("src", "")
             
+            # Get downloaded logo path
+            downloaded_logo_path = site.get("downloaded_logo_path", "")
+            
             # Create entry for both successful scrapes and failed ones
             logo_entry = {
                 "website": site["url"],
                 "logo_url": logo_url,
+                "downloaded_logo_path": downloaded_logo_path,
                 "reasoning": logo_detection.get("reasoning", "Website scraping failed - no analysis performed" if site["status"] == "failed" else "No logo analysis performed"),
                 "confidence": logo_detection.get("confidence", "none")
             }
@@ -573,6 +640,7 @@ class WebsiteScraper:
             completed(f"Failed: {sum(1 for site in self.summary_data if site['status'] == 'failed')}")
             completed(f"Total images found: {sum(site.get('total_images', 0) for site in self.summary_data)}")
             completed(f"Logos detected: {sum(1 for site in self.summary_data if site.get('logo_detection', {}).get('logo_found', False))}")
+            completed(f"Logos downloaded: {sum(1 for site in self.summary_data if site.get('downloaded_logo_path', ''))}")
             completed(f"Data saved in: {self.base_data_dir}")
             
         except KeyboardInterrupt:
@@ -587,5 +655,3 @@ class WebsiteScraper:
                 info("Closing WebDriver...")
                 self.driver.quit()
                 success("WebDriver closed successfully")
-
-
