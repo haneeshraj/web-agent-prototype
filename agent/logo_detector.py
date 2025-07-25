@@ -31,6 +31,9 @@ INSTRUCTIONS:
    - Top-left corner
    - Center of header
    - Footer area (secondary logos)
+   - Profile picture area (for social media pages)
+   - Cover photo area (for social media pages)
+   - Business info sections (for social media pages)
 
 5. From the provided images list, identify which image corresponds to the logo you see in the screenshot
 6. Consider these logo characteristics:
@@ -38,6 +41,13 @@ INSTRUCTIONS:
    - Often positioned prominently in navigation
    - May have alt text with brand/company names
    - Typically appears in header sections
+   - On social media pages, often appears as profile pictures or in cover photos
+
+7. IMPORTANT - Platform vs. Merchant Logo Priority:
+   - When analyzing social media pages (Facebook, Instagram, Twitter, LinkedIn, etc.), focus on identifying the ACCOUNT HOLDER'S/BUSINESS'S logo, NOT the social media platform's branding
+   - Ignore platform logos (Facebook "f" logo, Instagram camera icon, Twitter bird, LinkedIn "in" logo, etc.) that appear in headers, navigation, or footers
+   - Prioritize the merchant/business/account owner's brand identity over platform branding
+   - Look for the company's logo in profile pictures, cover photos, about sections, or embedded business imagery
 
 RESPONSE FORMAT:
 Return a JSON object with this exact structure:
@@ -56,7 +66,8 @@ IMPORTANT:
 - Only return valid JSON
 - If you cannot confidently identify a logo, set logo_found to false and explain why
 - If multiple logos exist, choose the primary/main brand logo
-- Ignore decorative images, icons that aren't logos, and background images"""
+- Ignore decorative images, icons that aren't logos, and background images
+- On social media pages, prioritize the account holder's brand logo over platform branding"""
 
     def _load_screenshot(self, screenshot_path: str) -> Optional[bytes]:
         """
