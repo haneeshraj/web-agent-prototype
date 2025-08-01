@@ -22,6 +22,7 @@ import requests
 from utils.file_utils import load_website_data
 from utils.terminal_prettify import success, error, warning, info, processing, completed, header
 from agent.logo_detector import LogoDetector
+from agent.mcc_classifier import MCCClassifier
 
 
 class WebsiteScraper:
@@ -32,8 +33,9 @@ class WebsiteScraper:
         self.summary_data = []
         self.download_images_dir = None  # Will be set when needed
         
-        # Initialize logo detector
+        # Initialize logo detector and MCC classifier
         self.logo_detector = LogoDetector()
+        self.mcc_classifier = MCCClassifier()
         
     def setup_driver(self):
         """Setup Chrome WebDriver with proper options for Windows"""
@@ -430,7 +432,10 @@ class WebsiteScraper:
             "load_time_seconds": 0,
             "screenshot_path": "",
             "logo_detection": {},  # Will store logo detection results
-            "downloaded_logo_path": ""  # New field for downloaded logo path
+            "downloaded_logo_path": "",  # Logo download path
+            "mcc_classification": {},  # NEW: Will store MCC classification results
+            "final_mcc_code": None,  # NEW: Final MCC code
+            "mcc_confidence": 0.0  # NEW: MCC classification confidence
         }
         
         try:
@@ -475,6 +480,7 @@ class WebsiteScraper:
             scrape_data["files_created"].append("images.json")
             
             # Perform logo detection using all three files (screenshot, HTML, images)
+            info("   🔍 Detecting logo...")
             logo_result = self.logo_detector.detect_logo(domain_dir, domain_name)
             scrape_data["logo_detection"] = logo_result
             
@@ -490,14 +496,32 @@ class WebsiteScraper:
                     else:
                         warning("   ❌ Failed to download logo")
             
-            # Add delay to respect rate limits
-            info("   ⏳ Rate limit delay...")
-            time.sleep(10)
-            
             # Save logo detection result
             logo_file_path = self.logo_detector.save_logo_result(domain_dir, logo_result)
             if logo_file_path:
                 scrape_data["files_created"].append("logo_detection.json")
+            
+            # NEW: Perform MCC classification
+            info("   🏷️  Classifying MCC code...")
+            mcc_result = self.mcc_classifier.classify_mcc(domain_dir, domain_name)
+            scrape_data["mcc_classification"] = mcc_result
+            
+            # Extract key MCC results for easy access
+            if mcc_result.get("classification_success"):
+                scrape_data["final_mcc_code"] = mcc_result.get("final_mcc")
+                scrape_data["mcc_confidence"] = mcc_result.get("final_confidence", 0.0)
+                success(f"   🎯 MCC: {scrape_data['final_mcc_code']} (confidence: {scrape_data['mcc_confidence']:.2f})")
+            else:
+                warning(f"   ❌ MCC classification failed: {mcc_result.get('error', 'Unknown error')}")
+            
+            # Save MCC classification result
+            mcc_file_path = self.mcc_classifier.save_mcc_result(domain_dir, mcc_result)
+            if mcc_file_path:
+                scrape_data["files_created"].append("mcc_classification.json")
+            
+            # Add delay to respect rate limits
+            info("   ⏳ Rate limit delay...")
+            time.sleep(10)
             
             scrape_data["status"] = "success"
             scrape_data["load_time_seconds"] = round(time.time() - start_time, 2)
@@ -509,6 +533,12 @@ class WebsiteScraper:
                 info(f"   🎯 Logo detected ({logo_result.get('confidence', 'unknown')} confidence)")
             else:
                 info(f"   ❌ No logo found")
+            
+            # Show MCC classification result summary
+            if scrape_data["final_mcc_code"]:
+                info(f"   🏷️  MCC: {scrape_data['final_mcc_code']}")
+            else:
+                info(f"   🏷️  MCC: Classification failed")
                 
             info(f"   📁 {domain_name}_{timestamp}/ • {len(images_data)} images")
             
@@ -542,6 +572,9 @@ class WebsiteScraper:
             "total_images_found": sum(site.get("total_images", 0) for site in self.summary_data),
             "logos_detected": sum(1 for site in self.summary_data if site.get("logo_detection", {}).get("logo_found", False)),
             "logos_downloaded": sum(1 for site in self.summary_data if site.get("downloaded_logo_path", "")),
+            "mcc_classifications_successful": sum(1 for site in self.summary_data if site.get("final_mcc_code") is not None),  # NEW
+            "mcc_classifications_failed": sum(1 for site in self.summary_data if site.get("final_mcc_code") is None and site["status"] == "success"),  # NEW
+            "average_mcc_confidence": round(sum(site.get("mcc_confidence", 0.0) for site in self.summary_data if site.get("mcc_confidence", 0.0) > 0) / max(1, sum(1 for site in self.summary_data if site.get("mcc_confidence", 0.0) > 0)), 3),  # NEW
             "average_load_time": round(sum(site.get("load_time_seconds", 0) for site in self.summary_data) / len(self.summary_data), 2) if self.summary_data else 0,
             "websites": self.summary_data
         }
@@ -551,8 +584,9 @@ class WebsiteScraper:
         
         success(f"Summary saved: summary.json")
         
-        # Create logo summary
+        # Create logo summary and MCC summary
         self.save_logo_summary()
+        self.save_mcc_summary()  # NEW
         
         return summary_file_path
     
@@ -590,9 +624,39 @@ class WebsiteScraper:
         success(f"Logo summary saved: logo_summary.json")
         return logo_summary_path
     
+    def save_mcc_summary(self):
+        """NEW: Save MCC-specific summary to a separate JSON file"""
+        mcc_summary_path = os.path.join(self.base_data_dir, "mcc_summary.json")
+        
+        mcc_summary = []
+        
+        for site in self.summary_data:
+            mcc_classification = site.get("mcc_classification", {})
+            
+            # Create entry for both successful and failed classifications
+            mcc_entry = {
+                "website": site["url"],
+                "final_mcc_code": site.get("final_mcc_code"),
+                "final_mcc_description": mcc_classification.get("final_mcc_description", ""),
+                "confidence": site.get("mcc_confidence", 0.0),
+                "classification_success": mcc_classification.get("classification_success", False),
+                "stage1_category": mcc_classification.get("stage1_result", {}).get("selected_category_name", ""),
+                "stage1_range": mcc_classification.get("stage1_result", {}).get("selected_category_range", ""),
+                "error": mcc_classification.get("error", "" if site["status"] == "success" else "Website scraping failed"),
+                "business_type_identified": mcc_classification.get("stage1_result", {}).get("business_type_identified", "")
+            }
+            
+            mcc_summary.append(mcc_entry)
+        
+        with open(mcc_summary_path, 'w', encoding='utf-8') as f:
+            json.dump(mcc_summary, f, indent=2, ensure_ascii=False)
+        
+        success(f"MCC summary saved: mcc_summary.json")
+        return mcc_summary_path
+    
     def run(self):
         """Main execution method"""
-        header("Website Scraper Agent")
+        header("Website Scraper Agent with Logo Detection & MCC Classification")
         
         # Setup WebDriver
         if not self.setup_driver():
@@ -641,6 +705,8 @@ class WebsiteScraper:
             completed(f"Total images found: {sum(site.get('total_images', 0) for site in self.summary_data)}")
             completed(f"Logos detected: {sum(1 for site in self.summary_data if site.get('logo_detection', {}).get('logo_found', False))}")
             completed(f"Logos downloaded: {sum(1 for site in self.summary_data if site.get('downloaded_logo_path', ''))}")
+            completed(f"MCC classifications successful: {sum(1 for site in self.summary_data if site.get('final_mcc_code') is not None)}")  # NEW
+            completed(f"Average MCC confidence: {sum(site.get('mcc_confidence', 0.0) for site in self.summary_data if site.get('mcc_confidence', 0.0) > 0) / max(1, sum(1 for site in self.summary_data if site.get('mcc_confidence', 0.0) > 0)):.2f}")  # NEW
             completed(f"Data saved in: {self.base_data_dir}")
             
         except KeyboardInterrupt:
