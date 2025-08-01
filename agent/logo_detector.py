@@ -31,9 +31,6 @@ INSTRUCTIONS:
    - Top-left corner
    - Center of header
    - Footer area (secondary logos)
-   - Profile picture area (for social media pages)
-   - Cover photo area (for social media pages)
-   - Business info sections (for social media pages)
 
 5. From the provided images list, identify which image corresponds to the logo you see in the screenshot
 6. Consider these logo characteristics:
@@ -41,13 +38,16 @@ INSTRUCTIONS:
    - Often positioned prominently in navigation
    - May have alt text with brand/company names
    - Typically appears in header sections
-   - On social media pages, often appears as profile pictures or in cover photos
-
-7. IMPORTANT - Platform vs. Merchant Logo Priority:
-   - When analyzing social media pages (Facebook, Instagram, Twitter, LinkedIn, etc.), focus on identifying the ACCOUNT HOLDER'S/BUSINESS'S logo, NOT the social media platform's branding
-   - Ignore platform logos (Facebook "f" logo, Instagram camera icon, Twitter bird, LinkedIn "in" logo, etc.) that appear in headers, navigation, or footers
-   - Prioritize the merchant/business/account owner's brand identity over platform branding
-   - Look for the company's logo in profile pictures, cover photos, about sections, or embedded business imagery
+7. PLATFORM vs MERCHANT DISTINCTION:
+   - If the page is a social media platform's login page, signup page, or generic platform page (showing Instagram, Facebook, Twitter, LinkedIn branding), return logo_found as false
+   - Only return logo_found as true if you can identify a MERCHANT/BUSINESS logo, not the platform's own branding
+   - Platform logos (Instagram wordmark, Facebook logo, etc.) should NOT be considered the "main brand logo" you're looking for
+8. VALID LOGO CRITERIA:
+   - A valid logo must be a designed brand identity element (text-based logo, symbol, or combination)
+   - DO NOT select profile pictures that are photos of people, even if they appear in profile/avatar positions
+   - DO NOT select generic photos, lifestyle images, or personal photographs
+   - Only select images that clearly represent a business/brand identity (company name, brand symbol, designed logo mark)
+   - If a profile picture is just a photo of a person rather than a designed logo, return logo_found as false
 
 RESPONSE FORMAT:
 Return a JSON object with this exact structure:
@@ -66,8 +66,7 @@ IMPORTANT:
 - Only return valid JSON
 - If you cannot confidently identify a logo, set logo_found to false and explain why
 - If multiple logos exist, choose the primary/main brand logo
-- Ignore decorative images, icons that aren't logos, and background images
-- On social media pages, prioritize the account holder's brand logo over platform branding"""
+- Ignore decorative images, icons that aren't logos, and background images"""
 
     def _load_screenshot(self, screenshot_path: str) -> Optional[bytes]:
         """

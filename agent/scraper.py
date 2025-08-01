@@ -625,7 +625,7 @@ class WebsiteScraper:
                 scrape_result = self.scrape_website(url)
                 self.summary_data.append(scrape_result)
                 
-                # Small delay between requests to be respectful
+                # Small delay between requests to be respectful and not get suspicious  i dont wanna get blocked  by the websites
                 if i < len(websites_data):
                     time.sleep(2)
             
