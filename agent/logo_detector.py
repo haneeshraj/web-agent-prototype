@@ -20,76 +20,116 @@ class LogoDetector:
         self.model_config = get_model_config("classifier-agent")
         
         # System prompt for logo detection and merchant name extraction
-        self.system_prompt = """You are a website logo detection and merchant name extraction expert. Your task is to identify the main logo/brand image from a website AND extract the merchant/business name using the provided screenshot and HTML structure.
+        self.system_prompt = """You are a website logo detection, merchant name extraction, and business address analysis expert. Your task is to identify the main logo/brand image from a website, extract the merchant/business name, AND analyze for business address information using the provided screenshot and HTML structure.
 
 INSTRUCTIONS:
 1. Analyze the screenshot to visually identify the website's main logo/brand image
 2. Use the HTML structure to understand the page layout and context
 3. Extract the merchant/business name from various sources (logo text, page title, headings, etc.)
-4. If there are cookie overlays, popups, or modals, ignore them and focus on the main website content behind them
-5. Look for logos typically positioned in:
+4. ADDITIONALLY: Analyze the HTML content for business address information and location context
+5. If there are cookie overlays, popups, or modals, ignore them and focus on the main website content behind them
+
+LOGO DETECTION:
+6. Look for logos typically positioned in:
    - Header/navigation area (most common)
    - Top-left corner
    - Center of header
    - Footer area (secondary logos)
 
-6. From the provided images list, identify which image corresponds to the logo you see in the screenshot
-7. Consider these logo characteristics:
+7. From the provided images list, identify which image corresponds to the logo you see in the screenshot
+8. Consider these logo characteristics:
    - Usually contains company/brand name or distinctive visual identity
    - Often positioned prominently in navigation
    - May have alt text with brand/company names
    - Typically appears in header sections
 
-8. MERCHANT NAME EXTRACTION:
-   - Look for the business/merchant name in multiple sources:
-     * Logo text (text within or next to the logo)
-     * Page title (HTML <title> tag)
-     * Main headings (H1, H2 tags)
-     * Navigation menu items
-     * "About" or "Company" sections
-     * Meta tags (business name, site name)
-     * Footer copyright information
-   - Prioritize names that appear in prominent locations (header, logo area, main title)
-   - Extract the BUSINESS name, not generic terms like "Home" or "Welcome"
-   - If multiple business names found, choose the most prominent/consistent one
+MERCHANT NAME EXTRACTION:
+9. Look for the business/merchant name in multiple sources:
+   - Logo text (text within or next to the logo)
+   - Page title (HTML <title> tag)
+   - Main headings (H1, H2 tags)
+   - Navigation menu items
+   - "About" or "Company" sections
+   - Meta tags (business name, site name)
+   - Footer copyright information
+10. Prioritize names that appear in prominent locations (header, logo area, main title)
+11. Extract the BUSINESS name, not generic terms like "Home" or "Welcome"
+12. If multiple business names found, choose the most prominent/consistent one
 
-9. PLATFORM vs MERCHANT DISTINCTION:
-   - If the page is a social media platform's login page, signup page, or generic platform page (showing Instagram, Facebook, Twitter, LinkedIn branding), return logo_found as false
-   - Only return logo_found as true if you can identify a MERCHANT/BUSINESS logo, not the platform's own branding
-   - Platform logos (Instagram wordmark, Facebook logo, etc.) should NOT be considered the "main brand logo" you're looking for
-   - For platform pages, still try to extract merchant name if there's a clear business profile being displayed
+ADDRESS & LOCATION ANALYSIS:
+13. SIMULTANEOUSLY analyze the HTML content for business address information:
+    - Look for complete addresses in Contact pages, About sections, Footer areas
+    - Identify headquarters, main office, or primary store addresses
+    - Focus on MAIN business addresses (not shipping/warehouse/customer service addresses)
+    - Look for street addresses with city, state/province, postal code
 
-10. VALID LOGO CRITERIA:
-   - A valid logo must be a designed brand identity element (text-based logo, symbol, or combination)
-   - DO NOT select profile pictures that are photos of people, even if they appear in profile/avatar positions
-   - DO NOT select generic photos, lifestyle images, or personal photographs
-   - Only select images that clearly represent a business/brand identity (company name, brand symbol, designed logo mark)
-   - If a profile picture is just a photo of a person rather than a designed logo, return logo_found as false
+14. ALSO extract location context from the website content:
+    - Countries, states/provinces, cities where the business operates
+    - "Founded in", "Based in", "Established in" statements
+    - Geographic indicators that suggest the original/primary location
+    - Regional mentions in business descriptions
+
+15. PRIORITIZATION for addresses:
+    - If a complete address is found, extract it directly
+    - If no complete address but location context exists, note the context
+    - Focus on ORIGINAL/FOUNDING location, not expansion markets
+
+VALIDATION RULES:
+16. PLATFORM vs MERCHANT DISTINCTION:
+    - If the page is a social media platform's login/signup page, return logo_found as false
+    - Only return logo_found as true for actual MERCHANT/BUSINESS logos
+    - Platform logos should NOT be considered the "main brand logo"
+
+17. VALID LOGO CRITERIA:
+    - Must be a designed brand identity element (text-based logo, symbol, or combination)
+    - DO NOT select profile pictures of people or generic photos
+    - Only select images representing business/brand identity
 
 RESPONSE FORMAT:
 Return a JSON object with this exact structure:
 {
     "logo_found": true/false,
-    "confidence": "range - [0.0, 1.0]",
+    "confidence": 0.95,
     "selected_image": {
-        // If logo found, include the exact image object from the images array
+        // If logo found, include the exact image object from images array
         // If not found, use empty object {}
     },
-    "reasoning": "Detailed explanation of why this image was selected as the logo, or why no logo was found",
+    "reasoning": "Detailed explanation of logo selection or why no logo found",
     "visual_description": "Description of what the logo looks like in the screenshot",
     "merchant_name": "Extracted business/merchant name",
-    "merchant_name_source": "Where the merchant name was found (e.g., 'logo text', 'page title', 'main heading', etc.)",
+    "merchant_name_source": "Where the merchant name was found",
     "merchant_name_confidence": 0.95,
-    "alternative_names": ["other possible business names found", "if any"]
+    "alternative_names": ["other possible business names found"],
+    
+    // NEW: Address Analysis Results
+    "address_analysis": {
+        "address_found_on_website": true/false,
+        "extracted_address": "Complete address if found, empty string if not",
+        "address_confidence": 0.90,
+        "address_source": "Where address was found (e.g., 'contact page', 'footer', 'about section')",
+        "address_type": "Type of address (e.g., 'headquarters', 'main office', 'primary store')",
+        "address_reasoning": "Explanation of why this address was selected or why none found"
+    },
+    
+    // NEW: Location Context Results
+    "location_context": {
+        "primary_country": "Country where business was founded/primarily based",
+        "primary_state_province": "State/province of primary location",
+        "primary_city": "City of primary location",
+        "additional_locations": ["other countries/regions mentioned"],
+        "location_confidence": 0.85,
+        "location_reasoning": "Explanation of why this location was identified as primary"
+    }
 }
 
 IMPORTANT:
 - Only return valid JSON
-- If you cannot confidently identify a logo, set logo_found to false and explain why
-- If multiple logos exist, choose the primary/main brand logo
-- Always attempt to extract a merchant name even if no logo is found
-- If no clear merchant name can be identified, set merchant_name to an empty string and explain why in reasoning
-- Ignore decorative images, icons that aren't logos, and background images"""
+- If no logo found, set logo_found to false and explain why
+- If no address found, set address_found_on_website to false
+- If no location context found, use empty strings for location fields
+- Always attempt to extract merchant name even if no logo found
+- Focus on ORIGINAL/PRIMARY business locations, not expansion markets
+- Confidence scores should be between 0.0 and 1.0"""
 
     def _load_screenshot(self, screenshot_path: str) -> Optional[bytes]:
         """
@@ -164,7 +204,7 @@ IMPORTANT:
         if len(html_content) > max_html_length:
             html_content = html_content[:max_html_length] + "\n... [HTML truncated for length]"
         
-        prompt = f"""Please analyze this website to identify the main logo/brand image AND extract the merchant/business name.
+        prompt = f"""Please analyze this website to: 1) identify the main logo/brand image, 2) extract the merchant/business name, and 3) analyze address/location information.
 
 WEBSITE HTML STRUCTURE:
 ```html
@@ -176,14 +216,14 @@ AVAILABLE IMAGES ON THE PAGE:
 {json.dumps(images_data, indent=2)}
 ```
 
-TASK:
+COMBINED ANALYSIS TASKS:
+
+**LOGO DETECTION:**
 1. Look at the provided screenshot to visually identify the main logo
 2. Use the HTML structure to understand the page layout and extract business information
 3. Match the logo you see in the screenshot with one of the images from the available images list
-4. Extract the merchant/business name from various sources in the HTML and screenshot
-5. Return your analysis in the specified JSON format with both logo detection AND merchant name extraction
 
-MERCHANT NAME EXTRACTION PRIORITY:
+**MERCHANT NAME EXTRACTION PRIORITY:**
 - Text within or immediately next to the logo
 - Main page title (HTML <title> tag)
 - Primary headings (H1, H2) that contain business names
@@ -191,20 +231,46 @@ MERCHANT NAME EXTRACTION PRIORITY:
 - Header/footer text with business identification
 - Meta tags with site/business names
 
+**ADDRESS & LOCATION ANALYSIS:**
+4. Extract complete business address information from the website content
+5. Identify location context clues (city, state, country, region mentions)
+6. Look for contact information, store locations, "about us" sections
+7. Analyze any address-related structured data or schema markup
+
+**ADDRESS EXTRACTION PRIORITY:**
+- Contact/About pages with full addresses
+- Footer sections with business address
+- Store location pages or "Find Us" sections
+- Structured data (JSON-LD, microdata) with address info
+- Headers with location information
+- Maps or location widgets with address details
+
+**LOCATION CONTEXT CLUES:**
+- City/state mentions in text content
+- Phone numbers with area codes
+- Local references or landmarks
+- Service area descriptions
+- "Serving [Location]" or "Located in [City]" text
+
 Remember to ignore any cookie overlays, popups, or modal dialogs - focus on the main website content behind them."""
 
         return prompt
     
     def detect_logo(self, domain_dir: str, domain_name: str) -> Dict[str, Any]:
         """
-        Detect logo from website files in the domain directory and extract merchant name.
+        Detect logo from website files, extract merchant name, and analyze address/location information.
+        This is an optimized method that combines logo detection with address extraction stages 0-1
+        to reduce LLM API calls.
         
         Args:
             domain_dir (str): Path to domain directory containing the files
             domain_name (str): Domain name for logging
             
         Returns:
-            Dict[str, Any]: Logo detection results including merchant name
+            Dict[str, Any]: Combined analysis results including:
+                - Logo detection results and merchant name
+                - Address analysis (equivalent to address extraction stage 0-1)
+                - Location context information
         """
         # Define file paths
         screenshot_path = None
@@ -291,12 +357,13 @@ Remember to ignore any cookie overlays, popups, or modal dialogs - focus on the 
                 # Validate required keys and add defaults for new fields
                 required_keys = ['logo_found', 'confidence', 'selected_image', 'reasoning']
                 new_keys = ['merchant_name', 'merchant_name_source', 'merchant_name_confidence', 'alternative_names']
+                address_keys = ['address_analysis', 'location_context']
                 
                 for key in required_keys:
                     if key not in result:
                         result[key] = None
                 
-                # Add default values for new merchant name fields if missing
+                # Add default values for merchant name fields if missing
                 if 'merchant_name' not in result:
                     result['merchant_name'] = ""
                 if 'merchant_name_source' not in result:
@@ -305,6 +372,25 @@ Remember to ignore any cookie overlays, popups, or modal dialogs - focus on the 
                     result['merchant_name_confidence'] = 0.0
                 if 'alternative_names' not in result:
                     result['alternative_names'] = []
+                
+                # Add default values for address analysis fields if missing
+                if 'address_analysis' not in result:
+                    result['address_analysis'] = {
+                        'addresses_found': [],
+                        'confidence': 'none',
+                        'primary_address': '',
+                        'source': '',
+                        'reasoning': 'No address information found'
+                    }
+                if 'location_context' not in result:
+                    result['location_context'] = {
+                        'city': '',
+                        'state': '',
+                        'country': '',
+                        'region': '',
+                        'local_references': [],
+                        'confidence': 'none'
+                    }
                 
                 return result
             else:
@@ -336,6 +422,21 @@ Remember to ignore any cookie overlays, popups, or modal dialogs - focus on the 
             'merchant_name_source': '',
             'merchant_name_confidence': 0.0,
             'alternative_names': [],
+            'address_analysis': {
+                'addresses_found': [],
+                'confidence': 'none',
+                'primary_address': '',
+                'source': '',
+                'reasoning': 'Analysis failed'
+            },
+            'location_context': {
+                'city': '',
+                'state': '',
+                'country': '',
+                'region': '',
+                'local_references': [],
+                'confidence': 'none'
+            },
             'analysis_metadata': {
                 'error': True,
                 'model_used': self.model_config.get('model', 'unknown'),

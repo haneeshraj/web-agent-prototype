@@ -582,15 +582,20 @@ Focus on finding the PRIMARY business headquarters for {merchant_name}, especial
                 "alternative_addresses": []
             }
 
-    def extract_address(self, domain_dir: str, domain_name: str, merchant_name: str = "", business_type: str = "") -> Dict[str, Any]:
+    def extract_address(self, domain_dir: str, domain_name: str, merchant_name: str = "", business_type: str = "", 
+                       logo_address_analysis: Optional[Dict[str, Any]] = None, 
+                       logo_location_context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """
         Extract business address using a two-stage approach: website analysis + search fallback.
+        Optimized to use results from logo analysis when available to reduce LLM calls.
         
         Args:
             domain_dir (str): Directory containing website data
             domain_name (str): Domain name of the website
             merchant_name (str): Merchant/business name for search queries
             business_type (str): Type of business for search context
+            logo_address_analysis (Dict[str, Any], optional): Address analysis from logo detection
+            logo_location_context (Dict[str, Any], optional): Location context from logo detection
             
         Returns:
             Dict[str, Any]: Complete address extraction results
@@ -601,8 +606,8 @@ Focus on finding the PRIMARY business headquarters for {merchant_name}, especial
             "domain": domain_name,
             "merchant_name_used": merchant_name,
             "business_type_used": business_type,
-            "location_context": {},
-            "website_analysis": {},
+            "location_context": logo_location_context or {},
+            "website_analysis": logo_address_analysis or {},
             "search_analysis": {},
             "final_address": "",
             "final_confidence": 0.0,
@@ -613,46 +618,90 @@ Focus on finding the PRIMARY business headquarters for {merchant_name}, especial
         }
         
         try:
-            # Stage 0: Extract location context from website
-            html_path = os.path.join(domain_dir, "page.html")
-            html_content = self._load_html_content(html_path)
+            # Check if we have usable results from logo analysis (optimization)
+            skip_stage_0 = logo_location_context and logo_location_context.get('confidence') in ['high', 'medium']
+            skip_stage_1 = (logo_address_analysis and 
+                           logo_address_analysis.get('addresses_found') and 
+                           logo_address_analysis.get('confidence') in ['high', 'medium'])
             
-            if not html_content:
-                result["error"] = "HTML file not found or could not be loaded"
-                return result
-            
-            info("Stage 0: Extracting location context...")
-            location_context = self._extract_location_context(html_content)
-            result["location_context"] = location_context
-            
-            if location_context.get("location_confidence", 0.0) > 0.3:
-                primary_location = []
-                if location_context.get("primary_city"):
-                    primary_location.append(location_context["primary_city"])
-                if location_context.get("primary_state_province"):
-                    primary_location.append(location_context["primary_state_province"])
-                if location_context.get("primary_country"):
-                    primary_location.append(location_context["primary_country"])
-                if primary_location:
-                    info(f"Identified primary location context: {', '.join(primary_location)}")
-            
-            # Stage 1: Analyze website HTML for address
-            info("Stage 1: Analyzing website content for address...")
-            website_result = self._analyze_website_for_address(html_content)
-            result["website_analysis"] = website_result
-            
-            # If address found in website with high confidence, use it
-            if (website_result.get("address_found_in_website", False) and 
-                website_result.get("address_confidence", 0.0) >= 0.7):
+            # Stage 0: Extract location context from website (skip if already done in logo analysis)
+            if skip_stage_0:
+                info("Stage 0: Using location context from logo analysis (optimization)")
+                location_context = logo_location_context
+                result["location_context"] = location_context
+                if location_context.get('city') or location_context.get('state'):
+                    location_info = []
+                    if location_context.get('city'): location_info.append(location_context['city'])
+                    if location_context.get('state'): location_info.append(location_context['state'])
+                    if location_context.get('country'): location_info.append(location_context['country'])
+                    info(f"Using logo analysis location context: {', '.join(location_info)}")
+            else:
+                html_path = os.path.join(domain_dir, "page.html")
+                html_content = self._load_html_content(html_path)
                 
-                result["final_address"] = website_result.get("extracted_address", "")
-                result["final_confidence"] = website_result.get("address_confidence", 0.0)
-                result["final_source"] = f"website_{website_result.get('address_source', '')}"
-                result["address_extraction_method"] = "website_direct"
-                result["reasoning"] = f"Address found directly on website with high confidence: {website_result.get('reasoning', '')}"
+                if not html_content:
+                    result["error"] = "HTML file not found or could not be loaded"
+                    return result
                 
-                success(f"Address found on website: {result['final_address']}")
-                return result
+                info("Stage 0: Extracting location context...")
+                location_context = self._extract_location_context(html_content)
+                result["location_context"] = location_context
+                
+                if location_context.get("location_confidence", 0.0) > 0.3:
+                    primary_location = []
+                    if location_context.get("primary_city"):
+                        primary_location.append(location_context["primary_city"])
+                    if location_context.get("primary_state_province"):
+                        primary_location.append(location_context["primary_state_province"])
+                    if location_context.get("primary_country"):
+                        primary_location.append(location_context["primary_country"])
+                    if primary_location:
+                        info(f"Identified primary location context: {', '.join(primary_location)}")
+            
+            # Stage 1: Analyze website HTML for address (skip if already done in logo analysis)
+            if skip_stage_1:
+                info("Stage 1: Using website address analysis from logo analysis (optimization)")
+                website_result = logo_address_analysis
+                result["website_analysis"] = website_result
+                
+                # If address found in logo analysis with high confidence, use it
+                if (website_result.get("confidence") == "high" and 
+                    website_result.get("primary_address")):
+                    
+                    result["final_address"] = website_result.get("primary_address", "")
+                    result["final_confidence"] = 0.8  # High confidence from logo analysis
+                    result["final_source"] = f"logo_analysis_{website_result.get('source', '')}"
+                    result["address_extraction_method"] = "logo_analysis_optimization"
+                    result["reasoning"] = f"Address found during logo analysis with high confidence: {website_result.get('reasoning', '')}"
+                    
+                    success(f"Address found via logo analysis: {result['final_address']}")
+                    return result
+            else:
+                # Get HTML content if not already loaded
+                if 'html_content' not in locals():
+                    html_path = os.path.join(domain_dir, "page.html")
+                    html_content = self._load_html_content(html_path)
+                    
+                    if not html_content:
+                        result["error"] = "HTML file not found or could not be loaded"
+                        return result
+                
+                info("Stage 1: Analyzing website content for address...")
+                website_result = self._analyze_website_for_address(html_content)
+                result["website_analysis"] = website_result
+                
+                # If address found in website with high confidence, use it
+                if (website_result.get("address_found_in_website", False) and 
+                    website_result.get("address_confidence", 0.0) >= 0.7):
+                    
+                    result["final_address"] = website_result.get("extracted_address", "")
+                    result["final_confidence"] = website_result.get("address_confidence", 0.0)
+                    result["final_source"] = f"website_{website_result.get('address_source', '')}"
+                    result["address_extraction_method"] = "website_direct"
+                    result["reasoning"] = f"Address found directly on website with high confidence: {website_result.get('reasoning', '')}"
+                    
+                    success(f"Address found on website: {result['final_address']}")
+                    return result
             
             # Stage 2: Search for address using SerpAPI (if address not found on website or low confidence)
             if merchant_name:

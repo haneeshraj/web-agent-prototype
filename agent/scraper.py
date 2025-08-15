@@ -489,7 +489,8 @@ class WebsiteScraper:
             scrape_data["files_created"].append("images.json")
             
             # Perform logo detection using all three files (screenshot, HTML, images)
-            info("   🔍 Detecting logo & extracting merchant name...")
+            # This also performs initial address analysis (stages 0-1) to optimize LLM calls
+            info("   🔍 Detecting logo & extracting merchant name + initial address analysis...")
             logo_result = self.logo_detector.detect_logo(domain_dir, domain_name)
             scrape_data["logo_detection"] = logo_result
             
@@ -501,6 +502,29 @@ class WebsiteScraper:
                 success(f"   🏢 Merchant: {scrape_data['merchant_name']} (confidence: {scrape_data['merchant_name_confidence']:.2f})")
             else:
                 warning("   🏢 Merchant name not identified")
+            
+            # Extract initial address analysis from logo detection result
+            address_analysis = logo_result.get('address_analysis', {})
+            location_context = logo_result.get('location_context', {})
+            
+            # Check if we found a good address in the combined analysis
+            address_found_in_logo_analysis = False
+            if address_analysis.get('addresses_found') and address_analysis.get('confidence') in ['high', 'medium']:
+                address_found_in_logo_analysis = True
+                scrape_data["final_address"] = address_analysis.get('primary_address', '')
+                scrape_data["address_confidence"] = 0.8 if address_analysis.get('confidence') == 'high' else 0.6
+                scrape_data["address_source"] = f"logo_analysis_{address_analysis.get('source', '')}"
+                success(f"   🏠 Address (from logo analysis): {scrape_data['final_address']}")
+            elif address_analysis.get('addresses_found'):
+                info(f"   📍 Found {len(address_analysis['addresses_found'])} potential addresses in logo analysis")
+            
+            # Check location context
+            if location_context.get('city') or location_context.get('state'):
+                location_info = []
+                if location_context.get('city'): location_info.append(location_context['city'])
+                if location_context.get('state'): location_info.append(location_context['state'])
+                if location_context.get('country'): location_info.append(location_context['country'])
+                info(f"   🌍 Location context: {', '.join(location_info)}")
             
             # Download logo image if one was detected
             if logo_result.get('logo_found') and logo_result.get('selected_image'):
@@ -537,29 +561,48 @@ class WebsiteScraper:
             if mcc_file_path:
                 scrape_data["files_created"].append("mcc_classification.json")
             
-            # Perform address extraction
-            info("   📍 Extracting business address...")
-            merchant_name = scrape_data.get("merchant_name", "")
-            business_type = ""
-            
-            # Try to extract business type from MCC classification for better search context
-            if mcc_result.get("classification_success"):
-                stage1_result = mcc_result.get("stage1_result", {})
-                business_type = stage1_result.get("business_type_identified", "")
-                
-            address_result = self.address_extractor.extract_address(
-                domain_dir, domain_name, merchant_name, business_type
-            )
-            scrape_data["address_extraction"] = address_result
-            
-            # Extract key address results for easy access
-            if address_result.get("final_address"):
-                scrape_data["final_address"] = address_result.get("final_address", "")
-                scrape_data["address_confidence"] = address_result.get("final_confidence", 0.0)
-                scrape_data["address_source"] = address_result.get("final_source", "")
-                success(f"   🏠 Address: {scrape_data['final_address']} (confidence: {scrape_data['address_confidence']:.2f})")
+            # Perform address extraction (only if needed)
+            if address_found_in_logo_analysis:
+                info("   📍 Address already found in logo analysis - skipping detailed extraction")
+                # Create a minimal address result that matches the expected format
+                address_result = {
+                    'final_address': scrape_data["final_address"],
+                    'final_confidence': scrape_data["address_confidence"], 
+                    'final_source': scrape_data["address_source"],
+                    'stage_0_result': location_context,
+                    'stage_1_result': address_analysis,
+                    'stage_2_result': None,
+                    'reasoning': f"Address found during logo analysis with {address_analysis.get('confidence', 'unknown')} confidence",
+                    'stages_completed': ['stage_0', 'stage_1'],
+                    'optimized_extraction': True
+                }
+                scrape_data["address_extraction"] = address_result
             else:
-                warning(f"   ❌ No address found: {address_result.get('reasoning', 'Unknown reason')}")
+                info("   📍 Running detailed address extraction...")
+                merchant_name = scrape_data.get("merchant_name", "")
+                business_type = ""
+                
+                # Try to extract business type from MCC classification for better search context
+                if mcc_result.get("classification_success"):
+                    stage1_result = mcc_result.get("stage1_result", {})
+                    business_type = stage1_result.get("business_type_identified", "")
+                
+                # Pass the logo analysis results to avoid redundant work
+                address_result = self.address_extractor.extract_address(
+                    domain_dir, domain_name, merchant_name, business_type,
+                    logo_address_analysis=address_analysis,
+                    logo_location_context=location_context
+                )
+                scrape_data["address_extraction"] = address_result
+                
+                # Extract key address results for easy access
+                if address_result.get("final_address"):
+                    scrape_data["final_address"] = address_result.get("final_address", "")
+                    scrape_data["address_confidence"] = address_result.get("final_confidence", 0.0)
+                    scrape_data["address_source"] = address_result.get("final_source", "")
+                    success(f"   🏠 Address: {scrape_data['final_address']} (confidence: {scrape_data['address_confidence']:.2f})")
+                else:
+                    warning(f"   ❌ No address found: {address_result.get('reasoning', 'Unknown reason')}")
             
             # Save address extraction result
             address_file_path = self.address_extractor.save_address_result(domain_dir, address_result)
