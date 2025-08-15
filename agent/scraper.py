@@ -23,6 +23,7 @@ from utils.file_utils import load_website_data
 from utils.terminal_prettify import success, error, warning, info, processing, completed, header
 from agent.logo_detector import LogoDetector
 from agent.mcc_classifier import MCCClassifier
+from agent.address_extractor import AddressExtractor
 
 
 class WebsiteScraper:
@@ -36,6 +37,7 @@ class WebsiteScraper:
         # Initialize logo detector and MCC classifier
         self.logo_detector = LogoDetector()
         self.mcc_classifier = MCCClassifier()
+        self.address_extractor = AddressExtractor()
         
     def setup_driver(self):
         """Setup Chrome WebDriver with proper options for Windows"""
@@ -433,9 +435,16 @@ class WebsiteScraper:
             "screenshot_path": "",
             "logo_detection": {},  # Will store logo detection results
             "downloaded_logo_path": "",  # Logo download path
-            "mcc_classification": {},  # NEW: Will store MCC classification results
-            "final_mcc_code": None,  # NEW: Final MCC code
-            "mcc_confidence": 0.0  # NEW: MCC classification confidence
+            "merchant_name": "",  # Extracted merchant name
+            "merchant_name_confidence": 0.0,  # Merchant name confidence
+            "merchant_name_source": "",  # Where merchant name was found
+            "mcc_classification": {},  # Will store MCC classification results
+            "final_mcc_code": None,  # Final MCC code
+            "mcc_confidence": 0.0,  # MCC classification confidence
+            "address_extraction": {},  # Will store address extraction results
+            "final_address": "",  # Final extracted address
+            "address_confidence": 0.0,  # Address extraction confidence
+            "address_source": "",  # Where address was found
         }
         
         try:
@@ -480,9 +489,18 @@ class WebsiteScraper:
             scrape_data["files_created"].append("images.json")
             
             # Perform logo detection using all three files (screenshot, HTML, images)
-            info("   🔍 Detecting logo...")
+            info("   🔍 Detecting logo & extracting merchant name...")
             logo_result = self.logo_detector.detect_logo(domain_dir, domain_name)
             scrape_data["logo_detection"] = logo_result
+            
+            # Extract merchant name data from logo detection result
+            if logo_result.get('merchant_name'):
+                scrape_data["merchant_name"] = logo_result['merchant_name']
+                scrape_data["merchant_name_confidence"] = logo_result.get('merchant_name_confidence', 0.0)
+                scrape_data["merchant_name_source"] = logo_result.get('merchant_name_source', '')
+                success(f"   🏢 Merchant: {scrape_data['merchant_name']} (confidence: {scrape_data['merchant_name_confidence']:.2f})")
+            else:
+                warning("   🏢 Merchant name not identified")
             
             # Download logo image if one was detected
             if logo_result.get('logo_found') and logo_result.get('selected_image'):
@@ -501,7 +519,7 @@ class WebsiteScraper:
             if logo_file_path:
                 scrape_data["files_created"].append("logo_detection.json")
             
-            # NEW: Perform MCC classification
+            # Perform MCC classification
             info("   🏷️  Classifying MCC code...")
             mcc_result = self.mcc_classifier.classify_mcc(domain_dir, domain_name)
             scrape_data["mcc_classification"] = mcc_result
@@ -519,6 +537,35 @@ class WebsiteScraper:
             if mcc_file_path:
                 scrape_data["files_created"].append("mcc_classification.json")
             
+            # Perform address extraction
+            info("   📍 Extracting business address...")
+            merchant_name = scrape_data.get("merchant_name", "")
+            business_type = ""
+            
+            # Try to extract business type from MCC classification for better search context
+            if mcc_result.get("classification_success"):
+                stage1_result = mcc_result.get("stage1_result", {})
+                business_type = stage1_result.get("business_type_identified", "")
+                
+            address_result = self.address_extractor.extract_address(
+                domain_dir, domain_name, merchant_name, business_type
+            )
+            scrape_data["address_extraction"] = address_result
+            
+            # Extract key address results for easy access
+            if address_result.get("final_address"):
+                scrape_data["final_address"] = address_result.get("final_address", "")
+                scrape_data["address_confidence"] = address_result.get("final_confidence", 0.0)
+                scrape_data["address_source"] = address_result.get("final_source", "")
+                success(f"   🏠 Address: {scrape_data['final_address']} (confidence: {scrape_data['address_confidence']:.2f})")
+            else:
+                warning(f"   ❌ No address found: {address_result.get('reasoning', 'Unknown reason')}")
+            
+            # Save address extraction result
+            address_file_path = self.address_extractor.save_address_result(domain_dir, address_result)
+            if address_file_path:
+                scrape_data["files_created"].append("address_extraction.json")
+            
             # Add delay to respect rate limits
             info("   ⏳ Rate limit delay...")
             time.sleep(10)
@@ -528,17 +575,21 @@ class WebsiteScraper:
             
             success(f"✅ {url}")
             
-            # Show logo detection result
+            # Show summary of all extractions
             if logo_result.get('logo_found'):
                 info(f"   🎯 Logo detected ({logo_result.get('confidence', 'unknown')} confidence)")
             else:
                 info(f"   ❌ No logo found")
             
-            # Show MCC classification result summary
             if scrape_data["final_mcc_code"]:
                 info(f"   🏷️  MCC: {scrape_data['final_mcc_code']}")
             else:
                 info(f"   🏷️  MCC: Classification failed")
+            
+            if scrape_data["final_address"]:
+                info(f"   📍 Address: Found via {scrape_data['address_source']}")
+            else:
+                info(f"   📍 Address: Not found")
                 
             info(f"   📁 {domain_name}_{timestamp}/ • {len(images_data)} images")
             
@@ -564,6 +615,20 @@ class WebsiteScraper:
         """Save summary data to JSON file"""
         summary_file_path = os.path.join(self.base_data_dir, "summary.json")
         
+        # Calculate merchant name statistics
+        merchants_identified = sum(1 for site in self.summary_data if site.get("merchant_name", ""))
+        average_merchant_confidence = 0.0
+        if merchants_identified > 0:
+            total_confidence = sum(site.get("merchant_name_confidence", 0.0) for site in self.summary_data if site.get("merchant_name", ""))
+            average_merchant_confidence = round(total_confidence / merchants_identified, 3)
+        
+        # Calculate address statistics
+        addresses_found = sum(1 for site in self.summary_data if site.get("final_address", ""))
+        average_address_confidence = 0.0
+        if addresses_found > 0:
+            total_address_confidence = sum(site.get("address_confidence", 0.0) for site in self.summary_data if site.get("final_address", ""))
+            average_address_confidence = round(total_address_confidence / addresses_found, 3)
+        
         summary = {
             "run_timestamp": self.run_timestamp,
             "total_websites": len(self.summary_data),
@@ -572,9 +637,15 @@ class WebsiteScraper:
             "total_images_found": sum(site.get("total_images", 0) for site in self.summary_data),
             "logos_detected": sum(1 for site in self.summary_data if site.get("logo_detection", {}).get("logo_found", False)),
             "logos_downloaded": sum(1 for site in self.summary_data if site.get("downloaded_logo_path", "")),
-            "mcc_classifications_successful": sum(1 for site in self.summary_data if site.get("final_mcc_code") is not None),  # NEW
-            "mcc_classifications_failed": sum(1 for site in self.summary_data if site.get("final_mcc_code") is None and site["status"] == "success"),  # NEW
-            "average_mcc_confidence": round(sum(site.get("mcc_confidence", 0.0) for site in self.summary_data if site.get("mcc_confidence", 0.0) > 0) / max(1, sum(1 for site in self.summary_data if site.get("mcc_confidence", 0.0) > 0)), 3),  # NEW
+            "merchants_identified": merchants_identified,
+            "average_merchant_confidence": average_merchant_confidence,
+            "mcc_classifications_successful": sum(1 for site in self.summary_data if site.get("final_mcc_code") is not None),
+            "mcc_classifications_failed": sum(1 for site in self.summary_data if site.get("final_mcc_code") is None and site["status"] == "success"),
+            "average_mcc_confidence": round(sum(site.get("mcc_confidence", 0.0) for site in self.summary_data if site.get("mcc_confidence", 0.0) > 0) / max(1, sum(1 for site in self.summary_data if site.get("mcc_confidence", 0.0) > 0)), 3),
+            "addresses_found": addresses_found,
+            "average_address_confidence": average_address_confidence,
+            "addresses_from_website": sum(1 for site in self.summary_data if site.get("address_source", "").startswith("website")),
+            "addresses_from_search": sum(1 for site in self.summary_data if site.get("address_source", "").startswith("search")),
             "average_load_time": round(sum(site.get("load_time_seconds", 0) for site in self.summary_data) / len(self.summary_data), 2) if self.summary_data else 0,
             "websites": self.summary_data
         }
@@ -584,9 +655,11 @@ class WebsiteScraper:
         
         success(f"Summary saved: summary.json")
         
-        # Create logo summary and MCC summary
+        # Create logo summary, merchant summary, MCC summary, and address summary
         self.save_logo_summary()
-        self.save_mcc_summary()  # NEW
+        self.save_merchant_summary()
+        self.save_mcc_summary()
+        self.save_address_summary()
         
         return summary_file_path
     
@@ -613,7 +686,9 @@ class WebsiteScraper:
                 "logo_url": logo_url,
                 "downloaded_logo_path": downloaded_logo_path,
                 "reasoning": logo_detection.get("reasoning", "Website scraping failed - no analysis performed" if site["status"] == "failed" else "No logo analysis performed"),
-                "confidence": logo_detection.get("confidence", "none")
+                "confidence": logo_detection.get("confidence", "none"),
+                "merchant_name": site.get("merchant_name", ""),
+                "merchant_name_confidence": site.get("merchant_name_confidence", 0.0)
             }
             
             logo_summary.append(logo_entry)
@@ -624,8 +699,37 @@ class WebsiteScraper:
         success(f"Logo summary saved: logo_summary.json")
         return logo_summary_path
     
+    def save_merchant_summary(self):
+        """Save merchant-specific summary to a separate JSON file"""
+        merchant_summary_path = os.path.join(self.base_data_dir, "merchant_summary.json")
+        
+        merchant_summary = []
+        
+        for site in self.summary_data:
+            logo_detection = site.get("logo_detection", {})
+            
+            # Create entry for both successful and failed extractions
+            merchant_entry = {
+                "website": site["url"],
+                "merchant_name": site.get("merchant_name", ""),
+                "merchant_name_confidence": site.get("merchant_name_confidence", 0.0),
+                "merchant_name_source": site.get("merchant_name_source", ""),
+                "alternative_names": logo_detection.get("alternative_names", []),
+                "extraction_success": bool(site.get("merchant_name", "")),
+                "logo_found": logo_detection.get("logo_found", False),
+                "error": "" if site["status"] == "success" else "Website scraping failed"
+            }
+            
+            merchant_summary.append(merchant_entry)
+        
+        with open(merchant_summary_path, 'w', encoding='utf-8') as f:
+            json.dump(merchant_summary, f, indent=2, ensure_ascii=False)
+        
+        success(f"Merchant summary saved: merchant_summary.json")
+        return merchant_summary_path
+    
     def save_mcc_summary(self):
-        """NEW: Save MCC-specific summary to a separate JSON file"""
+        """Save MCC-specific summary to a separate JSON file"""
         mcc_summary_path = os.path.join(self.base_data_dir, "mcc_summary.json")
         
         mcc_summary = []
@@ -636,6 +740,7 @@ class WebsiteScraper:
             # Create entry for both successful and failed classifications
             mcc_entry = {
                 "website": site["url"],
+                "merchant_name": site.get("merchant_name", ""),
                 "final_mcc_code": site.get("final_mcc_code"),
                 "final_mcc_description": mcc_classification.get("final_mcc_description", ""),
                 "confidence": site.get("mcc_confidence", 0.0),
@@ -653,6 +758,48 @@ class WebsiteScraper:
         
         success(f"MCC summary saved: mcc_summary.json")
         return mcc_summary_path
+    
+    def save_address_summary(self):
+        """Save address-specific summary to a separate JSON file"""
+        address_summary_path = os.path.join(self.base_data_dir, "address_summary.json")
+        
+        address_summary = []
+        
+        for site in self.summary_data:
+            address_extraction = site.get("address_extraction", {})
+            
+            # Create entry for both successful scrapes and failed ones
+            address_entry = {
+                "website": site["url"],
+                "final_address": site.get("final_address", ""),
+                "address_confidence": site.get("address_confidence", 0.0),
+                "address_source": site.get("address_source", ""),
+                "extraction_method": address_extraction.get("address_extraction_method", ""),
+                "website_analysis": {
+                    "address_found": address_extraction.get("website_analysis", {}).get("address_found_in_website", False),
+                    "confidence": address_extraction.get("website_analysis", {}).get("address_confidence", 0.0),
+                    "source": address_extraction.get("website_analysis", {}).get("address_source", ""),
+                    "reasoning": address_extraction.get("website_analysis", {}).get("reasoning", "Website scraping failed" if site["status"] == "failed" else "No website analysis performed")
+                },
+                "search_analysis": {
+                    "address_found": address_extraction.get("search_analysis", {}).get("address_found", False),
+                    "confidence": address_extraction.get("search_analysis", {}).get("address_confidence", 0.0),
+                    "source": address_extraction.get("search_analysis", {}).get("address_source", ""),
+                    "reasoning": address_extraction.get("search_analysis", {}).get("reasoning", "No search analysis performed")
+                },
+                "merchant_name_used": address_extraction.get("merchant_name_used", ""),
+                "business_type_used": address_extraction.get("business_type_used", ""),
+                "error": address_extraction.get("error", "" if site["status"] == "success" else "Website scraping failed"),
+                "scrape_status": site["status"]
+            }
+            
+            address_summary.append(address_entry)
+        
+        with open(address_summary_path, 'w', encoding='utf-8') as f:
+            json.dump(address_summary, f, indent=2, ensure_ascii=False)
+        
+        success(f"Address summary saved: address_summary.json")
+        return address_summary_path
     
     def run(self):
         """Main execution method"""
@@ -689,14 +836,14 @@ class WebsiteScraper:
                 scrape_result = self.scrape_website(url)
                 self.summary_data.append(scrape_result)
                 
-                # Small delay between requests to be respectful and not get suspicious  i dont wanna get blocked  by the websites
+                # Small delay between requests to be respectful
                 if i < len(websites_data):
                     time.sleep(2)
             
             # Save summary
             summary_path = self.save_summary()
             
-            # Final report
+            # Final report with location statistics
             header("Scraping Completed!")
             completed(f"Run timestamp: {self.run_timestamp}")
             completed(f"Total websites processed: {len(self.summary_data)}")
@@ -705,8 +852,34 @@ class WebsiteScraper:
             completed(f"Total images found: {sum(site.get('total_images', 0) for site in self.summary_data)}")
             completed(f"Logos detected: {sum(1 for site in self.summary_data if site.get('logo_detection', {}).get('logo_found', False))}")
             completed(f"Logos downloaded: {sum(1 for site in self.summary_data if site.get('downloaded_logo_path', ''))}")
-            completed(f"MCC classifications successful: {sum(1 for site in self.summary_data if site.get('final_mcc_code') is not None)}")  # NEW
-            completed(f"Average MCC confidence: {sum(site.get('mcc_confidence', 0.0) for site in self.summary_data if site.get('mcc_confidence', 0.0) > 0) / max(1, sum(1 for site in self.summary_data if site.get('mcc_confidence', 0.0) > 0)):.2f}")  # NEW
+            
+            # Merchant name statistics
+            merchants_identified = sum(1 for site in self.summary_data if site.get("merchant_name", ""))
+            completed(f"Merchant names extracted: {merchants_identified}")
+            if merchants_identified > 0:
+                avg_merchant_confidence = sum(site.get("merchant_name_confidence", 0.0) for site in self.summary_data if site.get("merchant_name", "")) / merchants_identified
+                completed(f"Average merchant name confidence: {avg_merchant_confidence:.2f}")
+            
+            # MCC statistics
+            completed(f"MCC classifications successful: {sum(1 for site in self.summary_data if site.get('final_mcc_code') is not None)}")
+            mcc_successful_sites = [site for site in self.summary_data if site.get('mcc_confidence', 0.0) > 0]
+            if mcc_successful_sites:
+                avg_mcc_confidence = sum(site.get('mcc_confidence', 0.0) for site in mcc_successful_sites) / len(mcc_successful_sites)
+                completed(f"Average MCC confidence: {avg_mcc_confidence:.2f}")
+            
+            # Address statistics
+            addresses_found = sum(1 for site in self.summary_data if site.get("final_address", ""))
+            completed(f"Addresses found: {addresses_found}")
+            if addresses_found > 0:
+                avg_address_confidence = sum(site.get("address_confidence", 0.0) for site in self.summary_data if site.get("final_address", "")) / addresses_found
+                completed(f"Average address confidence: {avg_address_confidence:.2f}")
+                
+                # Address source breakdown
+                website_addresses = sum(1 for site in self.summary_data if site.get("address_source", "").startswith("website"))
+                search_addresses = sum(1 for site in self.summary_data if site.get("address_source", "").startswith("search"))
+                completed(f"Addresses from website: {website_addresses}")
+                completed(f"Addresses from search: {search_addresses}")
+            
             completed(f"Data saved in: {self.base_data_dir}")
             
         except KeyboardInterrupt:

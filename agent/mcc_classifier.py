@@ -1,21 +1,24 @@
 """
-MCC (Merchant Category Code) classifier using Pixtral Large model locally.
+MCC (Merchant Category Code) classifier using LLM from config.
 Two-stage classification: Category -> Exact MCC Code
 """
 
 import json
 import os
+import time
 import pandas as pd
 from typing import Dict, Any, List, Optional, Tuple
 from pathlib import Path
 
 from utils.text_extractor import TextExtractor
 from utils.terminal_prettify import success, error, warning, info, processing
+from utils.llm import create_llm_client
+from utils.config import get_model_config
 
 
 class MCCClassifier:
     """
-    MCC classifier that uses Pixtral Large locally for two-stage classification.
+    MCC classifier that uses LLM from config for two-stage classification.
     """
     
     def __init__(self, mcc_data_path: str = "data/mcc_codes_extracted.csv"):
@@ -28,6 +31,10 @@ class MCCClassifier:
         self.mcc_data_path = mcc_data_path
         self.mcc_df = None
         self.text_extractor = TextExtractor()
+        
+        # Initialize LLM client from config
+        self.llm_client = create_llm_client()
+        self.model_config = get_model_config("classifier-agent")
         
         # MCC category ranges
         self.mcc_categories = {
@@ -48,9 +55,6 @@ class MCCClassifier:
         
         # Load MCC data
         self._load_mcc_data()
-        
-        # Initialize Pixtral Large client (placeholder for local model)
-        self._initialize_local_model()
     
     def _load_mcc_data(self) -> bool:
         """Load MCC codes from CSV file."""
@@ -66,46 +70,6 @@ class MCCClassifier:
         except Exception as e:
             error(f"Failed to load MCC data: {e}")
             return False
-    
-    def _initialize_local_model(self):
-        """
-        Initialize Mistral API client for Pixtral Large.
-        """
-        try:
-            info("Initializing Mistral API client...")
-            
-            # Import required libraries
-            from mistralai import Mistral
-            import os
-            from dotenv import load_dotenv
-            
-            # Load environment variables
-            load_dotenv()
-            
-            # Get API key
-            api_key = os.getenv('MISTRAL_API_KEY')
-            if not api_key:
-                error("MISTRAL_API_KEY not found in environment variables")
-                error("Please add MISTRAL_API_KEY=your_key_here to your .env file")
-                self.model_initialized = False
-                return
-            
-            # Initialize Mistral client
-            self.mistral_client = Mistral(api_key=api_key)
-            self.model_name = "pixtral-large-latest"  # Use latest Pixtral Large model
-            
-            success("Mistral API client initialized successfully!")
-            self.model_initialized = True
-            
-        except ImportError as e:
-            error("Missing required packages. Please install: pip install mistralai python-dotenv")
-            self.model_initialized = False
-            raise e
-            
-        except Exception as e:
-            error(f"Failed to initialize Mistral API: {e}")
-            self.model_initialized = False
-            raise e
     
     def _get_category_range_codes(self, category_range: str) -> pd.DataFrame:
         """
@@ -148,6 +112,9 @@ class MCCClassifier:
         """
         categories_text = "\n".join([f"{range}: {name}" for range, name in self.mcc_categories.items()])
         
+        # Analyze text to provide business-specific guidance
+        business_guidance = self._get_stage1_business_guidance(text_content)
+        
         prompt = f"""You are an expert MCC (Merchant Category Code) classifier. Your task is to analyze the website content and screenshot to determine which MCC category this business belongs to.
 
 WEBSITE TEXT CONTENT:
@@ -156,34 +123,159 @@ WEBSITE TEXT CONTENT:
 MCC CATEGORIES:
 {categories_text}
 
+BUSINESS-SPECIFIC GUIDANCE:
+{business_guidance}
+
+CRITICAL CATEGORY SELECTION RULES:
+🍰 BAKERIES/PATISSERIES/CONFECTIONERY → "5000-5599: Retail Outlet Services" (contains MCC 5441 for candy/confectionery stores)
+🍕 RESTAURANTS/DINING → "5700-7299: Miscellaneous Stores" (contains MCC 5812, 5813, 5814 for restaurants/bars)
+🛍️ RETAIL STORES → Choose category based on what they sell (clothing → 5600-5699, home goods → 5700-7299, etc.)
+💼 SERVICES → "7300-7999: Business Services" (consulting, management, PR, etc.)
+✈️ TRAVEL → "3000-3299: Airlines", "3300-3499: Car Rental", "3500-3999: Lodging"
+
 INSTRUCTIONS:
 1. Analyze both the screenshot and the text content to understand what type of business this is
 2. Look for key indicators like:
    - Business name and branding
    - Products or services offered
    - Industry terminology
-   - Visual elements in the screenshot (storefront, professional services, etc.)
-3. Select the most appropriate MCC category from the list above
-4. Consider the primary business activity, not secondary services
+   - Visual elements in the screenshot
+3. Apply the CRITICAL CATEGORY SELECTION RULES above - these are mandatory
+4. Select the most appropriate MCC category from the list that will contain the correct specific MCC code
+5. Consider the primary business activity, not secondary services
 
 RESPONSE FORMAT:
 Return a JSON object with this exact structure:
 {{
     "selected_category_range": "XXXX-YYYY",
-    "selected_category_name": "Category Name",
+    "selected_category_name": "Category Name", 
     "confidence": 0.95,
-    "reasoning": "Detailed explanation of why this category was selected based on the evidence from text and visual analysis",
+    "reasoning": "Detailed explanation of why this category was selected based on evidence from text and visual analysis, including reference to category selection rules",
     "key_indicators": ["indicator1", "indicator2", "indicator3"],
     "business_type_identified": "Brief description of the business type"
 }}
 
 IMPORTANT:
 - Only return valid JSON
+- Selected category must be from the MCC CATEGORIES list above
 - Confidence should be between 0.0 and 1.0
 - If you cannot confidently categorize, set confidence below 0.7 and explain why
-- Focus on the PRIMARY business activity, not secondary services"""
+- Focus on the PRIMARY business activity that determines which MCC codes are available
+- Use the CRITICAL CATEGORY SELECTION RULES to ensure proper category mapping"""
 
         return prompt
+    
+    def _get_stage1_business_guidance(self, text_content: str) -> str:
+        """
+        Generate business-specific guidance for Stage 1 classification.
+        
+        Args:
+            text_content (str): Extracted website text
+            
+        Returns:
+            str: Formatted guidance for category selection
+        """
+        text_lower = text_content.lower()
+        guidance = []
+        
+        # Bakery/Patisserie specific guidance
+        if any(term in text_lower for term in ['patisserie', 'bakery', 'pastry', 'confectionery', 'candy', 'sweets', 'dessert']):
+            guidance.append("🍰 BAKERY/PATISSERIE DETECTED: This business sells baked goods, pastries, or confectionery items. Must select '5000-5599: Retail Outlet Services' to access MCC 5441 (Candy, Nut, and Confectionery Stores).")
+        
+        # Restaurant/Food Service guidance
+        elif any(term in text_lower for term in ['restaurant', 'dining', 'eat', 'food', 'menu', 'pizza', 'sushi', 'kitchen', 'chef', 'meal']):
+            guidance.append("🍕 RESTAURANT/FOOD SERVICE DETECTED: This business serves prepared food to customers. Must select '5700-7299: Miscellaneous Stores' to access restaurant MCCs (5812, 5813, 5814).")
+        
+        # Bar/Drinking establishment guidance
+        if any(term in text_lower for term in ['bar', 'pub', 'tavern', 'cocktail', 'beer', 'wine', 'alcohol', 'drinking']):
+            guidance.append("🍺 BAR/DRINKING ESTABLISHMENT DETECTED: This business primarily serves alcoholic beverages. Must select '5700-7299: Miscellaneous Stores' to access MCC 5813 (Bars, Cocktail Lounges).")
+        
+        # Retail guidance based on products
+        if any(term in text_lower for term in ['shop', 'store', 'retail', 'buy', 'purchase', 'product']):
+            if any(term in text_lower for term in ['art', 'print', 'craft', 'stationery', 'paper']):
+                guidance.append("🎨 ART/CRAFT RETAIL DETECTED: This business sells art supplies, prints, or craft items. Consider '5700-7299: Miscellaneous Stores' to access MCC 5970 (Artist Supply Stores).")
+            elif any(term in text_lower for term in ['clothing', 'apparel', 'fashion', 'shirt', 'dress']):
+                guidance.append("👕 CLOTHING RETAIL DETECTED: This business sells clothing or apparel. Must select '5600-5699: Clothing Stores' for clothing-specific MCCs.")
+            elif any(term in text_lower for term in ['furniture', 'home', 'decor', 'rug', 'furnishing']):
+                guidance.append("🏠 HOME FURNISHINGS DETECTED: This business sells furniture or home decor. Must select '5700-7299: Miscellaneous Stores' to access MCC 5712 (Furniture and Home Furnishings).")
+        
+        # Service business guidance
+        if any(term in text_lower for term in ['consulting', 'management', 'service', 'professional', 'advice', 'support']):
+            guidance.append("💼 PROFESSIONAL SERVICES DETECTED: This business provides consulting, management, or professional services. Must select '7300-7999: Business Services' for service-related MCCs.")
+        
+        # Social media/content guidance
+        if any(term in text_lower for term in ['instagram', 'youtube', 'social media', 'content', 'influencer', 'creator']):
+            guidance.append("📱 SOCIAL MEDIA/CONTENT BUSINESS DETECTED: This business focuses on content creation or social media services. Must select '7300-7999: Business Services' to access MCC 7392 (Consulting, Management and PR Services).")
+        
+        # Travel-related guidance
+        if any(term in text_lower for term in ['airline', 'flight', 'aviation']):
+            guidance.append("✈️ AIRLINE DETECTED: Must select '3000-3299: Airlines' for aviation-related MCCs.")
+        elif any(term in text_lower for term in ['hotel', 'lodging', 'accommodation', 'resort']):
+            guidance.append("🏨 LODGING DETECTED: Must select '3500-3999: Lodging' for hotel/accommodation MCCs.")
+        elif any(term in text_lower for term in ['car rental', 'vehicle rental', 'rental car']):
+            guidance.append("🚗 CAR RENTAL DETECTED: Must select '3300-3499: Car Rental' for vehicle rental MCCs.")
+        
+        if not guidance:
+            guidance.append("⚠️ GENERAL GUIDANCE: Analyze the primary business activity and select the category that contains the most specific MCC codes for this type of business.")
+        
+        return "\n".join(guidance)
+    
+    def _get_stage2_business_guidance(self, text_content: str) -> str:
+        """
+        Generate business-specific validation rules based on text content analysis.
+        
+        Args:
+            text_content (str): Extracted website text
+            
+        Returns:
+            str: Formatted validation rules for the prompt
+        """
+        text_lower = text_content.lower()
+        rules = []
+        
+        # Food and Restaurant Rules
+        food_keywords = ['restaurant', 'pizza', 'food', 'menu', 'dining', 'eat', 'drink', 'bar', 'café', 'cafe', 
+                        'bakery', 'pastry', 'patisserie', 'sushi', 'kitchen', 'chef', 'cook', 'meal', 'buffet',
+                        'takeout', 'delivery', 'catering', 'wine', 'beer', 'cocktail', 'lunch', 'dinner', 'breakfast']
+        
+        if any(keyword in text_lower for keyword in food_keywords):
+            rules.append("🍕 FOOD BUSINESS DETECTED: This business MUST be classified with a food-related MCC code (5812, 5813, 5814, 5441, etc.). NEVER use non-food MCCs like Florists, Hardware, Electronics, etc.")
+        
+        # Retail Rules
+        retail_keywords = ['shop', 'store', 'buy', 'purchase', 'product', 'retail', 'sell', 'order', 'cart', 'checkout']
+        if any(keyword in text_lower for keyword in retail_keywords):
+            rules.append("🛍️ RETAIL BUSINESS DETECTED: Focus on what products are actually sold, not peripheral services.")
+        
+        # Service Rules  
+        service_keywords = ['consulting', 'service', 'management', 'professional', 'advice', 'support', 'solutions']
+        if any(keyword in text_lower for keyword in service_keywords):
+            rules.append("💼 SERVICE BUSINESS DETECTED: Focus on the primary service offered, use Business Services MCCs (7300-7999).")
+        
+        # Specific Business Type Rules
+        if 'patisserie' in text_lower or 'bakery' in text_lower or 'pastry' in text_lower:
+            rules.append("🥐 BAKERY/PATISSERIE DETECTED: Use MCC 5441 (Candy, Nut, and Confectionery Stores) or 5812 (Restaurants) if seating available. NEVER use 5992 (Florists).")
+        
+        if 'pizza' in text_lower:
+            rules.append("🍕 PIZZA BUSINESS DETECTED: Use MCC 5812 (Restaurants) for sit-down pizza places or 5814 (Fast Food) for delivery/takeout focused.")
+        
+        if 'bar' in text_lower or 'pub' in text_lower or 'tavern' in text_lower:
+            rules.append("🍺 BAR/PUB DETECTED: Use MCC 5813 (Bars, Cocktail Lounges) for alcohol-focused establishments.")
+        
+        if 'art' in text_lower and 'print' in text_lower:
+            rules.append("🎨 ART PRINTS DETECTED: Use MCC 5111 (Stationery, Office Supplies) for printable art or similar paper-based products.")
+        
+        # Instagram/Social Media Rules
+        if 'instagram' in text_lower or 'social media' in text_lower or 'influencer' in text_lower:
+            rules.append("📱 SOCIAL MEDIA BUSINESS DETECTED: If content creation/curation is the primary activity, use MCC 7392 (Consulting, Management and PR Services).")
+        
+        # YouTube/Content Rules
+        if 'youtube' in text_lower or 'channel' in text_lower or 'content creator' in text_lower:
+            rules.append("📺 CONTENT CREATOR DETECTED: If selling products, classify by product type. If pure content creation, use appropriate services MCC.")
+        
+        if not rules:
+            rules.append("⚠️ GENERAL RULE: Classify based on PRIMARY business activity. Avoid broad/generic MCCs when specific ones exist.")
+        
+        return "\n".join(rules)
     
     def _create_stage2_prompt(self, text_content: str, category_range: str, candidate_mccs: pd.DataFrame) -> str:
         """
@@ -205,7 +297,7 @@ IMPORTANT:
         mcc_options_text = "\n".join(mcc_options)
         
         # Create business-specific validation rules
-        validation_rules = self._get_business_validation_rules(text_content)
+        validation_rules = self._get_stage2_business_guidance(text_content)
         
         prompt = f"""You are an expert MCC (Merchant Category Code) classifier. Based on the Stage 1 analysis, this business belongs to the "{self.mcc_categories.get(category_range, 'Unknown')}" category ({category_range}).
 
@@ -268,103 +360,109 @@ IMPORTANT:
 
         return prompt
     
-    def _query_pixtral_local(self, prompt: str, image_path: str) -> str:
+    def _query_llm_with_retry(self, prompt: str, image_path: str, stage: str, retry_count: int = 0) -> str:
         """
-        Query Pixtral Large model via Mistral API with text prompt and image.
+        Query LLM with retry logic for rate limiting.
         
         Args:
             prompt (str): Text prompt for the model
             image_path (str): Path to screenshot image
+            stage (str): Classification stage ("stage1" or "stage2")
+            retry_count (int): Current retry attempt
             
         Returns:
             str: Model response
         """
-        if not self.model_initialized:
-            error("Mistral API client not initialized")
-            return '{"error": "API client not initialized"}'
-        
         try:
-            import base64
-            from PIL import Image
-            import io
+            # Load screenshot if available
+            screenshot_data = None
+            if image_path and os.path.exists(image_path):
+                with open(image_path, 'rb') as f:
+                    screenshot_data = f.read()
             
-            processing("Preparing image and prompt for Mistral API...")
+            # Create appropriate system prompt based on stage
+            if stage == "stage1":
+                system_prompt = "You are an expert at categorizing businesses into MCC categories. Analyze the website and return JSON."
+            else:
+                system_prompt = "You are an expert at selecting specific MCC codes for businesses. Analyze the website and return JSON."
             
-            # Load and process image
-            if not os.path.exists(image_path):
-                error(f"Screenshot not found: {image_path}")
-                return '{"error": "Image file not found"}'
+            processing(f"Querying {self.model_config['model']}...")
             
-            # Convert image to base64
-            with open(image_path, "rb") as image_file:
-                image_base64 = base64.b64encode(image_file.read()).decode('utf-8')
-            
-            # Create message with image and text
-            messages = [
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "text",
-                            "text": prompt
-                        },
-                        {
-                            "type": "image_url",
-                            "image_url": f"data:image/png;base64,{image_base64}"
-                        }
-                    ]
-                }
-            ]
-            
-            # Generate response
-            processing("Querying Pixtral Large via Mistral API...")
-            
-            chat_response = self.mistral_client.chat.complete(
-                model=self.model_name,
-                messages=messages,
-                temperature=0.1,  # Low temperature for consistent JSON
-                max_tokens=1024
+            response = self.llm_client.query(
+                model=self.model_config['model'],
+                system_prompt=system_prompt,
+                user_prompt=prompt,
+                image_data=screenshot_data,
+                image_mime_type="image/png" if screenshot_data else None,
+                max_tokens=self.model_config['max_tokens'],
+                temperature=self.model_config.get('temperature', 0.3)
             )
             
-            response = chat_response.choices[0].message.content
-            info("Pixtral Large API call completed successfully")
-            return response.strip()
+            info(f"{self.model_config['model']} query completed successfully")
+            return response['content'].strip()
             
         except Exception as e:
-            error(f"Mistral API call failed: {e}")
+            error_str = str(e)
             
-            # Fallback to placeholder if API fails
-            warning("Falling back to placeholder response")
-            if "MCC CATEGORIES:" in prompt:
-                # Stage 1: Category classification
-                fallback_response = """
-                {
-                    "selected_category_range": "5812-5812",
-                    "selected_category_name": "Eating Places and Restaurants",
-                    "confidence": 0.75,
-                    "reasoning": "API call failed, using fallback classification. Manual review recommended.",
-                    "key_indicators": ["restaurant", "food", "menu"],
-                    "business_type_identified": "Restaurant/Food service (API fallback)"
-                }
-                """
-            else:
-                # Stage 2: Exact MCC code
-                fallback_response = """
-                {
-                    "selected_mcc": 5812,
-                    "selected_mcc_description": "Eating Places and Restaurants",
-                    "confidence": 0.75,
-                    "reasoning": "API call failed, using fallback MCC code. Manual review recommended.",
-                    "business_match_factors": ["food service", "restaurant"],
-                    "alternative_mccs_considered": []
-                }
-                """
+            # Check for rate limiting
+            if any(indicator in error_str.lower() for indicator in ['429', 'rate', 'limit', 'quota', 'capacity']):
+                if retry_count < 3:
+                    wait_time = (2 ** retry_count) * 10  # 10, 20, 40 seconds
+                    warning(f"Rate limited. Waiting {wait_time} seconds before retry {retry_count + 1}/3...")
+                    time.sleep(wait_time)
+                    return self._query_llm_with_retry(prompt, image_path, stage, retry_count + 1)
+                else:
+                    error(f"Max retries reached. Using fallback classification.")
+                    return self._get_fallback_response(stage)
             
-            return fallback_response.strip()
+            # For other errors, log and use fallback
+            error(f"LLM query failed: {e}")
+            return self._get_fallback_response(stage)
+    
+    def _get_fallback_response(self, stage: str) -> str:
+        """
+        Get fallback response when LLM fails.
+        
+        Args:
+            stage (str): Classification stage
+            
+        Returns:
+            str: Fallback JSON response
+        """
+        if stage == "stage1":
+            # Default to restaurants/food service category
+            return json.dumps({
+                "selected_category_range": "5700-7299",
+                "selected_category_name": "Miscellaneous Stores",
+                "confidence": 0.5,
+                "reasoning": "Fallback classification due to API error. Manual review recommended.",
+                "key_indicators": ["fallback"],
+                "business_type_identified": "Unknown (API fallback)"
+            })
+        else:
+            # Default to general restaurant MCC
+            return json.dumps({
+                "selected_mcc": 5812,
+                "selected_mcc_description": "Eating Places and Restaurants",
+                "confidence": 0.5,
+                "reasoning": "Fallback MCC code due to API error. Manual review recommended.",
+                "business_match_factors": ["fallback"],
+                "alternative_mccs_considered": []
+            })
+    
+    def _find_screenshot(self, domain_dir: str) -> Optional[str]:
+        """Find screenshot file in domain directory."""
+        try:
+            for file in os.listdir(domain_dir):
+                if file.startswith("screenshot_") and file.endswith(".png"):
+                    return os.path.join(domain_dir, file)
+        except Exception:
+            pass
+        return None
     
     def _parse_json_response(self, response: str) -> Dict[str, Any]:
         """
-        Parse JSON response from Pixtral Large.
+        Parse JSON response from LLM.
         
         Args:
             response (str): Raw response from model
@@ -388,251 +486,6 @@ IMPORTANT:
         except Exception as e:
             error(f"Error parsing response: {e}")
             return {"error": f"Response parsing failed: {str(e)}"}
-    
-    def classify_mcc(self, domain_dir: str, domain_name: str) -> Dict[str, Any]:
-        """
-        Classify MCC code for a website using two-stage approach.
-        
-        Args:
-            domain_dir (str): Path to domain directory containing files
-            domain_name (str): Domain name for logging
-            
-        Returns:
-            Dict[str, Any]: Complete MCC classification results
-        """
-        processing(f"Starting MCC classification for {domain_name}")
-        
-        # Initialize result structure
-        result = {
-            "domain": domain_name,
-            "classification_success": False,
-            "stage1_result": {},
-            "stage2_result": {},
-            "final_mcc": None,
-            "final_mcc_description": "",
-            "final_confidence": 0.0,
-            "error": None,
-            "processing_metadata": {
-                "text_extraction_success": False,
-                "screenshot_found": False,
-                "stage1_completed": False,
-                "stage2_completed": False
-            }
-        }
-        
-        try:
-            # 1. Load required files
-            html_path = os.path.join(domain_dir, "page.html")
-            screenshot_path = self._find_screenshot(domain_dir)
-            
-            if not os.path.exists(html_path):
-                result["error"] = "HTML file not found"
-                return result
-            
-            if not screenshot_path:
-                result["error"] = "Screenshot not found"
-                return result
-            
-            result["processing_metadata"]["screenshot_found"] = True
-            
-            # 2. Extract text content
-            text_content = self.text_extractor.extract_for_mcc_classification(html_path)
-            if not text_content:
-                result["error"] = "Failed to extract text content"
-                return result
-            
-            result["processing_metadata"]["text_extraction_success"] = True
-            info(f"Extracted {len(text_content)} characters of text")
-            
-            # 3. Stage 1: Category Classification
-            info("Stage 1: Determining MCC category...")
-            stage1_prompt = self._create_stage1_prompt(text_content)
-            stage1_response = self._query_pixtral_local(stage1_prompt, screenshot_path)
-            stage1_result = self._parse_json_response(stage1_response)
-            
-            result["stage1_result"] = stage1_result
-            
-            if "error" in stage1_result:
-                result["error"] = f"Stage 1 failed: {stage1_result['error']}"
-                return result
-            
-            result["processing_metadata"]["stage1_completed"] = True
-            
-            # Validate Stage 1 results
-            selected_range = stage1_result.get("selected_category_range")
-            if not selected_range:
-                result["error"] = f"No category range returned from Stage 1"
-                return result
-            
-            # Handle cases where model returns specific MCC codes instead of ranges
-            # If it's a specific MCC code (like 5812), find the appropriate range
-            if selected_range and '-' not in selected_range:
-                try:
-                    mcc_code = int(selected_range)
-                    # Find which category this MCC belongs to
-                    for range_key, category_name in self.mcc_categories.items():
-                        start_code, end_code = range_key.split('-')
-                        if int(start_code) <= mcc_code <= int(end_code):
-                            selected_range = range_key
-                            stage1_result["selected_category_range"] = range_key
-                            info(f"Mapped MCC {mcc_code} to range {range_key}")
-                            break
-                except ValueError:
-                    pass
-            
-            # Handle ranges that don't exactly match our predefined categories
-            # (e.g., model returns "5812-5814" but we need "5700-7299")
-            if selected_range not in self.mcc_categories:
-                # Try to find the best matching category
-                try:
-                    if '-' in selected_range:
-                        start_mcc, end_mcc = selected_range.split('-')
-                        mid_mcc = (int(start_mcc) + int(end_mcc)) // 2
-                    else:
-                        mid_mcc = int(selected_range)
-                    
-                    # Find which category this MCC falls into
-                    for range_key, category_name in self.mcc_categories.items():
-                        start_code, end_code = range_key.split('-')
-                        if int(start_code) <= mid_mcc <= int(end_code):
-                            selected_range = range_key
-                            stage1_result["selected_category_range"] = range_key
-                            stage1_result["selected_category_name"] = category_name
-                            info(f"Mapped range {stage1_result.get('selected_category_range')} to category {range_key}")
-                            break
-                    else:
-                        result["error"] = f"Could not map category range {selected_range} to valid MCC category"
-                        return result
-                        
-                except ValueError:
-                    result["error"] = f"Invalid category range format from Stage 1: {selected_range}"
-                    return result
-            
-            success(f"Stage 1 complete: {selected_range} - {stage1_result.get('selected_category_name')}")
-            
-            # 4. Stage 2: Exact MCC Code Determination
-            info("Stage 2: Determining exact MCC code...")
-            candidate_mccs = self._get_category_range_codes(selected_range)
-            
-            if candidate_mccs.empty:
-                result["error"] = f"No MCC codes found for category {selected_range}"
-                return result
-            
-            info(f"Found {len(candidate_mccs)} candidate MCC codes in category")
-            
-            stage2_prompt = self._create_stage2_prompt(text_content, selected_range, candidate_mccs)
-            stage2_response = self._query_pixtral_local(stage2_prompt, screenshot_path)
-            stage2_result = self._parse_json_response(stage2_response)
-            
-            result["stage2_result"] = stage2_result
-            
-            if "error" in stage2_result:
-                result["error"] = f"Stage 2 failed: {stage2_result['error']}"
-                return result
-            
-            result["processing_metadata"]["stage2_completed"] = True
-            
-            # 5. Validate and finalize results
-            final_mcc = stage2_result.get("selected_mcc")
-            if not final_mcc:
-                result["error"] = f"No MCC code returned from Stage 2"
-                return result
-            
-            # Validate MCC is in candidate list
-            if final_mcc not in candidate_mccs['MCC'].values:
-                result["error"] = f"Selected MCC {final_mcc} not in candidate list for category {selected_range}"
-                return result
-            
-            # Validate business logic
-            is_valid, validation_error = self._validate_mcc_selection(final_mcc, text_content, candidate_mccs)
-            if not is_valid:
-                result["error"] = validation_error
-                return result
-            
-            result["final_mcc"] = final_mcc
-            result["final_mcc_description"] = stage2_result.get("selected_mcc_description", "")
-            result["final_confidence"] = min(
-                stage1_result.get("confidence", 0.0),
-                stage2_result.get("confidence", 0.0)
-            )
-            result["classification_success"] = True
-            
-            success(f"MCC Classification complete: {final_mcc} - {result['final_mcc_description']}")
-            success(f"Final confidence: {result['final_confidence']:.2f}")
-            
-            return result
-            
-        except Exception as e:
-            error(f"MCC classification failed for {domain_name}: {e}")
-            result["error"] = f"Unexpected error: {str(e)}"
-            return result
-    
-    def _find_screenshot(self, domain_dir: str) -> Optional[str]:
-        """Find screenshot file in domain directory."""
-        try:
-            for file in os.listdir(domain_dir):
-                if file.startswith("screenshot_") and file.endswith(".png"):
-                    return os.path.join(domain_dir, file)
-        except Exception:
-            pass
-        return None
-    
-    def _get_business_validation_rules(self, text_content: str) -> str:
-        """
-        Generate business-specific validation rules based on text content analysis.
-        
-        Args:
-            text_content (str): Extracted website text
-            
-        Returns:
-            str: Formatted validation rules for the prompt
-        """
-        text_lower = text_content.lower()
-        rules = []
-        
-        # Food and Restaurant Rules
-        food_keywords = ['restaurant', 'pizza', 'food', 'menu', 'dining', 'eat', 'drink', 'bar', 'café', 'cafe', 
-                        'bakery', 'pastry', 'patisserie', 'sushi', 'kitchen', 'chef', 'cook', 'meal', 'buffet',
-                        'takeout', 'delivery', 'catering', 'wine', 'beer', 'cocktail', 'lunch', 'dinner', 'breakfast']
-        
-        if any(keyword in text_lower for keyword in food_keywords):
-            rules.append("🍕 FOOD BUSINESS DETECTED: This business MUST be classified with a food-related MCC code (5812, 5813, 5814, 5441, etc.). NEVER use non-food MCCs like Florists, Hardware, Electronics, etc.")
-        
-        # Retail Rules
-        retail_keywords = ['shop', 'store', 'buy', 'purchase', 'product', 'retail', 'sell', 'order', 'cart', 'checkout']
-        if any(keyword in text_lower for keyword in retail_keywords):
-            rules.append("🛍️ RETAIL BUSINESS DETECTED: Focus on what products are actually sold, not peripheral services.")
-        
-        # Service Rules  
-        service_keywords = ['consulting', 'service', 'management', 'professional', 'advice', 'support', 'solutions']
-        if any(keyword in text_lower for keyword in service_keywords):
-            rules.append("💼 SERVICE BUSINESS DETECTED: Focus on the primary service offered, use Business Services MCCs (7300-7999).")
-        
-        # Specific Business Type Rules
-        if 'patisserie' in text_lower or 'bakery' in text_lower or 'pastry' in text_lower:
-            rules.append("🥐 BAKERY/PATISSERIE DETECTED: Use MCC 5441 (Candy, Nut, and Confectionery Stores) or 5812 (Restaurants) if seating available. NEVER use 5992 (Florists).")
-        
-        if 'pizza' in text_lower:
-            rules.append("🍕 PIZZA BUSINESS DETECTED: Use MCC 5812 (Restaurants) for sit-down pizza places or 5814 (Fast Food) for delivery/takeout focused.")
-        
-        if 'bar' in text_lower or 'pub' in text_lower or 'tavern' in text_lower:
-            rules.append("🍺 BAR/PUB DETECTED: Use MCC 5813 (Bars, Cocktail Lounges) for alcohol-focused establishments.")
-        
-        if 'art' in text_lower and 'print' in text_lower:
-            rules.append("🎨 ART PRINTS DETECTED: Use MCC 5111 (Stationery, Office Supplies) for printable art or similar paper-based products.")
-        
-        # Instagram/Social Media Rules
-        if 'instagram' in text_lower or 'social media' in text_lower or 'influencer' in text_lower:
-            rules.append("📱 SOCIAL MEDIA BUSINESS DETECTED: If content creation/curation is the primary activity, use MCC 7392 (Consulting, Management and PR Services).")
-        
-        # YouTube/Content Rules
-        if 'youtube' in text_lower or 'channel' in text_lower or 'content creator' in text_lower:
-            rules.append("📺 CONTENT CREATOR DETECTED: If selling products, classify by product type. If pure content creation, use appropriate services MCC.")
-        
-        if not rules:
-            rules.append("⚠️ GENERAL RULE: Classify based on PRIMARY business activity. Avoid broad/generic MCCs when specific ones exist.")
-        
-        return "\n".join(rules)
     
     def _validate_mcc_selection(self, selected_mcc: int, text_content: str, candidate_mccs: pd.DataFrame) -> tuple[bool, str]:
         """
@@ -675,6 +528,186 @@ IMPORTANT:
         
         return True, ""
     
+    def classify_mcc(self, domain_dir: str, domain_name: str) -> Dict[str, Any]:
+        """
+        Classify MCC code for a website using two-stage approach.
+        
+        Args:
+            domain_dir (str): Path to domain directory containing files
+            domain_name (str): Domain name for logging
+            
+        Returns:
+            Dict[str, Any]: Complete MCC classification results
+        """
+        processing(f"Starting MCC classification for {domain_name}")
+        
+        # Initialize result structure
+        result = {
+            "domain": domain_name,
+            "classification_success": False,
+            "stage1_result": {},
+            "stage2_result": {},
+            "final_mcc": None,
+            "final_mcc_description": "",
+            "final_confidence": 0.0,
+            "error": None,
+            "processing_metadata": {
+                "text_extraction_success": False,
+                "screenshot_found": False,
+                "stage1_completed": False,
+                "stage2_completed": False,
+                "model_used": self.model_config['model']
+            }
+        }
+        
+        try:
+            # 1. Load required files
+            html_path = os.path.join(domain_dir, "page.html")
+            screenshot_path = self._find_screenshot(domain_dir)
+            
+            if not os.path.exists(html_path):
+                result["error"] = "HTML file not found"
+                return result
+            
+            if screenshot_path:
+                result["processing_metadata"]["screenshot_found"] = True
+            
+            # 2. Extract text content
+            text_content = self.text_extractor.extract_for_mcc_classification(html_path)
+            if not text_content:
+                result["error"] = "Failed to extract text content"
+                return result
+            
+            result["processing_metadata"]["text_extraction_success"] = True
+            info(f"Extracted {len(text_content)} characters of text")
+            
+            # 3. Stage 1: Category Classification
+            info("Stage 1: Determining MCC category...")
+            stage1_prompt = self._create_stage1_prompt(text_content)
+            stage1_response = self._query_llm_with_retry(stage1_prompt, screenshot_path, "stage1")
+            stage1_result = self._parse_json_response(stage1_response)
+            
+            result["stage1_result"] = stage1_result
+            
+            if "error" in stage1_result:
+                result["error"] = f"Stage 1 failed: {stage1_result['error']}"
+                return result
+            
+            result["processing_metadata"]["stage1_completed"] = True
+            
+            # Validate and normalize Stage 1 results
+            selected_range = stage1_result.get("selected_category_range")
+            if not selected_range:
+                result["error"] = "No category range returned from Stage 1"
+                return result
+            
+            # Handle cases where model returns specific MCC codes instead of ranges
+            if selected_range and '-' not in selected_range:
+                try:
+                    mcc_code = int(selected_range)
+                    # Find which category this MCC belongs to
+                    for range_key, category_name in self.mcc_categories.items():
+                        start_code, end_code = range_key.split('-')
+                        if int(start_code) <= mcc_code <= int(end_code):
+                            selected_range = range_key
+                            stage1_result["selected_category_range"] = range_key
+                            info(f"Mapped MCC {mcc_code} to range {range_key}")
+                            break
+                except ValueError:
+                    pass
+            
+            # Handle ranges that don't exactly match our predefined categories
+            if selected_range not in self.mcc_categories:
+                # Try to find the best matching category
+                try:
+                    if '-' in selected_range:
+                        start_mcc, end_mcc = selected_range.split('-')
+                        mid_mcc = (int(start_mcc) + int(end_mcc)) // 2
+                    else:
+                        mid_mcc = int(selected_range)
+                    
+                    # Find which category this MCC falls into
+                    for range_key, category_name in self.mcc_categories.items():
+                        start_code, end_code = range_key.split('-')
+                        if int(start_code) <= mid_mcc <= int(end_code):
+                            selected_range = range_key
+                            stage1_result["selected_category_range"] = range_key
+                            stage1_result["selected_category_name"] = category_name
+                            info(f"Mapped range to category {range_key}")
+                            break
+                    else:
+                        result["error"] = f"Could not map category range {selected_range} to valid MCC category"
+                        return result
+                        
+                except ValueError:
+                    result["error"] = f"Invalid category range format from Stage 1: {selected_range}"
+                    return result
+            
+            success(f"Stage 1 complete: {selected_range} - {stage1_result.get('selected_category_name')}")
+            
+            # 4. Stage 2: Exact MCC Code Determination
+            info("Stage 2: Determining exact MCC code...")
+            candidate_mccs = self._get_category_range_codes(selected_range)
+            
+            if candidate_mccs.empty:
+                result["error"] = f"No MCC codes found for category {selected_range}"
+                return result
+            
+            info(f"Found {len(candidate_mccs)} candidate MCC codes in category")
+            
+            stage2_prompt = self._create_stage2_prompt(text_content, selected_range, candidate_mccs)
+            stage2_response = self._query_llm_with_retry(stage2_prompt, screenshot_path, "stage2")
+            stage2_result = self._parse_json_response(stage2_response)
+            
+            result["stage2_result"] = stage2_result
+            
+            if "error" in stage2_result:
+                result["error"] = f"Stage 2 failed: {stage2_result['error']}"
+                return result
+            
+            result["processing_metadata"]["stage2_completed"] = True
+            
+            # 5. Validate and finalize results
+            final_mcc = stage2_result.get("selected_mcc")
+            if not final_mcc:
+                result["error"] = "No MCC code returned from Stage 2"
+                return result
+            
+            # Validate MCC is in candidate list
+            if final_mcc not in candidate_mccs['MCC'].values:
+                # Try to find closest match in category
+                warning(f"Selected MCC {final_mcc} not in exact candidate list, finding closest match...")
+                # Use first MCC in category as fallback
+                final_mcc = candidate_mccs.iloc[0]['MCC']
+                stage2_result["selected_mcc"] = final_mcc
+                stage2_result["selected_mcc_description"] = candidate_mccs.iloc[0]['Description']
+                stage2_result["confidence"] = min(stage2_result.get("confidence", 0.5), 0.7)
+            
+            # Validate business logic
+            is_valid, validation_error = self._validate_mcc_selection(final_mcc, text_content, candidate_mccs)
+            if not is_valid:
+                warning(f"Validation warning: {validation_error}")
+                # Continue with lower confidence rather than failing
+                stage2_result["confidence"] = min(stage2_result.get("confidence", 0.5), 0.6)
+            
+            result["final_mcc"] = final_mcc
+            result["final_mcc_description"] = stage2_result.get("selected_mcc_description", "")
+            result["final_confidence"] = min(
+                stage1_result.get("confidence", 0.0),
+                stage2_result.get("confidence", 0.0)
+            )
+            result["classification_success"] = True
+            
+            success(f"MCC Classification complete: {final_mcc} - {result['final_mcc_description']}")
+            success(f"Final confidence: {result['final_confidence']:.2f}")
+            
+            return result
+            
+        except Exception as e:
+            error(f"MCC classification failed for {domain_name}: {e}")
+            result["error"] = f"Unexpected error: {str(e)}"
+            return result
+    
     def save_mcc_result(self, domain_dir: str, mcc_result: Dict[str, Any]) -> str:
         """
         Save MCC classification result to JSON file.
@@ -714,24 +747,3 @@ def classify_website_mcc(domain_dir: str, domain_name: str, mcc_data_path: str =
     """
     classifier = MCCClassifier(mcc_data_path)
     return classifier.classify_mcc(domain_dir, domain_name)
-
-
-# Example usage and testing
-if __name__ == "__main__":
-    import sys
-    
-    if len(sys.argv) > 2:
-        domain_dir = sys.argv[1]
-        domain_name = sys.argv[2]
-        
-        classifier = MCCClassifier()
-        result = classifier.classify_mcc(domain_dir, domain_name)
-        
-        print("=" * 60)
-        print("MCC CLASSIFICATION RESULT")
-        print("=" * 60)
-        print(json.dumps(result, indent=2))
-        
-    else:
-        print("Usage: python mcc_classifier.py <domain_directory> <domain_name>")
-        print("Example: python mcc_classifier.py data/runs/run_20240101_120000/example_com_20240101_120000 example.com")

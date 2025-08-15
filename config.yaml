@@ -1,5 +1,8 @@
 agent:
   classifier-agent:
-    model: "gemini-2.5-pro"
+    model: "gpt-5-mini"
     max_tokens: 2048
     temperature: 0.3
+# Address extraction requires SERPAPI_KEY environment variable for search functionality
+# Get your API key from: https://serpapi.com/
+# Set it as: export SERPAPI_KEY="your_api_key_here"

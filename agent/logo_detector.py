@@ -11,7 +11,7 @@ from utils.terminal_prettify import success, error, warning, info
 
 class LogoDetector:
     """
-    Logo detection agent that analyzes screenshots and HTML to identify website logos.
+    Logo detection agent that analyzes screenshots and HTML to identify website logos and extract merchant names.
     """
     
     def __init__(self):
@@ -19,30 +19,47 @@ class LogoDetector:
         self.llm_client = create_llm_client()
         self.model_config = get_model_config("classifier-agent")
         
-        # System prompt for logo detection
-        self.system_prompt = """You are a website logo detection expert. Your task is to identify the main logo/brand image from a website using the provided screenshot and HTML structure.
+        # System prompt for logo detection and merchant name extraction
+        self.system_prompt = """You are a website logo detection and merchant name extraction expert. Your task is to identify the main logo/brand image from a website AND extract the merchant/business name using the provided screenshot and HTML structure.
 
 INSTRUCTIONS:
 1. Analyze the screenshot to visually identify the website's main logo/brand image
 2. Use the HTML structure to understand the page layout and context
-3. If there are cookie overlays, popups, or modals, ignore them and focus on the main website content behind them
-4. Look for logos typically positioned in:
+3. Extract the merchant/business name from various sources (logo text, page title, headings, etc.)
+4. If there are cookie overlays, popups, or modals, ignore them and focus on the main website content behind them
+5. Look for logos typically positioned in:
    - Header/navigation area (most common)
    - Top-left corner
    - Center of header
    - Footer area (secondary logos)
 
-5. From the provided images list, identify which image corresponds to the logo you see in the screenshot
-6. Consider these logo characteristics:
+6. From the provided images list, identify which image corresponds to the logo you see in the screenshot
+7. Consider these logo characteristics:
    - Usually contains company/brand name or distinctive visual identity
    - Often positioned prominently in navigation
    - May have alt text with brand/company names
    - Typically appears in header sections
-7. PLATFORM vs MERCHANT DISTINCTION:
+
+8. MERCHANT NAME EXTRACTION:
+   - Look for the business/merchant name in multiple sources:
+     * Logo text (text within or next to the logo)
+     * Page title (HTML <title> tag)
+     * Main headings (H1, H2 tags)
+     * Navigation menu items
+     * "About" or "Company" sections
+     * Meta tags (business name, site name)
+     * Footer copyright information
+   - Prioritize names that appear in prominent locations (header, logo area, main title)
+   - Extract the BUSINESS name, not generic terms like "Home" or "Welcome"
+   - If multiple business names found, choose the most prominent/consistent one
+
+9. PLATFORM vs MERCHANT DISTINCTION:
    - If the page is a social media platform's login page, signup page, or generic platform page (showing Instagram, Facebook, Twitter, LinkedIn branding), return logo_found as false
    - Only return logo_found as true if you can identify a MERCHANT/BUSINESS logo, not the platform's own branding
    - Platform logos (Instagram wordmark, Facebook logo, etc.) should NOT be considered the "main brand logo" you're looking for
-8. VALID LOGO CRITERIA:
+   - For platform pages, still try to extract merchant name if there's a clear business profile being displayed
+
+10. VALID LOGO CRITERIA:
    - A valid logo must be a designed brand identity element (text-based logo, symbol, or combination)
    - DO NOT select profile pictures that are photos of people, even if they appear in profile/avatar positions
    - DO NOT select generic photos, lifestyle images, or personal photographs
@@ -59,13 +76,19 @@ Return a JSON object with this exact structure:
         // If not found, use empty object {}
     },
     "reasoning": "Detailed explanation of why this image was selected as the logo, or why no logo was found",
-    "visual_description": "Description of what the logo looks like in the screenshot"
+    "visual_description": "Description of what the logo looks like in the screenshot",
+    "merchant_name": "Extracted business/merchant name",
+    "merchant_name_source": "Where the merchant name was found (e.g., 'logo text', 'page title', 'main heading', etc.)",
+    "merchant_name_confidence": 0.95,
+    "alternative_names": ["other possible business names found", "if any"]
 }
 
 IMPORTANT:
 - Only return valid JSON
 - If you cannot confidently identify a logo, set logo_found to false and explain why
 - If multiple logos exist, choose the primary/main brand logo
+- Always attempt to extract a merchant name even if no logo is found
+- If no clear merchant name can be identified, set merchant_name to an empty string and explain why in reasoning
 - Ignore decorative images, icons that aren't logos, and background images"""
 
     def _load_screenshot(self, screenshot_path: str) -> Optional[bytes]:
@@ -141,7 +164,7 @@ IMPORTANT:
         if len(html_content) > max_html_length:
             html_content = html_content[:max_html_length] + "\n... [HTML truncated for length]"
         
-        prompt = f"""Please analyze this website to identify the main logo/brand image.
+        prompt = f"""Please analyze this website to identify the main logo/brand image AND extract the merchant/business name.
 
 WEBSITE HTML STRUCTURE:
 ```html
@@ -155,9 +178,18 @@ AVAILABLE IMAGES ON THE PAGE:
 
 TASK:
 1. Look at the provided screenshot to visually identify the main logo
-2. Use the HTML structure to understand the page layout
+2. Use the HTML structure to understand the page layout and extract business information
 3. Match the logo you see in the screenshot with one of the images from the available images list
-4. Return your analysis in the specified JSON format
+4. Extract the merchant/business name from various sources in the HTML and screenshot
+5. Return your analysis in the specified JSON format with both logo detection AND merchant name extraction
+
+MERCHANT NAME EXTRACTION PRIORITY:
+- Text within or immediately next to the logo
+- Main page title (HTML <title> tag)
+- Primary headings (H1, H2) that contain business names
+- Navigation menu items that indicate business name
+- Header/footer text with business identification
+- Meta tags with site/business names
 
 Remember to ignore any cookie overlays, popups, or modal dialogs - focus on the main website content behind them."""
 
@@ -165,14 +197,14 @@ Remember to ignore any cookie overlays, popups, or modal dialogs - focus on the 
     
     def detect_logo(self, domain_dir: str, domain_name: str) -> Dict[str, Any]:
         """
-        Detect logo from website files in the domain directory.
+        Detect logo from website files in the domain directory and extract merchant name.
         
         Args:
             domain_dir (str): Path to domain directory containing the files
             domain_name (str): Domain name for logging
             
         Returns:
-            Dict[str, Any]: Logo detection results
+            Dict[str, Any]: Logo detection results including merchant name
         """
         # Define file paths
         screenshot_path = None
@@ -256,11 +288,23 @@ Remember to ignore any cookie overlays, popups, or modal dialogs - focus on the 
                 json_str = json_match.group(0)
                 result = json.loads(json_str)
                 
-                # Validate required keys
+                # Validate required keys and add defaults for new fields
                 required_keys = ['logo_found', 'confidence', 'selected_image', 'reasoning']
+                new_keys = ['merchant_name', 'merchant_name_source', 'merchant_name_confidence', 'alternative_names']
+                
                 for key in required_keys:
                     if key not in result:
                         result[key] = None
+                
+                # Add default values for new merchant name fields if missing
+                if 'merchant_name' not in result:
+                    result['merchant_name'] = ""
+                if 'merchant_name_source' not in result:
+                    result['merchant_name_source'] = ""
+                if 'merchant_name_confidence' not in result:
+                    result['merchant_name_confidence'] = 0.0
+                if 'alternative_names' not in result:
+                    result['alternative_names'] = []
                 
                 return result
             else:
@@ -288,6 +332,10 @@ Remember to ignore any cookie overlays, popups, or modal dialogs - focus on the 
             'selected_image': {},
             'reasoning': reason,
             'visual_description': 'Analysis failed',
+            'merchant_name': '',
+            'merchant_name_source': '',
+            'merchant_name_confidence': 0.0,
+            'alternative_names': [],
             'analysis_metadata': {
                 'error': True,
                 'model_used': self.model_config.get('model', 'unknown'),

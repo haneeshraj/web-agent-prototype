@@ -49,7 +49,9 @@ class LLMClient:
             'gpt-4.1', # 4i, 3s, $2.00 (ip), $0.50 (cachee), $8.00 (op) 
             'gpt-4o-mini',  # 2i, 4s, $0.15 (ip), $0.08 (cachee), $0.60 (op) 
             'gpt-4o', # 3i, 3s, $2.50 (ip), $1.25 (cachee), $10.00 (op) 
-            'o3' # 5r, 1s, $2.00 (ip), $0.50 (cachee), $8.00 (op) 
+            'o3', # 5r, 1s, $2.00 (ip), $0.50 (cachee), $8.00 (op) 
+            'gpt-5-nano', # 2r, 5s, $0.05 (ip), $0.01 (cachee), $0.40 (op) 
+            'gpt-5-mini', # 3r, 4s, $0.25 (ip), $0.03 (cachee), $2.00 (op) 
         ]
         
         # Anthropic models (text and vision)
@@ -272,6 +274,21 @@ class LLMClient:
     
     def _query_openai(self, client, model: str, formatted_data: dict, **kwargs):
         """Query OpenAI API."""
+        # Handle the parameter change for newer models
+        # GPT-5 and newer models use max_completion_tokens instead of max_tokens
+        if 'max_tokens' in kwargs:
+            max_tokens_value = kwargs.pop('max_tokens')
+            # For GPT-5 models and newer, use max_completion_tokens
+            if model.startswith('gpt-5') or model.startswith('o1'):
+                kwargs['max_completion_tokens'] = max_tokens_value
+            else:
+                kwargs['max_tokens'] = max_tokens_value
+        
+        # GPT-5 models only support temperature=1 (default), remove custom temperature
+        if model.startswith('gpt-5'):
+            if 'temperature' in kwargs:
+                kwargs.pop('temperature')
+        
         response = client.chat.completions.create(
             model=model,
             messages=formatted_data["messages"],
