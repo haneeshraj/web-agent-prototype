@@ -1,7 +1,9 @@
 import json
 import os
 import time
-from typing import Dict, Any, Optional
+import requests
+import urllib.parse
+from typing import Dict, Any, Optional, List
 from pathlib import Path
 
 from utils.llm import create_llm_client
@@ -88,11 +90,27 @@ Return a JSON object with this exact structure:
 {
     "address_found_in_website": true/false,
     "extracted_address": "Full formatted address if found, empty string if not",
+    "address_components": {
+        "house_number_street": "House number and street name (e.g., '225 Delaware Avenue')",
+        "city": "City name in full form (e.g., 'New York' not 'NYC')",
+        "county": "County/District if applicable",
+        "state": "State/Province in full form (e.g., 'New York' not 'NY')",
+        "country": "Country in full form (e.g., 'United States' not 'USA')",
+        "postal_code": "Postal/ZIP code if applicable"
+    },
+    "clean_address": "Address without suite numbers or secondary identifiers",
     "address_confidence": 0.95,
     "address_source": "Where the address was found (e.g., 'contact page', 'footer', 'about section')",
     "address_type": "Type of address (e.g., 'headquarters', 'main office', 'primary store')",
     "reasoning": "Detailed explanation of why this address was selected or why no address was found"
 }
+
+IMPORTANT ADDRESS FORMATTING RULES:
+- Expand all abbreviations: NY → New York, USA → United States, CA → California
+- Remove suite numbers, unit numbers, floor numbers from main address
+- Store suite/unit info separately but prioritize the main street address
+- Use full official names for countries and states
+- If city has common abbreviations (NYC, LA, etc.), use full names
 
 IMPORTANT:
 - Only return valid JSON
@@ -134,10 +152,19 @@ Return a JSON object with this exact structure:
 {
     "address_found": true/false,
     "extracted_address": "Full formatted address if found, empty string if not",
+    "address_components": {
+        "house_number_street": "House number and street name (e.g., '225 Delaware Avenue')",
+        "city": "City name in full form (e.g., 'New York' not 'NYC')",
+        "county": "County/District if applicable",
+        "state": "State/Province in full form (e.g., 'New York' not 'NY')",
+        "country": "Country in full form (e.g., 'United States' not 'USA')",
+        "postal_code": "Postal/ZIP code if applicable"
+    },
+    "clean_address": "Address without suite numbers or secondary identifiers",
     "address_confidence": 0.95,
     "address_source": "Which search result source provided the address",
     "address_type": "Type of address (e.g., 'corporate headquarters', 'founding location', 'main office')",
-    "reasoning": "Detailed explanation of why this address was selected as the PRIMARY headquarters, especially if multiple locations were considered",
+    "reasoning": "Detailed explanation of why this address was selected as the PRIMARY headquarters",
     "supporting_sources": ["list of sources that confirm this address"],
     "alternative_addresses": [
         {
@@ -147,6 +174,13 @@ Return a JSON object with this exact structure:
         }
     ]
 }
+
+IMPORTANT ADDRESS FORMATTING RULES:
+- Expand all abbreviations: NY → New York, USA → United States, CA → California  
+- Remove suite numbers, unit numbers, floor numbers from main address
+- Store suite/unit info separately but prioritize the main street address
+- Use full official names for countries and states
+- If city has common abbreviations (NYC, LA, etc.), use full names
 
 IMPORTANT:
 - Only return valid JSON
@@ -217,6 +251,15 @@ IMPORTANT:
             return json.dumps({
                 "address_found_in_website": False,
                 "extracted_address": "",
+                "address_components": {
+                    "house_number_street": "",
+                    "city": "",
+                    "county": "",
+                    "state": "",
+                    "country": "",
+                    "postal_code": ""
+                },
+                "clean_address": "",
                 "address_confidence": 0.0,
                 "address_source": "",
                 "address_type": "",
@@ -235,6 +278,15 @@ IMPORTANT:
             return json.dumps({
                 "address_found": False,
                 "extracted_address": "",
+                "address_components": {
+                    "house_number_street": "",
+                    "city": "",
+                    "county": "",
+                    "state": "",
+                    "country": "",
+                    "postal_code": ""
+                },
+                "clean_address": "",
                 "address_confidence": 0.0,
                 "address_source": "",
                 "address_type": "",
@@ -242,6 +294,150 @@ IMPORTANT:
                 "supporting_sources": [],
                 "alternative_addresses": []
             })
+
+    def _geocode_address(self, address_components: Dict[str, str], full_address: str) -> Optional[Dict[str, Any]]:
+        """
+        Geocode address using OpenStreetMap Nominatim API.
+        
+        Args:
+            address_components (Dict[str, str]): Structured address components
+            full_address (str): Full address string as fallback
+            
+        Returns:
+            Optional[Dict[str, Any]]: Geocoding result with lat, lon, and validated address
+        """
+        try:
+            # First attempt: Use structured query with components
+            if address_components:
+                params = {}
+                if address_components.get('house_number_street'):
+                    params['street'] = address_components['house_number_street']
+                if address_components.get('city'):
+                    params['city'] = address_components['city']
+                if address_components.get('county'):
+                    params['county'] = address_components['county']
+                if address_components.get('state'):
+                    params['state'] = address_components['state']
+                if address_components.get('country'):
+                    params['country'] = address_components['country']
+                if address_components.get('postal_code'):
+                    params['postalcode'] = address_components['postal_code']
+                
+                params['format'] = 'json'
+                params['limit'] = '5'
+                
+                if params:
+                    info(f"Geocoding structured address: {params}")
+                    response = self._make_nominatim_request(params)
+                    if response and len(response) > 0:
+                        result = response[0]  # Take first result
+                        return {
+                            'lat': result.get('lat'),
+                            'lon': result.get('lon'),
+                            'display_name': result.get('display_name'),
+                            'address_type': result.get('addresstype'),
+                            'place_id': result.get('place_id'),
+                            'boundingbox': result.get('boundingbox'),
+                            'source': 'structured_query'
+                        }
+            
+            # Fallback: Try with full address string
+            if full_address:
+                info(f"Geocoding full address string: {full_address}")
+                params = {
+                    'q': full_address,
+                    'format': 'json',
+                    'limit': '5'
+                }
+                response = self._make_nominatim_request(params)
+                if response and len(response) > 0:
+                    result = response[0]  # Take first result
+                    return {
+                        'lat': result.get('lat'),
+                        'lon': result.get('lon'),
+                        'display_name': result.get('display_name'),
+                        'address_type': result.get('addresstype'),
+                        'place_id': result.get('place_id'),
+                        'boundingbox': result.get('boundingbox'),
+                        'source': 'full_address_query'
+                    }
+            
+            warning("No geocoding results found")
+            return None
+            
+        except Exception as e:
+            error(f"Geocoding failed: {e}")
+            return None
+
+    def _make_nominatim_request(self, params: Dict[str, str]) -> Optional[List[Dict]]:
+        """
+        Make request to Nominatim API with proper rate limiting.
+        
+        Args:
+            params (Dict[str, str]): Query parameters
+            
+        Returns:
+            Optional[List[Dict]]: API response or None if failed
+        """
+        try:
+            base_url = "https://nominatim.openstreetmap.org/search"
+            
+            # Add required headers
+            headers = {
+                'User-Agent': 'WebAgentPrototype/1.0 (business-address-extraction)',
+                'Accept': 'application/json'
+            }
+            
+            # Rate limiting - Nominatim allows 1 request per second
+            time.sleep(1)
+            
+            response = requests.get(base_url, params=params, headers=headers, timeout=10)
+            response.raise_for_status()
+            
+            result = response.json()
+            info(f"Nominatim returned {len(result)} results")
+            return result
+            
+        except requests.exceptions.RequestException as e:
+            error(f"Nominatim API request failed: {e}")
+            return None
+        except json.JSONDecodeError as e:
+            error(f"Failed to parse Nominatim response: {e}")
+            return None
+
+    def _create_clean_address_fallback(self, full_address: str) -> str:
+        """
+        Create a clean address by removing suite numbers and expanding abbreviations.
+        Used as fallback when LLM doesn't provide clean_address.
+        
+        Args:
+            full_address (str): Original address
+            
+        Returns:
+            str: Cleaned address
+        """
+        if not full_address:
+            return ""
+        
+        # Remove common suite/unit identifiers
+        import re
+        clean_addr = re.sub(r'\b(Suite|Ste|Unit|Apt|Apartment|Floor|Fl|Room|Rm)\s+[A-Za-z0-9#-]+\b,?\s*', '', full_address, flags=re.IGNORECASE)
+        
+        # Basic abbreviation expansions
+        expansions = {
+            r'\bNY\b': 'New York',
+            r'\bCA\b': 'California', 
+            r'\bTX\b': 'Texas',
+            r'\bFL\b': 'Florida',
+            r'\bUSA\b': 'United States',
+            r'\bNYC\b': 'New York',
+            r'\bLA\b': 'Los Angeles'
+        }
+        
+        for abbrev, full_form in expansions.items():
+            clean_addr = re.sub(abbrev, full_form, clean_addr, flags=re.IGNORECASE)
+        
+        return clean_addr.strip()
 
     def _extract_location_context(self, html_content: str) -> Dict[str, Any]:
         """
@@ -377,6 +573,49 @@ Remember to focus on main business addresses (headquarters, main office, primary
             
             # Parse JSON response
             result = json.loads(json_str)
+            
+            # Add geocoding if address was found
+            if result.get("address_found_in_website", False) and result.get("extracted_address"):
+                info("Adding geocoding validation to extracted address...")
+                
+                # Get address components for structured geocoding
+                address_components = result.get("address_components", {})
+                full_address = result.get("extracted_address", "")
+                clean_address = result.get("clean_address", "")
+                
+                # Create clean address fallback if not provided by LLM
+                if not clean_address:
+                    clean_address = self._create_clean_address_fallback(full_address)
+                    result["clean_address"] = clean_address
+                
+                # Try geocoding with clean address first, then full address
+                geocoding_result = None
+                if clean_address:
+                    # Create clean address components for geocoding
+                    clean_components = address_components.copy() if address_components else {}
+                    if clean_components.get('house_number_street'):
+                        # Remove suite numbers from street component
+                        import re
+                        clean_street = re.sub(r'\b(Suite|Ste|Unit|Apt|Apartment|Floor|Fl|Room|Rm)\s+[A-Za-z0-9#-]+\b,?\s*', 
+                                            '', clean_components['house_number_street'], flags=re.IGNORECASE).strip()
+                        clean_components['house_number_street'] = clean_street
+                    
+                    geocoding_result = self._geocode_address(clean_components, clean_address)
+                
+                # Fallback to full address if clean address geocoding failed
+                if not geocoding_result and full_address != clean_address:
+                    warning("Clean address geocoding failed, trying full address...")
+                    geocoding_result = self._geocode_address(address_components, full_address)
+                
+                # Add geocoding results to response
+                if geocoding_result:
+                    result["geocoding"] = geocoding_result
+                    success(f"Address geocoded successfully: {geocoding_result.get('display_name')}")
+                    info(f"Coordinates: {geocoding_result.get('lat')}, {geocoding_result.get('lon')}")
+                else:
+                    result["geocoding"] = None
+                    warning("Address geocoding failed - no coordinates available")
+            
             info(f"Website address analysis completed")
             return result
             
@@ -553,6 +792,49 @@ Focus on finding the PRIMARY business headquarters for {merchant_name}, especial
             
             # Parse JSON response
             result = json.loads(json_str)
+            
+            # Add geocoding if address was found
+            if result.get("address_found", False) and result.get("extracted_address"):
+                info("Adding geocoding validation to search-extracted address...")
+                
+                # Get address components for structured geocoding
+                address_components = result.get("address_components", {})
+                full_address = result.get("extracted_address", "")
+                clean_address = result.get("clean_address", "")
+                
+                # Create clean address fallback if not provided by LLM
+                if not clean_address:
+                    clean_address = self._create_clean_address_fallback(full_address)
+                    result["clean_address"] = clean_address
+                
+                # Try geocoding with clean address first, then full address
+                geocoding_result = None
+                if clean_address:
+                    # Create clean address components for geocoding
+                    clean_components = address_components.copy() if address_components else {}
+                    if clean_components.get('house_number_street'):
+                        # Remove suite numbers from street component
+                        import re
+                        clean_street = re.sub(r'\b(Suite|Ste|Unit|Apt|Apartment|Floor|Fl|Room|Rm)\s+[A-Za-z0-9#-]+\b,?\s*', 
+                                            '', clean_components['house_number_street'], flags=re.IGNORECASE).strip()
+                        clean_components['house_number_street'] = clean_street
+                    
+                    geocoding_result = self._geocode_address(clean_components, clean_address)
+                
+                # Fallback to full address if clean address geocoding failed
+                if not geocoding_result and full_address != clean_address:
+                    warning("Clean address geocoding failed, trying full address...")
+                    geocoding_result = self._geocode_address(address_components, full_address)
+                
+                # Add geocoding results to response
+                if geocoding_result:
+                    result["geocoding"] = geocoding_result
+                    success(f"Search address geocoded successfully: {geocoding_result.get('display_name')}")
+                    info(f"Coordinates: {geocoding_result.get('lat')}, {geocoding_result.get('lon')}")
+                else:
+                    result["geocoding"] = None
+                    warning("Search address geocoding failed - no coordinates available")
+            
             info(f"Search-based address extraction completed")
             return result
             

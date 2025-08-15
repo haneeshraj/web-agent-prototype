@@ -103,12 +103,20 @@ Return a JSON object with this exact structure:
     
     // NEW: Address Analysis Results
     "address_analysis": {
-        "address_found_on_website": true/false,
-        "extracted_address": "Complete address if found, empty string if not",
-        "address_confidence": 0.90,
-        "address_source": "Where address was found (e.g., 'contact page', 'footer', 'about section')",
-        "address_type": "Type of address (e.g., 'headquarters', 'main office', 'primary store')",
-        "address_reasoning": "Explanation of why this address was selected or why none found"
+        "addresses_found": ["list of addresses found on the website"],
+        "confidence": "high|medium|low|none",
+        "primary_address": "Main business address if found",
+        "address_components": {
+            "house_number_street": "House number and street name (e.g., '225 Delaware Avenue')",
+            "city": "City name in full form (e.g., 'New York' not 'NYC')",
+            "county": "County/District if applicable",
+            "state": "State/Province in full form (e.g., 'New York' not 'NY')",
+            "country": "Country in full form (e.g., 'United States' not 'USA')",
+            "postal_code": "Postal/ZIP code if applicable"
+        },
+        "clean_address": "Address without suite numbers or secondary identifiers",
+        "source": "Where address was found (e.g., 'contact page', 'footer', 'about section')",
+        "reasoning": "Explanation of why this address was selected or why none found"
     },
     
     // NEW: Location Context Results
@@ -252,6 +260,13 @@ COMBINED ANALYSIS TASKS:
 - Service area descriptions
 - "Serving [Location]" or "Located in [City]" text
 
+**IMPORTANT ADDRESS FORMATTING RULES:**
+- Expand all abbreviations: NY → New York, USA → United States, CA → California
+- Remove suite numbers, unit numbers, floor numbers from main address
+- Store suite/unit info separately but prioritize the main street address  
+- Use full official names for countries and states
+- If city has common abbreviations (NYC, LA, etc.), use full names
+
 Remember to ignore any cookie overlays, popups, or modal dialogs - focus on the main website content behind them."""
 
         return prompt
@@ -379,9 +394,30 @@ Remember to ignore any cookie overlays, popups, or modal dialogs - focus on the 
                         'addresses_found': [],
                         'confidence': 'none',
                         'primary_address': '',
+                        'address_components': {
+                            'house_number_street': '',
+                            'city': '',
+                            'county': '',
+                            'state': '',
+                            'country': '',
+                            'postal_code': ''
+                        },
+                        'clean_address': '',
                         'source': '',
                         'reasoning': 'No address information found'
                     }
+                elif 'address_components' not in result['address_analysis']:
+                    # Ensure address_components exists in existing address_analysis
+                    result['address_analysis']['address_components'] = {
+                        'house_number_street': '',
+                        'city': '',
+                        'county': '',
+                        'state': '',
+                        'country': '',
+                        'postal_code': ''
+                    }
+                if 'clean_address' not in result.get('address_analysis', {}):
+                    result['address_analysis']['clean_address'] = ''
                 if 'location_context' not in result:
                     result['location_context'] = {
                         'city': '',
@@ -426,6 +462,15 @@ Remember to ignore any cookie overlays, popups, or modal dialogs - focus on the 
                 'addresses_found': [],
                 'confidence': 'none',
                 'primary_address': '',
+                'address_components': {
+                    'house_number_street': '',
+                    'city': '',
+                    'county': '',
+                    'state': '',
+                    'country': '',
+                    'postal_code': ''
+                },
+                'clean_address': '',
                 'source': '',
                 'reasoning': 'Analysis failed'
             },
