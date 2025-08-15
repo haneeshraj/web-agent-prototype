@@ -1,0 +1,54 @@
+{
+  "domain": "spotcoffee_com",
+  "classification_success": true,
+  "stage1_result": {
+    "selected_category_range": "5700-7299",
+    "selected_category_name": "Miscellaneous Stores",
+    "confidence": 1.0,
+    "reasoning": "The business, SPoT Coffee, is clearly identified as a cafe or coffee shop. The website text explicitly mentions 'Our Menu', 'Catering', and describes their locations as 'cafes'. The screenshot reinforces this with an image of a cafe patio and prominent calls-to-action for 'Order Online For Pick Up' and 'Order Online for Delivery'. These features indicate the primary business is serving prepared food and beverages. According to the CRITICAL CATEGORY SELECTION RULES and the provided guidance, businesses serving prepared food fall under the 'RESTAURANTS/DINING' classification, which requires selecting the '5700-7299: Miscellaneous Stores' category to access the relevant MCCs like 5812 (Eating Places and Restaurants) or 5814 (Fast Food Restaurants).",
+    "key_indicators": [
+      "Coffee",
+      "Our Menu",
+      "Catering",
+      "Order Online For Pick Up",
+      "cafe"
+    ],
+    "business_type_identified": "Cafe / Coffee Shop"
+  },
+  "stage2_result": {
+    "selected_mcc": 5812,
+    "selected_mcc_description": "Eating Places and Restaurants",
+    "confidence": 0.99,
+    "reasoning": "The business, SPoT Coffee, is explicitly described as a 'cafe' and a 'perfect location for business lunches, family gatherings'. The website features a menu, online ordering for pickup and delivery, and catering services. This aligns perfectly with the definition of an eating place or restaurant where prepared food and beverages are sold for immediate consumption. The critical validation rule 'FOOD BUSINESS DETECTED' mandates a food-related MCC, and 5812 is the most accurate and specific option available for a coffee shop/cafe environment.",
+    "business_match_factors": [
+      "primary_activity",
+      "business_model",
+      "industry_type"
+    ],
+    "alternative_mccs_considered": [
+      {
+        "mcc": 5814,
+        "reason_rejected": "While coffee shops can have quick service, the term 'Fast Food' typically applies to limited-menu, counter-service chains. The description of SPoT Coffee as a place for 'business lunches' and 'family gatherings' suggests a more traditional cafe/restaurant atmosphere, making 5812 a better fit."
+      },
+      {
+        "mcc": 5811,
+        "reason_rejected": "Catering is offered as a service but is not the primary business. The core of the business is the operation of physical cafe locations, which falls under 'Eating Places and Restaurants'."
+      },
+      {
+        "mcc": 5999,
+        "reason_rejected": "This code is too generic. A much more specific and accurate food-related code (5812) is available and required by the validation rules. The online 'Shop' for coffee beans is a secondary activity to the primary cafe business."
+      }
+    ]
+  },
+  "final_mcc": 5812,
+  "final_mcc_description": "Eating Places and Restaurants",
+  "final_confidence": 0.99,
+  "error": null,
+  "processing_metadata": {
+    "text_extraction_success": true,
+    "screenshot_found": true,
+    "stage1_completed": true,
+    "stage2_completed": true,
+    "model_used": "gemini-2.5-pro"
+  }
+}

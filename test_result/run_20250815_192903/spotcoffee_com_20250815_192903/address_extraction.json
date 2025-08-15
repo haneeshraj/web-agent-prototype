@@ -1,0 +1,84 @@
+{
+  "domain": "spotcoffee_com",
+  "merchant_name_used": "SPoT Coffee",
+  "business_type_used": "Cafe / Coffee Shop",
+  "location_context": {
+    "primary_country": "",
+    "primary_state_province": "",
+    "primary_city": "",
+    "additional_locations": [],
+    "location_confidence": 0.0,
+    "reasoning": "The provided HTML content is from the website's homepage and consists primarily of structural code, navigation elements, and social media links. There are no explicit mentions of cities, states/provinces, or countries. The content lacks an 'About Us' section, footer address, or any narrative text that would indicate a founding location or headquarters. While a link to a 'store-locator' and a Twitter handle ending in 'hq' suggest the company has physical locations and a headquarters, their specific geographic context is not present in the supplied HTML."
+  },
+  "website_analysis": {
+    "address_found_in_website": false,
+    "extracted_address": "",
+    "address_components": {
+      "house_number_street": "",
+      "city": "",
+      "county": "",
+      "state": "",
+      "country": "",
+      "postal_code": ""
+    },
+    "clean_address": "",
+    "address_confidence": 0.0,
+    "address_source": "",
+    "address_type": "",
+    "reasoning": "The provided HTML content was thoroughly analyzed for a business address. No complete, verifiable address could be found in common locations like the header, main content, or footer. The footer section, which is a typical location for a corporate address, appears to be truncated in the provided HTML snippet. Although the text mentions 'Buffalo', this is only a city name and does not constitute a full, extractable address."
+  },
+  "search_analysis": {
+    "address_found": true,
+    "extracted_address": "225 Delaware Avenue Suite 2, Buffalo, New York 14202, United States",
+    "address_components": {
+      "house_number_street": "225 Delaware Avenue",
+      "city": "Buffalo",
+      "county": "",
+      "state": "New York",
+      "country": "United States",
+      "postal_code": "14202"
+    },
+    "clean_address": "225 Delaware Avenue, Buffalo, New York 14202, United States",
+    "address_confidence": 1.0,
+    "address_source": "https://www.spotcoffee.com/contact/",
+    "address_type": "corporate headquarters",
+    "reasoning": "The official company website's contact page explicitly lists 'Head office (usa)' at '225 Delaware Avenue Suite 2, Buffalo, NY 14202'. This is the most authoritative source. Wikipedia and Pitchbook corroborate that the headquarters are in Buffalo, New York. Other addresses found, such as 227 Delaware Avenue, appear to be public-facing cafe locations, while the 765 Elmwood Ave address is from a less reliable third-party source and is contradicted by the official company site.",
+    "supporting_sources": [
+      "https://www.spotcoffee.com/contact/",
+      "https://en.wikipedia.org/wiki/SPoT_Coffee",
+      "https://pitchbook.com/profiles/company/59807-71"
+    ],
+    "alternative_addresses": [
+      {
+        "address": "765 Elmwood Ave, Buffalo, NY 14222",
+        "type": "possible former headquarters",
+        "reason_not_selected": "This address was mentioned on a third-party academic website but is not listed on the company's official website, which provides a different, explicitly labeled 'Head office' address."
+      },
+      {
+        "address": "227 Delaware Avenue, Buffalo, NY 14202",
+        "type": "cafe location",
+        "reason_not_selected": "This address is listed on consumer-facing sites like Yelp and a tourism website. It is adjacent to the official head office but appears to be the public cafe, not the corporate office."
+      }
+    ],
+    "geocoding": {
+      "lat": "42.8911052",
+      "lon": "-78.8765144",
+      "display_name": "225, Delaware Avenue, Theatre District, Downtown, Buffalo, Erie County, New York, 14202, United States",
+      "address_type": "place",
+      "place_id": 371925321,
+      "boundingbox": [
+        "42.8910552",
+        "42.8911552",
+        "-78.8765644",
+        "-78.8764644"
+      ],
+      "source": "structured_query"
+    }
+  },
+  "final_address": "225 Delaware Avenue Suite 2, Buffalo, New York 14202, United States",
+  "final_confidence": 1.0,
+  "final_source": "search_https://www.spotcoffee.com/contact/",
+  "address_extraction_method": "search_based",
+  "reasoning": "Address found via search after website analysis: The official company website's contact page explicitly lists 'Head office (usa)' at '225 Delaware Avenue Suite 2, Buffalo, NY 14202'. This is the most authoritative source. Wikipedia and Pitchbook corroborate that the headquarters are in Buffalo, New York. Other addresses found, such as 227 Delaware Avenue, appear to be public-facing cafe locations, while the 765 Elmwood Ave address is from a less reliable third-party source and is contradicted by the official company site.",
+  "error": null
+}

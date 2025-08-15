@@ -1,0 +1,11 @@
+[
+  {
+    "website": "http://www.spotcoffee.com",
+    "logo_url": "https://www.spotcoffee.com/wp-content/uploads/spot_logo.png",
+    "downloaded_logo_path": "D:\\2025\\DS-AI-ML-GEN\\web-agent-test-2\\utils\\..\\data\\runs\\run_20250815_192903\\download_images\\spotcoffee_com_20250815_192903.png",
+    "reasoning": "The logo is prominently displayed in the top-left corner of the website's header, a standard location for a primary brand logo. The HTML confirms this with an `<img>` tag inside an `<a class=\"Header-logo\">` element, linking to the homepage.",
+    "confidence": 1.0,
+    "merchant_name": "SPoT Coffee",
+    "merchant_name_confidence": 1.0
+  }
+]

@@ -1,0 +1,14 @@
+[
+  {
+    "website": "http://www.spotcoffee.com",
+    "merchant_name": "SPoT Coffee",
+    "merchant_name_confidence": 1.0,
+    "merchant_name_source": "Page title and og:site_name meta tag",
+    "alternative_names": [
+      "SPoT"
+    ],
+    "extraction_success": true,
+    "logo_found": true,
+    "error": ""
+  }
+]

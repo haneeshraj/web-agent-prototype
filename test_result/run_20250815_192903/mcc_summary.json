@@ -1,0 +1,14 @@
+[
+  {
+    "website": "http://www.spotcoffee.com",
+    "merchant_name": "SPoT Coffee",
+    "final_mcc_code": 5812,
+    "final_mcc_description": "Eating Places and Restaurants",
+    "confidence": 0.99,
+    "classification_success": true,
+    "stage1_category": "Miscellaneous Stores",
+    "stage1_range": "5700-7299",
+    "error": null,
+    "business_type_identified": "Cafe / Coffee Shop"
+  }
+]
