@@ -9,50 +9,50 @@ from utils.config import get_model_config
 from utils.terminal_prettify import success, error, warning, info
 
 
-class LogoDetector:
+class BrandImageDetector:
     """
-    Logo detection agent that analyzes screenshots and HTML to identify website logos and extract merchant names.
+    Brand image detection agent that analyzes screenshots and HTML to identify website brand images and extract company names.
     """
     
     def __init__(self):
-        """Initialize the logo detector with LLM client and configuration."""
+        """Initialize the brand image detector with LLM client and configuration."""
         self.llm_client = create_llm_client()
         self.model_config = get_model_config("classifier-agent")
         
-        # System prompt for logo detection and merchant name extraction
-        self.system_prompt = """You are a website logo detection, merchant name extraction, and business address analysis expert. Your task is to identify the main logo/brand image from a website, extract the merchant/business name, AND analyze for business address information using the provided screenshot and HTML structure.
+        # System prompt for brand image detection and company name extraction
+        self.system_prompt = """You are a website brand image detection, company name extraction, and business address analysis expert. Your task is to identify the main brand image/visual identity element from a website, extract the company/business name, AND analyze for business address information using the provided screenshot and HTML structure.
 
 INSTRUCTIONS:
-1. Analyze the screenshot to visually identify the website's main logo/brand image
+1. Analyze the screenshot to visually identify the website's main brand image/visual identity element
 2. Use the HTML structure to understand the page layout and context
-3. Extract the merchant/business name from various sources (logo text, page title, headings, etc.)
+3. Extract the company/business name from various sources (brand image text, page title, headings, etc.)
 4. ADDITIONALLY: Analyze the HTML content for business address information and location context
 5. If there are cookie overlays, popups, or modals, ignore them and focus on the main website content behind them
 
-LOGO DETECTION:
-6. Look for logos typically positioned in:
+BRAND IMAGE DETECTION:
+6. Look for brand images typically positioned in:
    - Header/navigation area (most common)
    - Top-left corner
    - Center of header
-   - Footer area (secondary logos)
+   - Footer area (secondary brand images)
 
-7. From the provided images list, identify which image corresponds to the logo you see in the screenshot
-8. Consider these logo characteristics:
+7. From the provided images list, identify which image corresponds to the brand image you see in the screenshot
+8. Consider these brand image characteristics:
    - Usually contains company/brand name or distinctive visual identity
    - Often positioned prominently in navigation
    - May have alt text with brand/company names
    - Typically appears in header sections
 
-MERCHANT NAME EXTRACTION:
-9. Look for the business/merchant name in multiple sources:
-   - Logo text (text within or next to the logo)
+COMPANY NAME EXTRACTION:
+9. Look for the business/company name in multiple sources:
+   - Brand image text (text within or next to the brand image)
    - Page title (HTML <title> tag)
    - Main headings (H1, H2 tags)
    - Navigation menu items
    - "About" or "Company" sections
    - Meta tags (business name, site name)
    - Footer copyright information
-10. Prioritize names that appear in prominent locations (header, logo area, main title)
+10. Prioritize names that appear in prominent locations (header, brand image area, main title)
 11. Extract the BUSINESS name, not generic terms like "Home" or "Welcome"
 12. If multiple business names found, choose the most prominent/consistent one
 
@@ -75,30 +75,30 @@ ADDRESS & LOCATION ANALYSIS:
     - Focus on ORIGINAL/FOUNDING location, not expansion markets
 
 VALIDATION RULES:
-16. PLATFORM vs MERCHANT DISTINCTION:
-    - If the page is a social media platform's login/signup page, return logo_found as false
-    - Only return logo_found as true for actual MERCHANT/BUSINESS logos
-    - Platform logos should NOT be considered the "main brand logo"
+16. PLATFORM vs COMPANY DISTINCTION:
+    - If the page is a social media platform's login/signup page, return brand_image_found as false
+    - Only return brand_image_found as true for actual COMPANY/BUSINESS brand images
+    - Platform brand images should NOT be considered the "main brand image"
 
-17. VALID LOGO CRITERIA:
-    - Must be a designed brand identity element (text-based logo, symbol, or combination)
+17. VALID BRAND IMAGE CRITERIA:
+    - Must be a designed brand identity element (text-based brand image, symbol, or combination)
     - DO NOT select profile pictures of people or generic photos
     - Only select images representing business/brand identity
 
 RESPONSE FORMAT:
 Return a JSON object with this exact structure:
 {
-    "logo_found": true/false,
+    "brand_image_found": true/false,
     "confidence": 0.95,
     "selected_image": {
-        // If logo found, include the exact image object from images array
+        // If brand image found, include the exact image object from images array
         // If not found, use empty object {}
     },
-    "reasoning": "Detailed explanation of logo selection or why no logo found",
-    "visual_description": "Description of what the logo looks like in the screenshot",
-    "merchant_name": "Extracted business/merchant name",
-    "merchant_name_source": "Where the merchant name was found",
-    "merchant_name_confidence": 0.95,
+    "reasoning": "Detailed explanation of brand image selection or why no brand image found",
+    "visual_description": "Description of what the brand image looks like in the screenshot",
+    "company_name": "Extracted business/company name",
+    "company_name_source": "Where the company name was found",
+    "company_name_confidence": 0.95,
     "alternative_names": ["other possible business names found"],
     
     // NEW: Address Analysis Results
@@ -132,10 +132,10 @@ Return a JSON object with this exact structure:
 
 IMPORTANT:
 - Only return valid JSON
-- If no logo found, set logo_found to false and explain why
+- If no brand image found, set brand_image_found to false and explain why
 - If no address found, set address_found_on_website to false
 - If no location context found, use empty strings for location fields
-- Always attempt to extract merchant name even if no logo found
+- Always attempt to extract company name even if no brand image found
 - Focus on ORIGINAL/PRIMARY business locations, not expansion markets
 - Confidence scores should be between 0.0 and 1.0"""
 
@@ -212,7 +212,7 @@ IMPORTANT:
         if len(html_content) > max_html_length:
             html_content = html_content[:max_html_length] + "\n... [HTML truncated for length]"
         
-        prompt = f"""Please analyze this website to: 1) identify the main logo/brand image, 2) extract the merchant/business name, and 3) analyze address/location information.
+        prompt = f"""Please analyze this website to: 1) identify the main brand image/visual identity element, 2) extract the company/business name, and 3) analyze address/location information.
 
 WEBSITE HTML STRUCTURE:
 ```html
@@ -226,13 +226,13 @@ AVAILABLE IMAGES ON THE PAGE:
 
 COMBINED ANALYSIS TASKS:
 
-**LOGO DETECTION:**
-1. Look at the provided screenshot to visually identify the main logo
+**BRAND IMAGE DETECTION:**
+1. Look at the provided screenshot to visually identify the main brand image
 2. Use the HTML structure to understand the page layout and extract business information
-3. Match the logo you see in the screenshot with one of the images from the available images list
+3. Match the brand image you see in the screenshot with one of the images from the available images list
 
-**MERCHANT NAME EXTRACTION PRIORITY:**
-- Text within or immediately next to the logo
+**COMPANY NAME EXTRACTION PRIORITY:**
+- Text within or immediately next to the brand image
 - Main page title (HTML <title> tag)
 - Primary headings (H1, H2) that contain business names
 - Navigation menu items that indicate business name
@@ -271,10 +271,10 @@ Remember to ignore any cookie overlays, popups, or modal dialogs - focus on the 
 
         return prompt
     
-    def detect_logo(self, domain_dir: str, domain_name: str) -> Dict[str, Any]:
+    def detect_brand_image(self, domain_dir: str, domain_name: str) -> Dict[str, Any]:
         """
-        Detect logo from website files, extract merchant name, and analyze address/location information.
-        This is an optimized method that combines logo detection with address extraction stages 0-1
+        Detect brand image from website files, extract company name, and analyze address/location information.
+        This is an optimized method that combines brand image detection with address extraction stages 0-1
         to reduce LLM API calls.
         
         Args:
@@ -283,7 +283,7 @@ Remember to ignore any cookie overlays, popups, or modal dialogs - focus on the 
             
         Returns:
             Dict[str, Any]: Combined analysis results including:
-                - Logo detection results and merchant name
+                - Brand image detection results and company name
                 - Address analysis (equivalent to address extraction stage 0-1)
                 - Location context information
         """
@@ -346,7 +346,7 @@ Remember to ignore any cookie overlays, popups, or modal dialogs - focus on the 
             return result
             
         except Exception as e:
-            error(f"Logo detection failed for {domain_name}: {e}")
+            error(f"Brand image detection failed for {domain_name}: {e}")
             return self._create_error_result(f"Analysis failed: {str(e)}")
     
     def _parse_llm_response(self, response_content: str) -> Dict[str, Any]:
@@ -357,7 +357,7 @@ Remember to ignore any cookie overlays, popups, or modal dialogs - focus on the 
             response_content (str): Raw LLM response
             
         Returns:
-            Dict[str, Any]: Parsed logo detection result
+            Dict[str, Any]: Parsed brand image detection result
         """
         try:
             # Try to find JSON in the response
@@ -370,21 +370,22 @@ Remember to ignore any cookie overlays, popups, or modal dialogs - focus on the 
                 result = json.loads(json_str)
                 
                 # Validate required keys and add defaults for new fields
-                required_keys = ['logo_found', 'confidence', 'selected_image', 'reasoning']
-                new_keys = ['merchant_name', 'merchant_name_source', 'merchant_name_confidence', 'alternative_names']
+                required_keys = ['brand_image_found', 'confidence', 'selected_image', 'reasoning']
+                
+                new_keys = ['company_name', 'company_name_source', 'company_name_confidence', 'alternative_names']
                 address_keys = ['address_analysis', 'location_context']
                 
                 for key in required_keys:
                     if key not in result:
                         result[key] = None
                 
-                # Add default values for merchant name fields if missing
-                if 'merchant_name' not in result:
-                    result['merchant_name'] = ""
-                if 'merchant_name_source' not in result:
-                    result['merchant_name_source'] = ""
-                if 'merchant_name_confidence' not in result:
-                    result['merchant_name_confidence'] = 0.0
+                # Add default values for company name fields if missing
+                if 'company_name' not in result:
+                    result['company_name'] = ""
+                if 'company_name_source' not in result:
+                    result['company_name_source'] = ""
+                if 'company_name_confidence' not in result:
+                    result['company_name_confidence'] = 0.0
                 if 'alternative_names' not in result:
                     result['alternative_names'] = []
                 
@@ -449,14 +450,14 @@ Remember to ignore any cookie overlays, popups, or modal dialogs - focus on the 
             Dict[str, Any]: Error result
         """
         return {
-            'logo_found': False,
+            'brand_image_found': False,
             'confidence': 'none',
             'selected_image': {},
             'reasoning': reason,
             'visual_description': 'Analysis failed',
-            'merchant_name': '',
-            'merchant_name_source': '',
-            'merchant_name_confidence': 0.0,
+            'company_name': '',
+            'company_name_source': '',
+            'company_name_confidence': 0.0,
             'alternative_names': [],
             'address_analysis': {
                 'addresses_found': [],
@@ -492,40 +493,39 @@ Remember to ignore any cookie overlays, popups, or modal dialogs - focus on the 
             }
         }
     
-    def save_logo_result(self, domain_dir: str, logo_result: Dict[str, Any]) -> str:
+    def save_brand_image_result(self, domain_dir: str, brand_image_result: Dict[str, Any]) -> str:
         """
-        Save logo detection result to JSON file.
+        Save brand image detection result to JSON file.
         
         Args:
             domain_dir (str): Domain directory path
-            logo_result (Dict[str, Any]): Logo detection result
+            brand_image_result (Dict[str, Any]): Brand image detection result
             
         Returns:
             str: Path to saved file
         """
         try:
-            logo_file_path = os.path.join(domain_dir, "logo_detection.json")
+            brand_image_file_path = os.path.join(domain_dir, "brand_image_detection.json")
             
-            with open(logo_file_path, 'w', encoding='utf-8') as f:
-                json.dump(logo_result, f, indent=2, ensure_ascii=False)
+            with open(brand_image_file_path, 'w', encoding='utf-8') as f:
+                json.dump(brand_image_result, f, indent=2, ensure_ascii=False)
             
-            return logo_file_path
-            
-        except Exception as e:
+            return brand_image_file_path
+        except Exception:
             return ""
 
 
-# Convenience function
-def detect_website_logo(domain_dir: str, domain_name: str) -> Dict[str, Any]:
+# Convenience functions
+def detect_website_brand_image(domain_dir: str, domain_name: str) -> Dict[str, Any]:
     """
-    Convenience function to detect logo from a website directory.
+    Convenience function to detect brand image from a website directory.
     
     Args:
         domain_dir (str): Path to domain directory
         domain_name (str): Domain name
         
     Returns:
-        Dict[str, Any]: Logo detection results
+        Dict[str, Any]: Brand image detection results
     """
-    detector = LogoDetector()
-    return detector.detect_logo(domain_dir, domain_name)
+    detector = BrandImageDetector()
+    return detector.detect_brand_image(domain_dir, domain_name)

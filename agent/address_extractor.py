@@ -215,6 +215,7 @@ IMPORTANT:
         """
         try:
             info(f"Querying {self.model_config['model']} for {context}...")
+            info(f"Max tokens configured: {self.model_config['max_tokens']}")
             
             response = self.llm_client.query(
                 model=self.model_config['model'],
@@ -225,6 +226,13 @@ IMPORTANT:
             )
             
             info(f"{self.model_config['model']} query completed successfully")
+            # Log token usage if available
+            if 'usage' in response:
+                usage = response['usage']
+                info(f"Token usage - Prompt: {usage.get('prompt_tokens', 'N/A')}, "
+                     f"Completion: {usage.get('completion_tokens', 'N/A')}, "
+                     f"Total: {usage.get('total_tokens', 'N/A')}")
+            
             return response['content'].strip()
             
         except Exception as e:
@@ -384,7 +392,7 @@ IMPORTANT:
             
             # Add required headers
             headers = {
-                'User-Agent': 'WebAgentPrototype/1.0 (business-address-extraction)',
+                'User-Agent': 'LLMAgentPrototype/1.0 (business-address-extraction)',
                 'Accept': 'application/json'
             }
             
@@ -570,6 +578,15 @@ Remember to focus on main business addresses (headquarters, main office, primary
                 json_str = json_match.group(0)
             else:
                 json_str = raw_response
+                
+            # Check if JSON appears to be truncated
+            if not json_str.strip().endswith('}') and len(raw_response) >= 1900:
+                warning("JSON response appears to be truncated. Attempting to fix...")
+                # Try to close any open objects/arrays
+                open_braces = json_str.count('{') - json_str.count('}')
+                if open_braces > 0:
+                    json_str += '}' * open_braces
+                    info(f"Added {open_braces} closing braces to fix truncated JSON")
             
             # Parse JSON response
             result = json.loads(json_str)
@@ -622,6 +639,28 @@ Remember to focus on main business addresses (headquarters, main office, primary
         except json.JSONDecodeError as e:
             error(f"Failed to parse LLM response as JSON: {e}")
             error(f"Raw response: {raw_response[:200]}...")
+            
+            # Check if response appears to be truncated
+            if len(raw_response) >= 1900 and not raw_response.strip().endswith('}'):
+                warning("Response appears to be truncated due to token limit. Consider increasing max_tokens in config.yaml")
+                
+                # Try to extract partial information from truncated response
+                if "extracted_address" in raw_response:
+                    import re
+                    # Try to extract the address from the partial JSON
+                    address_match = re.search(r'"extracted_address":\s*"([^"]*)"', raw_response)
+                    if address_match:
+                        extracted_address = address_match.group(1)
+                        warning(f"Extracted partial address from truncated response: {extracted_address}")
+                        return {
+                            "address_found_in_website": True,
+                            "extracted_address": extracted_address,
+                            "address_confidence": 0.5,  # Lower confidence due to truncation
+                            "address_source": "Partial extraction from truncated response",
+                            "address_type": "unknown",
+                            "reasoning": f"JSON parsing error due to truncated response: {e}"
+                        }
+            
             return {
                 "address_found_in_website": False,
                 "extracted_address": "",
@@ -641,12 +680,12 @@ Remember to focus on main business addresses (headquarters, main office, primary
                 "reasoning": f"Analysis error: {e}"
             }
 
-    def _search_for_address(self, merchant_name: str, business_type: str = "", location_context: Dict[str, Any] = None) -> Dict[str, Any]:
+    def _search_for_address(self, company_name: str, business_type: str = "", location_context: Dict[str, Any] = None) -> Dict[str, Any]:
         """
         Search for business address using SerpAPI with location context.
         
         Args:
-            merchant_name (str): Name of the business/merchant
+            company_name (str): Name of the business/company
             business_type (str): Type of business for better search context
             location_context (Dict[str, Any]): Geographic context from website analysis
             
@@ -668,10 +707,10 @@ Remember to focus on main business addresses (headquarters, main office, primary
         try:
             # Build location-aware search queries
             base_queries = [
-                f"{merchant_name} headquarters address",
-                f"{merchant_name} corporate office address",
-                f"{merchant_name} main office location",
-                f"{merchant_name} head office address"
+                f"{company_name} headquarters address",
+                f"{company_name} corporate office address",
+                f"{company_name} main office location",
+                f"{company_name} head office address"
             ]
             
             # Add location context to search queries if available
@@ -689,10 +728,10 @@ Remember to focus on main business addresses (headquarters, main office, primary
                     location_str = " ".join(location_parts)
                     # Add location-specific queries at the beginning (higher priority)
                     location_queries = [
-                        f"{merchant_name} headquarters address {location_str}",
-                        f"{merchant_name} main office {location_str}",
-                        f"{merchant_name} corporate office {location_str}",
-                        f"{merchant_name} founded in {location_str} headquarters"
+                        f"{company_name} headquarters address {location_str}",
+                        f"{company_name} main office {location_str}",
+                        f"{company_name} corporate office {location_str}",
+                        f"{company_name} founded in {location_str} headquarters"
                     ]
                     base_queries = location_queries + base_queries
                     info(f"Using location context: {location_str}")
@@ -700,8 +739,8 @@ Remember to focus on main business addresses (headquarters, main office, primary
             # Add business type specific queries if available
             if business_type:
                 base_queries.extend([
-                    f"{merchant_name} {business_type} headquarters address",
-                    f"{merchant_name} {business_type} main location"
+                    f"{company_name} {business_type} headquarters address",
+                    f"{company_name} {business_type} main location"
                 ])
             
             all_business_info = []
@@ -739,9 +778,9 @@ LOCATION CONTEXT (from website analysis):
 
 IMPORTANT: Use this location context to prioritize addresses in the primary location over expansion locations."""
 
-            user_prompt = f"""Please analyze these search results to extract the PRIMARY headquarters address for: {merchant_name}
+            user_prompt = f"""Please analyze these search results to extract the PRIMARY headquarters address for: {company_name}
 
-MERCHANT/BUSINESS NAME: {merchant_name}
+COMPANY/BUSINESS NAME: {company_name}
 BUSINESS TYPE: {business_type if business_type else "Unknown"}
 {location_info}
 
@@ -757,7 +796,7 @@ TASK:
 4. For multi-location businesses, prefer the ORIGINAL headquarters over expansion offices
 5. Return your analysis in the specified JSON format
 
-Focus on finding the PRIMARY business headquarters for {merchant_name}, especially considering any location context provided above."""
+Focus on finding the PRIMARY business headquarters for {company_name}, especially considering any location context provided above."""
 
             # Use retry logic for LLM query
             raw_response = self._query_llm_with_retry(
@@ -864,20 +903,20 @@ Focus on finding the PRIMARY business headquarters for {merchant_name}, especial
                 "alternative_addresses": []
             }
 
-    def extract_address(self, domain_dir: str, domain_name: str, merchant_name: str = "", business_type: str = "", 
-                       logo_address_analysis: Optional[Dict[str, Any]] = None, 
-                       logo_location_context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def extract_address(self, domain_dir: str, domain_name: str, company_name: str = "", business_type: str = "", 
+                       brand_address_analysis: Optional[Dict[str, Any]] = None, 
+                       brand_location_context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """
         Extract business address using a two-stage approach: website analysis + search fallback.
-        Optimized to use results from logo analysis when available to reduce LLM calls.
+        Optimized to use results from brand image analysis when available to reduce LLM calls.
         
         Args:
             domain_dir (str): Directory containing website data
             domain_name (str): Domain name of the website
-            merchant_name (str): Merchant/business name for search queries
+            company_name (str): Company/business name for search queries
             business_type (str): Type of business for search context
-            logo_address_analysis (Dict[str, Any], optional): Address analysis from logo detection
-            logo_location_context (Dict[str, Any], optional): Location context from logo detection
+            brand_address_analysis (Dict[str, Any], optional): Address analysis from brand image detection
+            brand_location_context (Dict[str, Any], optional): Location context from brand image detection
             
         Returns:
             Dict[str, Any]: Complete address extraction results
@@ -886,10 +925,10 @@ Focus on finding the PRIMARY business headquarters for {merchant_name}, especial
         
         result = {
             "domain": domain_name,
-            "merchant_name_used": merchant_name,
+            "company_name_used": company_name,
             "business_type_used": business_type,
-            "location_context": logo_location_context or {},
-            "website_analysis": logo_address_analysis or {},
+            "location_context": brand_location_context or {},
+            "website_analysis": brand_address_analysis or {},
             "search_analysis": {},
             "final_address": "",
             "final_confidence": 0.0,
@@ -900,23 +939,23 @@ Focus on finding the PRIMARY business headquarters for {merchant_name}, especial
         }
         
         try:
-            # Check if we have usable results from logo analysis (optimization)
-            skip_stage_0 = logo_location_context and logo_location_context.get('confidence') in ['high', 'medium']
-            skip_stage_1 = (logo_address_analysis and 
-                           logo_address_analysis.get('addresses_found') and 
-                           logo_address_analysis.get('confidence') in ['high', 'medium'])
+            # Check if we have usable results from brand image analysis (optimization)
+            skip_stage_0 = brand_location_context and brand_location_context.get('confidence') in ['high', 'medium']
+            skip_stage_1 = (brand_address_analysis and 
+                           brand_address_analysis.get('addresses_found') and 
+                           brand_address_analysis.get('confidence') in ['high', 'medium'])
             
-            # Stage 0: Extract location context from website (skip if already done in logo analysis)
+            # Stage 0: Extract location context from website (skip if already done in brand image analysis)
             if skip_stage_0:
-                info("Stage 0: Using location context from logo analysis (optimization)")
-                location_context = logo_location_context
+                info("Stage 0: Using location context from brand image analysis (optimization)")
+                location_context = brand_location_context
                 result["location_context"] = location_context
                 if location_context.get('city') or location_context.get('state'):
                     location_info = []
                     if location_context.get('city'): location_info.append(location_context['city'])
                     if location_context.get('state'): location_info.append(location_context['state'])
                     if location_context.get('country'): location_info.append(location_context['country'])
-                    info(f"Using logo analysis location context: {', '.join(location_info)}")
+                    info(f"Using brand image analysis location context: {', '.join(location_info)}")
             else:
                 html_path = os.path.join(domain_dir, "page.html")
                 html_content = self._load_html_content(html_path)
@@ -940,23 +979,23 @@ Focus on finding the PRIMARY business headquarters for {merchant_name}, especial
                     if primary_location:
                         info(f"Identified primary location context: {', '.join(primary_location)}")
             
-            # Stage 1: Analyze website HTML for address (skip if already done in logo analysis)
+            # Stage 1: Analyze website HTML for address (skip if already done in brand image analysis)
             if skip_stage_1:
-                info("Stage 1: Using website address analysis from logo analysis (optimization)")
-                website_result = logo_address_analysis
+                info("Stage 1: Using website address analysis from brand image analysis (optimization)")
+                website_result = brand_address_analysis
                 result["website_analysis"] = website_result
                 
-                # If address found in logo analysis with high confidence, use it
+                # If address found in brand image analysis with high confidence, use it
                 if (website_result.get("confidence") == "high" and 
                     website_result.get("primary_address")):
                     
                     result["final_address"] = website_result.get("primary_address", "")
-                    result["final_confidence"] = 0.8  # High confidence from logo analysis
-                    result["final_source"] = f"logo_analysis_{website_result.get('source', '')}"
-                    result["address_extraction_method"] = "logo_analysis_optimization"
-                    result["reasoning"] = f"Address found during logo analysis with high confidence: {website_result.get('reasoning', '')}"
+                    result["final_confidence"] = 0.8  # High confidence from brand image analysis
+                    result["final_source"] = f"brand_analysis_{website_result.get('source', '')}"
+                    result["address_extraction_method"] = "brand_analysis_optimization"
+                    result["reasoning"] = f"Address found during brand image analysis with high confidence: {website_result.get('reasoning', '')}"
                     
-                    success(f"Address found via logo analysis: {result['final_address']}")
+                    success(f"Address found via brand image analysis: {result['final_address']}")
                     return result
             else:
                 # Get HTML content if not already loaded
@@ -986,9 +1025,9 @@ Focus on finding the PRIMARY business headquarters for {merchant_name}, especial
                     return result
             
             # Stage 2: Search for address using SerpAPI (if address not found on website or low confidence)
-            if merchant_name:
+            if company_name:
                 info("Stage 2: Searching for address using SerpAPI...")
-                search_result = self._search_for_address(merchant_name, business_type, location_context)
+                search_result = self._search_for_address(company_name, business_type, location_context)
                 result["search_analysis"] = search_result
                 
                 if (search_result.get("address_found", False) and 
@@ -1003,10 +1042,10 @@ Focus on finding the PRIMARY business headquarters for {merchant_name}, especial
                     success(f"Address found via search: {result['final_address']}")
                     return result
             else:
-                info("Stage 2 skipped: No merchant name provided for search")
+                info("Stage 2 skipped: No company name provided for search")
                 result["search_analysis"] = {
                     "address_found": False,
-                    "reasoning": "No merchant name provided for search"
+                    "reasoning": "No company name provided for search"
                 }
             
             # No address found
