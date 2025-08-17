@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Test script to validate the address extraction functionality.
-This script tests the AddressExtractor independently without running the full scraper.
+This script tests the AddressExtractor independently without running the full information extractor.
 """
 
 import sys

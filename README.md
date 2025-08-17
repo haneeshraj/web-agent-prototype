@@ -1,42 +1,42 @@
-# 🕷️ Web Agent Prototype - AI-Powered Business Intelligence Scraper
+# 🕷️ LLM Agent Prototype - AI-Powered Business Information Extractor
 
-> **⚠️ PROTOTYPE PROJECT**: This is a proof-of-concept prototype for AI-powered web scraping and business intelligence extraction. The complete project repository will be released soon.
+> **⚠️ PROTOTYPE PROJECT**: This is a proof-of-concept prototype for AI-powered web information extraction and business intelligence gathering. The complete project repository will be released soon.
 
 ## 🎯 Overview
 
-The Web Agent Prototype is an advanced AI-powered web scraping system that extracts comprehensive business intelligence from websites using multiple specialized AI agents. It combines traditional web scraping with modern multimodal AI capabilities to automatically identify businesses, classify their types, extract addresses, and download brand assets.
+The LLM Agent Prototype is an advanced AI-powered web information extraction system that extracts comprehensive business intelligence from websites using multiple specialized AI agents. It combines traditional web content analysis with modern multimodal AI capabilities to automatically identify businesses, classify their types, extract addresses, and download brand assets.
 
 ## ✨ Key Features
 
 ### 🤖 **Multi-Agent AI Architecture**
 
-- **Logo Detection Agent**: Identifies company logos and extracts merchant names using vision-capable LLMs
+- **Brand Image Detection Agent**: Identifies company brand images and extracts company names using vision-capable LLMs
 - **MCC Classification Agent**: Two-stage business classification for payment processing (Merchant Category Codes)
 - **Address Extraction Agent**: Three-stage address extraction with location-aware search capabilities
-- **Web Scraping Engine**: Selenium-based automated browser with intelligent content extraction
+- **Web Information Extraction Engine**: Selenium-based automated browser with intelligent content extraction
 
 ### 🎯 **Intelligent Business Analysis**
 
-- **Visual Logo Recognition**: AI-powered logo detection from screenshots
-- **Merchant Name Extraction**: Multi-source business name identification
+- **Visual Brand Image Recognition**: AI-powered brand image detection from screenshots
+- **Company Name Extraction**: Multi-source business name identification
 - **Business Classification**: Automated MCC code assignment with confidence scoring
 - **Address Intelligence**: Location-aware headquarters detection with search fallback
-- **Asset Management**: Automatic logo download and organization
+- **Asset Management**: Automatic brand image download and organization
 
 ### 📊 **Comprehensive Reporting**
 
 - **Detailed Analytics**: Success rates, confidence scores, and extraction statistics
 - **Multi-Format Output**: JSON data files with structured business intelligence
-- **Specialized Summaries**: Logo, merchant, MCC, and address-specific reports
+- **Specialized Summaries**: Brand image, company, MCC, and address-specific reports
 - **Error Tracking**: Comprehensive error handling and reporting
 
 ## 🏗️ Architecture
 
 ```
-Web Agent Prototype/
+LLM Agent Prototype/
 ├── agent/                     # AI Agent Modules
-│   ├── scraper.py            # Main orchestrator
-│   ├── logo_detector.py      # Logo detection & merchant extraction
+│   ├── information_extractor.py            # Main orchestrator
+│   ├── brand_image_detector.py  # Brand image detection & company extraction
 │   ├── mcc_classifier.py     # Business classification (MCC codes)
 │   └── address_extractor.py  # Address extraction & location intelligence
 ├── utils/                     # Utility Modules
@@ -132,7 +132,7 @@ python test_address_extraction.py
 
 ## 📋 How It Works
 
-### 1. **Website Scraping**
+### 1. **Website Information Extraction**
 
 - Loads websites using Selenium WebDriver
 - Takes screenshots after 5-second load time
@@ -141,12 +141,12 @@ python test_address_extraction.py
 
 ### 2. **AI Analysis Pipeline**
 
-#### **Logo Detection & Merchant Extraction**
+#### **Brand Image Detection & Company Extraction**
 
 - Analyzes screenshots using vision-capable LLMs
-- Identifies company logos from visual elements
-- Extracts business names from multiple sources (logos, titles, headers)
-- Downloads identified logos locally
+- Identifies company brand images from visual elements
+- Extracts business names from multiple sources (brand images, titles, headers)
+- Downloads identified brand images locally
 
 #### **MCC Classification (2-Stage)**
 
@@ -172,14 +172,14 @@ data/runs/run_YYYYMMDD_HHMMSS/
 │   ├── screenshot_domain1_timestamp.png
 │   ├── page.html
 │   ├── images.json
-│   ├── logo_detection.json
+│   ├── brand_image_detection.json
 │   ├── mcc_classification.json
 │   └── address_extraction.json
 ├── download_images/
-│   └── logo_files.png
+│   └── brand_image_files.png
 ├── summary.json
-├── logo_summary.json
-├── merchant_summary.json
+├── brand_image_summary.json
+├── company_summary.json
 ├── mcc_summary.json
 └── address_summary.json
 ```
@@ -219,16 +219,16 @@ For enhanced address extraction, configure SerpAPI:
 
 ```json
 {
-  "merchant_name": "Acme Pizza Restaurant",
-  "merchant_confidence": 0.95,
+  "company_name": "Acme Pizza Restaurant",
+  "company_confidence": 0.95,
   "final_mcc_code": "5812",
   "mcc_confidence": 0.87,
   "business_type": "Eating Places and Restaurants",
   "final_address": "123 Main Street, New York, NY 10001",
   "address_confidence": 0.9,
   "address_source": "website_contact_page",
-  "logo_detected": true,
-  "downloaded_logo_path": "download_images/acme_20250814_123456.png"
+  "brand_image_detected": true,
+  "downloaded_brand_image_path": "download_images/acme_20250814_123456.png"
 }
 ```
 
@@ -237,13 +237,13 @@ For enhanced address extraction, configure SerpAPI:
 ```json
 {
   "total_websites": 50,
-  "successful_scrapes": 48,
-  "logos_detected": 42,
-  "merchants_identified": 45,
+  "successful_extractions": 48,
+  "brand_images_detected": 42,
+  "companies_identified": 45,
   "mcc_classifications_successful": 47,
   "addresses_found": 38,
   "average_confidence_scores": {
-    "merchant": 0.87,
+    "company": 0.87,
     "mcc": 0.82,
     "address": 0.79
   }
@@ -261,7 +261,7 @@ For enhanced address extraction, configure SerpAPI:
 ### **Business Intelligence**
 
 - Competitive analysis and market research
-- Brand monitoring and logo tracking
+- Brand monitoring and brand image tracking
 - Business directory creation
 
 ### **Due Diligence**
@@ -276,7 +276,7 @@ For enhanced address extraction, configure SerpAPI:
 
 - Built-in delays between requests (10 seconds)
 - Retry logic for API rate limits
-- Respectful scraping practices
+- Respectful information extraction practices
 
 ### **Cost Considerations**
 

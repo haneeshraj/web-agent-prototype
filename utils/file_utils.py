@@ -47,7 +47,7 @@ def load_website_data() -> tuple:
             })
         
         # Create comprehensive directory structure under data/runs/
-        # This matches the scraper's run directory structure
+        # This matches the information extractor's run directory structure
         run_data_dir = os.path.join(script_dir, "..", 'data', 'runs', f"run_{timestamp}")
         os.makedirs(run_data_dir, exist_ok=True)
         

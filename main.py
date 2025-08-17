@@ -5,19 +5,19 @@ from pathlib import Path
 current_dir = Path(__file__).parent
 sys.path.append(str(current_dir))
 
-from agent.scraper import WebsiteScraper
+from agent.information_extractor import WebsiteInformationExtractor
 
 
 def main():
     """Main function - simple and straightforward"""
     try:
-        scraper = WebsiteScraper()
-        scraper.run()
+        extractor = WebsiteInformationExtractor()
+        extractor.run()
         
         
         
     except KeyboardInterrupt:
-        print("\nScraping interrupted by user")
+        print("\nInformation extraction interrupted by user")
         
     except Exception as e:
         print(f"Error: {e}")

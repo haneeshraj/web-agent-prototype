@@ -1,5 +1,5 @@
 agent:
   classifier-agent:
     model: "gemini-2.5-pro"
-    max_tokens: 2048
+    max_tokens: 4096
     temperature: 0.3

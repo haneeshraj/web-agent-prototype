@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Dict, Any
 
 class Config:
-    """Configuration loader for the web scraper agent."""
+    """Configuration loader for the web information extractor agent."""
     
     def __init__(self, config_path: str = "config.yaml"):
         """

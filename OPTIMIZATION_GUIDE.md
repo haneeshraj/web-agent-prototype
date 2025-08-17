@@ -1,17 +1,17 @@
-# 🚀 Web Agent LLM Call Optimization Guide
+# 🚀 LLM Agent LLM Call Optimization Guide
 
-_Optimizing AI-powered web scraping to reduce API costs and improve performance_
+_Optimizing AI-powered web information extraction to reduce API costs and improve performance_
 
 ---
 
 ## 📋 Overview
 
-This document details the optimization strategies implemented to reduce LLM API calls in the web agent system while maintaining analysis quality. The primary goal was to minimize costs associated with GPT-4/GPT-5 model usage while preserving comprehensive business intelligence extraction.
+This document details the optimization strategies implemented to reduce LLM API calls in the LLM agent system while maintaining analysis quality. The primary goal was to minimize costs associated with GPT-4/GPT-5 model usage while preserving comprehensive business intelligence extraction.
 
 ## 🎯 Optimization Objectives
 
 - **Reduce LLM API calls** by 30-50% per website analysis
-- **Maintain analysis quality** for logo detection, merchant identification, and address extraction
+- **Maintain analysis quality** for brand image detection, company identification, and address extraction
 - **Improve performance** through reduced network round trips
 - **Lower operational costs** for large-scale website processing
 
@@ -45,12 +45,12 @@ This document details the optimization strategies implemented to reduce LLM API 
 
 ### Core Strategy: Combined Analysis
 
-The main optimization combines **logo detection** with **address extraction stages 0-1** into a single LLM call.
+The main optimization combines **brand image detection** with **address extraction stages 0-1** into a single LLM call.
 
 #### Before Optimization Flow:
 
 ```
-1. Logo Detection Call → Logo results
+1. Brand Image Detection Call → Brand image results
 2. Address Stage 0 Call → Location context
 3. Address Stage 1 Call → Website address analysis
 4. Address Stage 2 Call → Search fallback (if needed)
@@ -62,7 +62,7 @@ Total: 4-5 LLM calls per website
 #### After Optimization Flow:
 
 ```
-1. Combined Logo + Address Call → Logo + Location + Website address analysis
+1. Combined Brand Image + Address Call → Brand Image + Location + Website address analysis
 2. Address Stage 2 Call → Search fallback (only if needed)
 3. MCC Classification Call → Business classification
 
@@ -71,15 +71,15 @@ Total: 2-3 LLM calls per website
 
 ### Implementation Details
 
-#### 1. Enhanced Logo Detector (`agent/logo_detector.py`)
+#### 1. Enhanced Brand Image Detector (`agent/brand_image_detector.py`)
 
 **System Prompt Enhancement:**
 
 ```python
-# Added address analysis instructions to existing logo detection prompt
+# Added address analysis instructions to existing brand image detection prompt
 COMBINED_ANALYSIS_TASKS:
-- Logo Detection (original functionality)
-- Merchant Name Extraction (original functionality)
+- Brand Image Detection (original functionality)
+- Company Name Extraction (original functionality)
 - Address & Location Analysis (NEW - replaces Stage 0-1)
 ```
 
@@ -87,11 +87,11 @@ COMBINED_ANALYSIS_TASKS:
 
 ```json
 {
-  // Existing logo detection fields
-  "logo_found": true/false,
+  // Existing brand image detection fields
+  "brand_image_found": true/false,
   "confidence": 0.95,
   "selected_image": {...},
-  "merchant_name": "Business Name",
+  "company_name": "Business Name",
 
   // NEW: Address analysis fields
   "address_analysis": {
@@ -119,32 +119,32 @@ COMBINED_ANALYSIS_TASKS:
 **Smart Stage Skipping:**
 
 ```python
-def extract_address(self, domain_dir, domain_name, merchant_name="", business_type="",
-                   logo_address_analysis=None, logo_location_context=None):
+def extract_address(self, domain_dir, domain_name, company_name="", business_type="",
+                   brand_address_analysis=None, brand_location_context=None):
 
-    # Skip Stage 0 if high-quality location context from logo analysis
-    skip_stage_0 = (logo_location_context and
-                   logo_location_context.get('confidence') in ['high', 'medium'])
+    # Skip Stage 0 if high-quality location context from brand image analysis
+    skip_stage_0 = (brand_location_context and
+                   brand_location_context.get('confidence') in ['high', 'medium'])
 
-    # Skip Stage 1 if high-quality address analysis from logo analysis
-    skip_stage_1 = (logo_address_analysis and
-                   logo_address_analysis.get('addresses_found') and
-                   logo_address_analysis.get('confidence') in ['high', 'medium'])
+    # Skip Stage 1 if high-quality address analysis from brand image analysis
+    skip_stage_1 = (brand_address_analysis and
+                   brand_address_analysis.get('addresses_found') and
+                   brand_address_analysis.get('confidence') in ['high', 'medium'])
 ```
 
 **Conditional Processing Logic:**
 
 ```python
 if skip_stage_0:
-    info("Stage 0: Using location context from logo analysis (optimization)")
-    location_context = logo_location_context
+    info("Stage 0: Using location context from brand image analysis (optimization)")
+    location_context = brand_location_context
 else:
     info("Stage 0: Extracting location context...")
     location_context = self._extract_location_context(html_content)
 
 if skip_stage_1:
-    info("Stage 1: Using website address analysis from logo analysis (optimization)")
-    website_result = logo_address_analysis
+    info("Stage 1: Using website address analysis from brand image analysis (optimization)")
+    website_result = brand_address_analysis
     # Use results directly if high confidence
     if website_result.get("confidence") == "high":
         return final_result  # Skip further processing
@@ -153,35 +153,35 @@ else:
     website_result = self._analyze_website_for_address(html_content)
 ```
 
-#### 3. Updated Main Scraper Flow (`agent/scraper.py`)
+#### 3. Updated Main Information Extractor Flow (`agent/information_extractor.py`)
 
 **Combined Analysis Integration:**
 
 ```python
-# Perform combined logo + address analysis
-info("🔍 Detecting logo & extracting merchant name + initial address analysis...")
-logo_result = self.logo_detector.detect_logo(domain_dir, domain_name)
+# Perform combined brand image + address analysis
+info("🔍 Detecting brand image & extracting company name + initial address analysis...")
+brand_image_result = self.brand_image_detector.detect_brand_image(domain_dir, domain_name)
 
 # Extract address results from combined analysis
-address_analysis = logo_result.get('address_analysis', {})
-location_context = logo_result.get('location_context', {})
+address_analysis = brand_image_result.get('address_analysis', {})
+location_context = brand_image_result.get('location_context', {})
 
-# Check if sufficient address found in logo analysis
-address_found_in_logo_analysis = (
+# Check if sufficient address found in brand image analysis
+address_found_in_brand_analysis = (
     address_analysis.get('addresses_found') and
     address_analysis.get('confidence') in ['high', 'medium']
 )
 
-if address_found_in_logo_analysis:
-    info("📍 Address already found in logo analysis - skipping detailed extraction")
+if address_found_in_brand_analysis:
+    info("📍 Address already found in brand image analysis - skipping detailed extraction")
     # Create minimal result without additional LLM calls
 else:
     info("📍 Running detailed address extraction...")
-    # Pass logo results to avoid redundant analysis
+    # Pass brand image results to avoid redundant analysis
     address_result = self.address_extractor.extract_address(
-        domain_dir, domain_name, merchant_name, business_type,
-        logo_address_analysis=address_analysis,
-        logo_location_context=location_context
+        domain_dir, domain_name, company_name, business_type,
+        brand_address_analysis=address_analysis,
+        brand_location_context=location_context
     )
 ```
 
@@ -193,7 +193,7 @@ else:
 
 **Example: hackethals.de analysis**
 
-- **Logo Detector**: 1 call (11,186 tokens) - found address with high confidence
+- **Brand Image Detector**: 1 call (11,186 tokens) - found address with high confidence
 - **MCC Classifier**: 1 call
 - **Address Extractor**: 0 calls (skipped due to optimization)
 - **Total**: **2 LLM calls** vs. previous 4-5 calls
@@ -202,7 +202,7 @@ else:
 
 | Component       | Before         | After              | Change                              |
 | --------------- | -------------- | ------------------ | ----------------------------------- |
-| Logo Detection  | ~8,000 tokens  | ~11,000 tokens     | +37% (but eliminates 2 other calls) |
+| Brand Image Detection  | ~8,000 tokens  | ~11,000 tokens     | +37% (but eliminates 2 other calls) |
 | Address Stage 0 | ~3,000 tokens  | 0 tokens (skipped) | **-100%**                           |
 | Address Stage 1 | ~4,000 tokens  | 0 tokens (skipped) | **-100%**                           |
 | **Net Change**  | ~15,000 tokens | ~11,000 tokens     | **-27% total tokens**               |
@@ -217,7 +217,7 @@ The optimization works with all supported models:
 
 ```yaml
 # config.yaml
-logo-agent:
+brand-image-agent:
   model: "gpt-5-mini" # or gpt-4o-mini, claude-3-5-sonnet, etc.
   max_tokens: 4000 # Increased to handle combined analysis
   temperature: 0.3
@@ -233,8 +233,8 @@ classifier-agent:
 The optimization is enabled by default. To disable:
 
 ```python
-# In logo_detector.py system prompt, remove address analysis sections
-# In scraper.py, always call full address extraction
+# In brand_image_detector.py system prompt, remove address analysis sections
+# In information_extractor.py, always call full address extraction
 ```
 
 ---
@@ -243,9 +243,9 @@ The optimization is enabled by default. To disable:
 
 ### Test Coverage
 
-- ✅ **Logo detection accuracy maintained**
+- ✅ **Brand image detection accuracy maintained**
 - ✅ **Address extraction quality preserved**
-- ✅ **Merchant name identification unchanged**
+- ✅ **Company name identification unchanged**
 - ✅ **Error handling for failed combined analysis**
 - ✅ **Fallback to original flow when needed**
 
@@ -265,7 +265,7 @@ The optimization is enabled by default. To disable:
 ```json
 {
   "optimization_metrics": {
-    "logo_analysis_includes_address": true,
+    "brand_analysis_includes_address": true,
     "address_stages_skipped": ["stage_0", "stage_1"],
     "total_llm_calls": 2,
     "optimization_savings": "40%",
@@ -277,8 +277,8 @@ The optimization is enabled by default. To disable:
 ### Debug Logging
 
 ```python
-# Enable in scraper.py
-if address_found_in_logo_analysis:
+# Enable in information_extractor.py
+if address_found_in_brand_analysis:
     info("📍 Address already found in logo analysis - skipping detailed extraction")
 else:
     info("📍 Running detailed address extraction...")
@@ -366,4 +366,4 @@ The LLM call optimization successfully achieved:
 - ✅ **30% performance improvement** in processing speed
 - ✅ **Seamless fallback** to original behavior when needed
 
-This optimization represents a significant improvement in the efficiency of the web agent system while preserving the comprehensive business intelligence extraction capabilities that make it valuable for automated business analysis.
+This optimization represents a significant improvement in the efficiency of the LLM agent system while preserving the comprehensive business intelligence extraction capabilities that make it valuable for automated business analysis.
