@@ -75,6 +75,7 @@ Business Insights automates the entire business intelligence pipeline using spec
 
 ### 🚀 **Enterprise-Ready Features**
 
+- **REST API**: Full-featured FastAPI server for web applications and integrations
 - **Rate Limiting**: Built-in request throttling and respectful information extraction
 - **Cost Optimization**: Smart API usage with 35-45% cost reduction through optimization
 - **Multiple AI Providers**: Support for OpenAI, Anthropic, and Google models
@@ -346,6 +347,8 @@ python -c "from utils.config import Config; from utils.llm import LLMClient; pri
 
 ### 8️⃣ **Run Your First Analysis**
 
+**Option A: Command-Line Interface (CLI)**
+
 ```bash
 # Basic execution
 python main.py
@@ -359,6 +362,20 @@ python test_address_extraction.py
 # Run with verbose output
 python main.py --verbose
 ```
+
+**Option B: REST API Server**
+
+```bash
+# Start the FastAPI server
+python -m uvicorn app:app --host 127.0.0.1 --port 8000
+
+# Or use the startup script
+python api/startup.py
+```
+
+Then visit http://127.0.0.1:8000/docs for interactive API documentation.
+
+> 📚 **For detailed API usage**, see the [API Documentation](api/README.md)
 
 ### 9️⃣ **View Results**
 

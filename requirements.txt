@@ -1,40 +1,30 @@
 # Business Insights - AI-Powered Business Information Extractor
-# Core Requirements for Production Use
+# Only essential packages used in this project
 
-# Information Extraction & Browser Automation
+# Web scraping and browser automation
 selenium==4.15.2
 webdriver-manager==4.0.1
 beautifulsoup4==4.13.4
-
-# HTTP Requests & Web APIs
 requests==2.31.0
 
-# AI/LLM Providers (choose at least one)
+# AI/LLM providers (choose at least one)
 openai==1.97.0
 anthropic==0.58.2
 google-genai==1.26.0
 
-# Configuration & Environment
+# Configuration and environment
 python-dotenv==1.1.1
 PyYAML==6.0.1
 
-# Data Processing
-pandas==2.3.1
+# API framework
+fastapi==0.104.1
+uvicorn==0.24.0
+pydantic==2.11.7
 
-# Terminal Output Formatting
+# Terminal output formatting
 colorama==0.4.6
-
-# Optional: Enhanced Address Search
-# Uncomment if using SerpAPI for address extraction
-# requests-toolbelt==1.0.0
-
-# Development & Testing (Optional)
-# Uncomment for development/testing
-# pytest==8.4.1
-# pytest-asyncio==1.1.0
 
 # Notes:
 # - Python 3.8+ required
-# - Chrome browser must be installed on system
-# - API keys required for AI providers (set in .env file)
-# - Optional: SerpAPI key for enhanced address search
+# - Chrome browser must be installed
+# - At least one AI API key required (set in .env file)

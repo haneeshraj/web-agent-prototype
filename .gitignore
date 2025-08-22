@@ -4,3 +4,4 @@ __pycache__/
 downloaded_images/
 runs/
 cost_analysis_report.md
+api_runs/
