@@ -56,7 +56,8 @@ class WebsiteInformationExtractor:
             from io import StringIO
             
             chrome_options = Options()
-            # Don't use headless mode as requested
+            # Run in headless mode to avoid browser popup
+            chrome_options.add_argument("--headless")
             chrome_options.add_argument("--no-sandbox")
             chrome_options.add_argument("--disable-dev-shm-usage")
             chrome_options.add_argument("--disable-gpu")
