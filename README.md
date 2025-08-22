@@ -24,11 +24,7 @@
 
 ## 🎬 Demo
 
-<!-- Add Demo Video Here -->
-
-![Business Insights Demo](assets/demo.gif)
-
-📹 **[Watch Full Demo Video](https://your-demo-link.com)** - See Business Insights in action extracting comprehensive business intelligence from websites.
+https://github.com/user-attachments/assets/0719a841-9844-41aa-917b-ab15c24bd7a5
 
 ---
 
@@ -46,6 +42,9 @@
 ### 💡 Our Solution
 
 Business Insights automates the entire business intelligence pipeline using specialized AI agents that work together to deliver structured, actionable data at scale.
+
+
+
 
 ---
 
