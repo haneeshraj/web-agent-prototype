@@ -2,7 +2,7 @@
 
 <!-- Add Business Insights Logo/Branding Image Here -->
 
-![Business Insights Logo](assets/logo.png)
+![Business Insights Logo](assets/banner.png)
 
 > **Empowering businesses with AI-driven intelligence extraction and automated business analysis**
 
@@ -13,7 +13,6 @@
 [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://python.org)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/haneeshraj/business-insights)
-[![Coverage](https://img.shields.io/badge/coverage-85%25-yellow.svg)](https://github.com/haneeshraj/business-insights)
 [![GitHub Stars](https://img.shields.io/github/stars/haneeshraj/business-insights.svg)](https://github.com/haneeshraj/business-insights/stargazers)
 [![GitHub Forks](https://img.shields.io/github/forks/haneeshraj/business-insights.svg)](https://github.com/haneeshraj/business-insights/network)
 [![GitHub Issues](https://img.shields.io/github/issues/haneeshraj/business-insights.svg)](https://github.com/haneeshraj/business-insights/issues)
@@ -42,9 +41,6 @@ https://github.com/user-attachments/assets/0719a841-9844-41aa-917b-ab15c24bd7a5
 ### 💡 Our Solution
 
 Business Insights automates the entire business intelligence pipeline using specialized AI agents that work together to deliver structured, actionable data at scale.
-
-
-
 
 ---
 
