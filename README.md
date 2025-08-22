@@ -396,21 +396,63 @@ Experience Business Insights in action with our live demonstration featuring:
 
 #### **Scenario 1: Restaurant Chain Analysis**
 
-- **Input**: 50 restaurant websites across different cuisines
+- **Input**: Restaurant websites (e.g., Kasa Moto - Japanese restaurant)
 - **Output**: Company names, MCC codes (5812 - Restaurants), addresses, brand images
 - **Use Case**: Market research for food delivery platform
 
-#### **Scenario 2: Tech Startup Discovery**
+```
+⏳ [1/2] https://kasamoto.ca/
+    ├─ ⏳ Loading website
+    ├─ ⏳ Brand detection & initial analysis
+       ├─ ✓ Company: Kasa Moto (confidence: 0.99)
+       ├─ ℹ Downloading brand image: http://kasamoto.ca/wp-content/uploads/2023/11/KM-l...
+       ├─ ✓ Brand image saved successfully
+       ├─ ℹ Found 1 potential addresses in brand analysis
+       ├─ ℹ Location context: Toronto, Ontario, Canada
+    ├─ ⏳ Business classification (MCC)
+       ├─ ✓ Stage 1 complete: 5700-7299 - Miscellaneous Stores
+       ├─ ✓ Stage 2: MCC code selected
+       ├─ ✓ Business MCC: 5812 - Eating Places and Restaurants (confidence: 0.98)
+    ├─ ⏳ Detailed address extraction
+       ├─ ℹ 🚀 OPTIMIZATION: Address found in brand step, skipping website analysis, proceeding to geocoding
+       ├─ ✓ 🚀 OPTIMIZED: Kasamoto, 115, Yorkville Avenue, Annex, University—Rosedale, Toronto, Golden Horseshoe, Ontario, M5R 1C1, Canada (confidence: 0.95)
+       ├─ ✓ Address: Kasamoto, 115, Yorkville Avenue, Annex, University—Rosedale, Toronto, Golden Horseshoe, Ontario, M5R 1C1, Canada (confidence: 0.95)
+       ├─ ℹ Source: brand analysis Footer 'Contact Us' section and 'About us' section for contextual confirmation.
+    ├─ ✓ Extraction Summary:
+       ├─ ✓ Brand image: Detected (0.98 confidence)
+       ├─ ✓ MCC: 5812
+       ├─ ✓ Address: Found via brand analysis Footer 'Contact Us' section and 'About us' section for contextual confirmation.
+       ├─ ℹ Files: kasamoto_ca_20250822_005733/ • 47 images
+```
 
-- **Input**: Y Combinator portfolio company websites
-- **Output**: Business classifications, headquarters locations, founder information
-- **Use Case**: Investor due diligence and competitive analysis
+#### **Scenario 2: Coffee Shop Franchise Analysis**
 
-#### **Scenario 3: Retail Business Intelligence**
+- **Input**: Multi-location coffee chain websites (e.g., SPoT Coffee)
+- **Output**: Business classifications, headquarters locations, franchise detection
+- **Use Case**: Payment processor business classification and headquarters identification
 
-- **Input**: E-commerce and brick-and-mortar retail websites
-- **Output**: Business types, MCC codes, store locations, brand assets
-- **Use Case**: Payment processor business onboarding
+```
+⏳ [2/2] https://www.spotcoffee.com/
+    ├─ ⏳ Loading website
+    ├─ ⏳ Brand detection & initial analysis
+       ├─ ✓ Company: SPoT Coffee (confidence: 0.70)
+    ├─ ⏳ Business classification (MCC)
+       ├─ ✓ Stage 1 complete: 5700-7299 - Miscellaneous Stores
+       ├─ ✓ Stage 2: MCC code selected
+       ├─ ✓ Business MCC: 5812 - Eating Places and Restaurants (confidence: 0.98)
+    ├─ ⏳ Detailed address extraction
+       ├─ ℹ 📍 Using existing HTML analysis from brand step, proceeding to external search
+       ├─ ℹ 📍 Using location context from brand analysis as search hints
+       ├─ ℹ Searching: SPoT Coffee headquarters address
+       ├─ ✓ Address found via search: 225, Delaware Avenue, Theatre District, Downtown, Buffalo, Erie County, New York, 14202, United States (confidence: 0.95)
+       ├─ ✓ Address: 225, Delaware Avenue, Theatre District, Downtown, Buffalo, Erie County, New York, 14202, United States (confidence: 0.95)
+       ├─ ℹ Source: SerpAPI https://www.spotcoffee.com/contact/
+    ├─ ✓ Extraction Summary:
+       ├─ ✓ Brand image: Detected (0.6 confidence)
+       ├─ ✓ MCC: 5812
+       ├─ ✓ Address: Found via search: https://www.spotcoffee.com/contact/
+       ├─ ℹ Files: spotcoffee_com_20250822_005829/ • 9 images
+```
 
 ### 📊 **Sample Results**
 

@@ -973,20 +973,19 @@ Focus on finding the PRIMARY business headquarters for {company_name}, especiall
             }
 
     def extract_address(self, domain_dir: str, domain_name: str, company_name: str = "", business_type: str = "", 
-                       brand_address_analysis: Optional[Dict[str, Any]] = None, 
-                       brand_location_context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+                       brand_image_result: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """
-        Extract business address using a clean 2-stage approach:
-        Stage 0: Thorough website analysis for complete addresses
-        Stage 1: External SerpAPI search if Stage 0 fails
+        Extract business address using an optimized approach:
+        - If brand image detection found complete address: Skip website analysis, only geocode
+        - If brand image detection found location context only: Use for intelligent external search
+        - If brand image detection found nothing: Proceed directly to external search
         
         Args:
             domain_dir (str): Directory containing website data
             domain_name (str): Domain name of the website
             company_name (str): Company/business name for search queries
             business_type (str): Type of business for search context
-            brand_address_analysis (Dict[str, Any], optional): Address analysis from brand image detection
-            brand_location_context (Dict[str, Any], optional): Location context from brand image detection
+            brand_image_result (Dict[str, Any], optional): Complete brand image detection results
             
         Returns:
             Dict[str, Any]: Complete address extraction results
@@ -1004,90 +1003,117 @@ Focus on finding the PRIMARY business headquarters for {company_name}, especiall
             "final_source": "",
             "address_extraction_method": "",
             "reasoning": "",
-            "error": None
+            "error": None,
+            "geocoding": {}
         }
         
         try:
-            # Load HTML content
-            html_path = os.path.join(domain_dir, "page.html")
-            html_content = self._load_html_content(html_path)
-            
-            if not html_content:
-                result["error"] = "HTML file not found or could not be loaded"
-                return result
-            
             # ================================================================
-            # STAGE 0: THOROUGH WEBSITE ANALYSIS FOR COMPLETE ADDRESSES
+            # OPTIMIZATION: CHECK IF BRAND IMAGE DETECTION FOUND COMPLETE ADDRESS
             # ================================================================
             
-            # Check if brand analysis already found a complete address
-            if (brand_address_analysis and 
-                brand_address_analysis.get("confidence") in ["high", "medium"] and 
-                brand_address_analysis.get("primary_address")):
+            if (brand_image_result and 
+                brand_image_result.get("address_found_in_branding", False) and
+                brand_image_result.get("address_analysis", {}).get("primary_address")):
                 
-                website_result = brand_address_analysis
-                result["website_analysis"] = website_result
+                # Extract address information from brand analysis
+                address_analysis = brand_image_result.get("address_analysis", {})
+                extracted_address = address_analysis.get("primary_address", "")
                 
-                # Use the address from brand analysis
-                result["final_address"] = website_result.get("primary_address", "")
-                result["final_confidence"] = 0.9 if website_result.get("confidence") == "high" else 0.7
-                result["final_source"] = f"website_brand_analysis_{website_result.get('source', '')}"
-                result["address_extraction_method"] = "stage_0_brand_analysis"
-                result["reasoning"] = f"Complete address found during brand image analysis: {website_result.get('reasoning', '')}"
+                info(f"🚀 OPTIMIZATION: Address found in brand step, skipping website analysis, proceeding to geocoding")
                 
-                # Extract location context for completeness
-                if brand_location_context:
-                    result["location_context"] = brand_location_context
-                else:
-                    result["location_context"] = self._extract_location_context(html_content)
-                
-                success(f"Address: {result['final_address']} (confidence: {result['final_confidence']:.2f})")
-                return result
-            
-            # Perform detailed website analysis for complete addresses
-            website_result = self._analyze_website_for_address(html_content)
-            result["website_analysis"] = website_result
-            
-            # If complete address found on website, use it and geocode
-            if (website_result.get("address_found_in_website", False) and 
-                website_result.get("address_confidence", 0.0) >= 0.6):
-                
-                extracted_address = website_result.get("extracted_address", "")
-                
-                # Geocode the address to validate and get coordinates
+                # Only perform geocoding validation
                 geocoded_result = self._geocode_address(extracted_address)
+                
+                # Populate website_analysis with brand results for consistency
+                result["website_analysis"] = {
+                    "address_found_in_website": True,
+                    "extracted_address": extracted_address,
+                    "address_components": address_analysis.get("address_components", {}),
+                    "clean_address": address_analysis.get("clean_address", extracted_address),
+                    "address_confidence": address_analysis.get("confidence", 0.0),
+                    "address_source": address_analysis.get("source", "brand_analysis"),
+                    "address_type": "primary store",
+                    "reasoning": f"Address extracted during brand image detection: {address_analysis.get('reasoning', '')}",
+                    "geocoding": geocoded_result
+                }
+                
+                # Use location context from brand analysis
+                result["location_context"] = brand_image_result.get("location_context", {})
                 
                 if geocoded_result.get("success", False):
                     result["final_address"] = geocoded_result.get("formatted_address", extracted_address)
-                    result["final_confidence"] = min(website_result.get("address_confidence", 0.0), 0.95)
-                    result["final_source"] = f"website_{website_result.get('address_source', '')}"
-                    result["address_extraction_method"] = "stage_0_website_direct"
-                    result["reasoning"] = f"Complete address found on website and validated via geocoding: {website_result.get('reasoning', '')}"
+                    result["final_confidence"] = min(address_analysis.get("confidence", 0.0), 0.95)
+                    result["final_source"] = f"brand_analysis_{address_analysis.get('source', '')}"
+                    result["address_extraction_method"] = "optimized_brand_geocoding_only"
+                    result["reasoning"] = f"Address found in brand step and validated via geocoding: {address_analysis.get('reasoning', '')}"
                     result["geocoding"] = geocoded_result
                     
-                    success(f"Address: {result['final_address']} (confidence: {result['final_confidence']:.2f})")
+                    success(f"🚀 OPTIMIZED: {result['final_address']} (confidence: {result['final_confidence']:.2f})")
                     return result
                 else:
                     # Address found but geocoding failed - still use it with lower confidence
                     result["final_address"] = extracted_address
-                    result["final_confidence"] = website_result.get("address_confidence", 0.0) * 0.7  # Reduce confidence
-                    result["final_source"] = f"website_{website_result.get('address_source', '')}"
-                    result["address_extraction_method"] = "stage_0_website_unvalidated"
-                    result["reasoning"] = f"Address found on website but geocoding validation failed: {website_result.get('reasoning', '')}"
+                    result["final_confidence"] = address_analysis.get("confidence", 0.0) * 0.8  # Slight reduction for unvalidated
+                    result["final_source"] = f"brand_analysis_{address_analysis.get('source', '')}"
+                    result["address_extraction_method"] = "optimized_brand_unvalidated"
+                    result["reasoning"] = f"Address found in brand step but geocoding validation failed: {address_analysis.get('reasoning', '')}"
                     result["geocoding"] = geocoded_result
                     
-                    warning(f"Address found but unvalidated: {result['final_address']} (confidence: {result['final_confidence']:.2f})")
+                    warning(f"🚀 OPTIMIZED (unvalidated): {result['final_address']} (confidence: {result['final_confidence']:.2f})")
                     return result
             
             # ================================================================
-            # STAGE 1: EXTERNAL SEARCH (Only if Stage 0 failed)
+            # WEBSITE ANALYSIS: USE EXISTING HTML ANALYSIS FROM BRAND STEP
             # ================================================================
             
-            # Extract location context for search
-            if brand_location_context:
-                location_context = brand_location_context
+            info(f"📍 Using existing HTML analysis from brand step, proceeding to external search")
+            
+            # Use website analysis results from brand step if available
+            if brand_image_result and brand_image_result.get("html_analysis_performed", False):
+                # Populate website_analysis with indication that HTML was already analyzed
+                result["website_analysis"] = {
+                    "address_found_in_website": False,
+                    "extracted_address": "",
+                    "address_components": {},
+                    "clean_address": "",
+                    "address_confidence": 0.0,
+                    "address_source": "brand_step_analysis",
+                    "address_type": "",
+                    "reasoning": "HTML content already analyzed in brand detection step - no complete address found"
+                }
             else:
-                location_context = self._extract_location_context(html_content)
+                # Fallback: minimal analysis indication
+                result["website_analysis"] = {
+                    "address_found_in_website": False,
+                    "extracted_address": "",
+                    "address_confidence": 0.0,
+                    "reasoning": "Website analysis performed in brand step"
+                }
+            
+            # Use location context from brand analysis as intelligent hints (if available)
+            location_context_hints = {}
+            if brand_image_result and brand_image_result.get("location_context"):
+                location_context_hints = brand_image_result.get("location_context", {})
+                info(f"📍 Using location context from brand analysis as search hints")
+            
+            # ================================================================
+            # EXTERNAL SEARCH: FIND ADDRESS VIA SEARCH ENGINES
+            # ================================================================
+            
+            # Use location context from brand analysis or set empty context
+            if location_context_hints:
+                location_context = location_context_hints
+            else:
+                # No location context available - use empty context
+                location_context = {
+                    "primary_country": "",
+                    "primary_state_province": "",
+                    "primary_city": "",
+                    "additional_locations": [],
+                    "location_confidence": 0.0,
+                    "reasoning": "No location context available from brand analysis"
+                }
             
             result["location_context"] = location_context
             
@@ -1117,7 +1143,7 @@ Focus on finding the PRIMARY business headquarters for {company_name}, especiall
                         result["final_address"] = geocoded_result.get("formatted_address", extracted_address)
                         result["final_confidence"] = min(search_result.get("address_confidence", 0.0), 0.95)
                         result["final_source"] = f"search_{search_result.get('address_source', '')}"
-                        result["address_extraction_method"] = "stage_1_external_search"
+                        result["address_extraction_method"] = "external_search_optimized"
                         result["reasoning"] = f"Address found via external search and validated: {search_result.get('reasoning', '')}"
                         result["geocoding"] = geocoded_result
                         
@@ -1128,7 +1154,7 @@ Focus on finding the PRIMARY business headquarters for {company_name}, especiall
                         result["final_address"] = extracted_address
                         result["final_confidence"] = search_result.get("address_confidence", 0.0) * 0.7
                         result["final_source"] = f"search_{search_result.get('address_source', '')}"
-                        result["address_extraction_method"] = "stage_1_search_unvalidated"
+                        result["address_extraction_method"] = "external_search_unvalidated_optimized"
                         result["reasoning"] = f"Address found via search but geocoding failed: {search_result.get('reasoning', '')}"
                         result["geocoding"] = geocoded_result
                         
@@ -1147,8 +1173,8 @@ Focus on finding the PRIMARY business headquarters for {company_name}, especiall
             result["final_address"] = ""
             result["final_confidence"] = 0.0
             result["final_source"] = ""
-            result["address_extraction_method"] = "none"
-            result["reasoning"] = "No complete address found on website or through external search"
+            result["address_extraction_method"] = "none_optimized"
+            result["reasoning"] = "No complete address found via brand analysis or external search (HTML analysis skipped for optimization)"
             
             warning("No address found in website or external search")
             return result

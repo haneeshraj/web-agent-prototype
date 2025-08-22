@@ -65,22 +65,35 @@ ADDRESS & LOCATION ANALYSIS:
 
 14. ALSO extract location context from the website content:
     - Countries, states/provinces, cities where the business operates
-    - "Founded in", "Based in", "Established in" statements
+    - "Founded in", "Based in", "Established in", "Contact us" statements
     - Geographic indicators that suggest the original/primary location
     - Regional mentions in business descriptions
 
-15. PRIORITIZATION for addresses:
-    - If a complete address is found, extract it directly
-    - If no complete address but location context exists, note the context
-    - Focus on ORIGINAL/FOUNDING location, not expansion markets
+15. FRANCHISE/MULTI-LOCATION DETECTION:
+    - If MULTIPLE store locations/addresses are found (franchise/chain business):
+      → Only extract location_context (countries, states, cities mentioned)
+      → Set address_found_in_branding: false in response
+      → Do NOT extract specific address_components (leave empty)
+      → Focus on geographic coverage areas and regions served
+    - If SINGLE primary business address found:
+      → Extract full address_components + location_context
+      → Set address_found_in_branding: true in response
+      → Provide complete structured address data
+
+16. PRIORITIZATION for addresses:
+    - If a single complete address is found, extract it directly with components
+    - If multiple addresses found (franchise), only extract location context
+    - If no complete address but location context exists, note the context only
+    - Focus on ORIGINAL/FOUNDING location for single-location businesses
+    - For franchises, focus on operational regions and service areas
 
 VALIDATION RULES:
-16. PLATFORM vs COMPANY DISTINCTION:
+17. PLATFORM vs COMPANY DISTINCTION:
     - If the page is a social media platform's login/signup page, return brand_image_found as false
     - Only return brand_image_found as true for actual COMPANY/BUSINESS brand images
     - Platform brand images should NOT be considered the "main brand image"
 
-17. VALID BRAND IMAGE CRITERIA:
+18. VALID BRAND IMAGE CRITERIA:
     - Must be a designed brand identity element (text-based brand image, symbol, or combination)
     - DO NOT select profile pictures of people or generic photos
     - Only select images representing business/brand identity
@@ -101,6 +114,7 @@ Return ONLY a valid JSON object with this exact structure - no other text before
     "company_name_source": "Where the company name was found",
     "company_name_confidence": 0.95,
     "alternative_names": ["other possible business names found"],
+    "address_found_in_branding": true,
     "address_analysis": {
         "addresses_found": ["list of addresses found on the website"],
         "confidence": 0.85,
@@ -147,6 +161,9 @@ IMPORTANT:
 - Always attempt to extract company name even if no brand image found
 - Focus on ORIGINAL/PRIMARY business locations, not expansion markets
 - Use decimal confidence values between 0.0 and 1.0 (e.g., 0.95, 0.75, 0.50)
+- Set address_found_in_branding to true ONLY if single complete address with components found
+- Set address_found_in_branding to false for franchises/multiple locations or no address
+- For franchises: populate location_context but leave address_components empty
 """
 
     def _load_screenshot(self, screenshot_path: str) -> Optional[bytes]:
@@ -217,10 +234,8 @@ IMPORTANT:
         Returns:
             str: Formatted user prompt
         """
-        # Truncate HTML if too long (to avoid token limits)
-        max_html_length = 15000  # Adjust based on your needs
-        if len(html_content) > max_html_length:
-            html_content = html_content[:max_html_length] + "\n... [HTML truncated for length]"
+        # Don't truncate HTML - addresses and important info are often in footers/contact sections at the end
+        # Let the LLM see the complete page content to find all business information
         
         prompt = f"""Please analyze this website to: 1) identify the main brand image/visual identity element, 2) extract the company/business name, and 3) analyze address/location information.
 
@@ -488,6 +503,10 @@ Remember to ignore any cookie overlays, popups, or modal dialogs - focus on the 
         if 'alternative_names' not in result:
             result['alternative_names'] = []
         
+        # Add default for address_found_in_branding optimization flag
+        if 'address_found_in_branding' not in result:
+            result['address_found_in_branding'] = False
+        
         # Add default values for address analysis fields if missing
         if 'address_analysis' not in result:
             result['address_analysis'] = {
@@ -550,6 +569,7 @@ Remember to ignore any cookie overlays, popups, or modal dialogs - focus on the 
             'company_name_source': '',
             'company_name_confidence': 0.0,
             'alternative_names': [],
+            'address_found_in_branding': False,
             'address_analysis': {
                 'addresses_found': [],
                 'confidence': 0.0,

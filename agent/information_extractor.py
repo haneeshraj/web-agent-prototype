@@ -722,11 +722,10 @@ class WebsiteInformationExtractor:
                         stage1_result = mcc_result.get("stage1_result", {})
                         business_type = stage1_result.get("business_type_identified", "")
                     
-                    # Pass the brand analysis results to avoid redundant work
+                    # Pass the complete brand image result for optimization
                     address_result = self.address_extractor.extract_address(
                         domain_dir, domain_name, company_name, business_type,
-                        brand_address_analysis=address_analysis,
-                        brand_location_context=location_context
+                        brand_image_result=brand_image_result
                     )
                     extraction_data["address_extraction"] = address_result
                     address_animation.stop()
