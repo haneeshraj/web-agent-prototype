@@ -1,9 +1,12 @@
 agent:
   classifier-agent:
-    model: "gemini-2.5-flash"
+    model: "gemini-2.0-flash"
+    backup_model: "gemini-2.5-flash" # Fallback model for JSON parsing errors
     max_tokens: 8192
     temperature: 0.3
 
 processing:
   website_delay_seconds: 50 # Delay between processing each website (in seconds)
   rate_limit_delay_seconds: 10 # Rate limiting delay within each website processing
+  json_retry_delay_seconds: 10 # Delay before retrying after JSON parse error
+  max_json_retries: 1 # Number of retries with same model before switching to backup

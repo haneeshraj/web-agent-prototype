@@ -1,0 +1,50 @@
+{
+  "domain": "theonlycafe_com",
+  "classification_success": true,
+  "stage1_result": {
+    "selected_category_range": "5700-7299",
+    "selected_category_name": "Miscellaneous Stores",
+    "confidence": 0.95,
+    "reasoning": "The website promotes a cocktail bar and cafe, offering coffee, alcohol, and beer. The presence of 'COCKTAIL BAR' and 'Bar' in the text content, along with the 'Alcohol' and 'Beer' navigation links, indicates that this business primarily serves alcoholic beverages. According to the business-specific guidance, a bar/drinking establishment must be categorized under '5700-7299: Miscellaneous Stores' to access MCC 5813 (Bars, Cocktail Lounges).",
+    "key_indicators": [
+      "Cocktail Bar",
+      "Alcohol",
+      "Beer",
+      "Live Music",
+      "Coffee"
+    ],
+    "business_type_identified": "Bar/Cafe"
+  },
+  "stage2_result": {
+    "selected_mcc": 5813,
+    "selected_mcc_description": "Bars, Cocktail Lounges, Discotheques, Nightclubs and Taverns Drinking Places Alcoholic Beverages",
+    "confidence": 0.95,
+    "reasoning": "The business is \"THE ONLY COCKTAIL BAR!\" and serves alcohol. The website mentions \"Alcohol\" in the navigation. The business operates as a cocktail bar and bar. According to the critical validation rules, a business that is a bar/pub MUST be classified as MCC 5813 (Bars, Cocktail Lounges).",
+    "business_match_factors": [
+      "primary_activity",
+      "business_model",
+      "industry_type"
+    ],
+    "alternative_mccs_considered": [
+      {
+        "mcc": 5812,
+        "reason_rejected": "Although the business also operates as a cafe, the primary focus and marketing is as a cocktail bar. Therefore, MCC 5813 is more appropriate."
+      },
+      {
+        "mcc": 5921,
+        "reason_rejected": "This MCC is for package stores that sell beer, wine, and liquor for off-premise consumption. This business operates as a bar, so 5813 is more accurate."
+      }
+    ]
+  },
+  "final_mcc": 5813,
+  "final_mcc_description": "Bars, Cocktail Lounges, Discotheques, Nightclubs and Taverns Drinking Places Alcoholic Beverages",
+  "final_confidence": 0.95,
+  "error": null,
+  "processing_metadata": {
+    "text_extraction_success": true,
+    "screenshot_found": true,
+    "stage1_completed": true,
+    "stage2_completed": true,
+    "model_used": "gemini-2.0-flash"
+  }
+}

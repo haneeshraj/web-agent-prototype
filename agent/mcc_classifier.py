@@ -13,7 +13,7 @@ from pathlib import Path
 from utils.text_extractor import TextExtractor
 from utils.terminal_prettify import success, error, warning, info, processing
 from utils.llm import create_llm_client
-from utils.config import get_model_config
+from utils.config import get_model_config, get_config
 
 
 class MCCClassifier:
@@ -35,6 +35,12 @@ class MCCClassifier:
         # Initialize LLM client from config
         self.llm_client = create_llm_client()
         self.model_config = get_model_config("classifier-agent")
+        self.config = get_config()
+        
+        # Get retry configuration
+        self.backup_model = self.config.get('agent.classifier-agent.backup_model', 'gpt-4o-mini')
+        self.max_retries = self.config.get('processing.max_json_retries', 1)
+        self.retry_delay = self.config.get('processing.json_retry_delay_seconds', 10)
         
         # MCC category ranges
         self.mcc_categories = {
@@ -487,6 +493,94 @@ IMPORTANT:
         except Exception as e:
             error(f"Error parsing response: {e}")
             return {"error": f"Response parsing failed: {str(e)}"}
+
+    def _query_llm_with_json_retry(self, prompt: str, screenshot_path: str, stage_name: str) -> Dict[str, Any]:
+        """
+        Query LLM with retry logic for JSON parsing errors and quota exhaustion.
+        
+        Args:
+            prompt (str): The prompt to send
+            screenshot_path (str): Path to screenshot
+            stage_name (str): Stage identifier for logging
+            
+        Returns:
+            Dict[str, Any]: Parsed JSON response or error dict
+        """
+        current_model = self.model_config.get('model', 'gemini-2.5-flash')
+        
+        # First attempt with primary model
+        for attempt in range(self.max_retries + 1):
+            if attempt > 0:
+                warning(f"Retry attempt {attempt} for {stage_name} (waiting {self.retry_delay}s)")
+                time.sleep(self.retry_delay)
+            
+            try:
+                response = self._query_llm_with_retry(prompt, screenshot_path, stage_name)
+                parsed_result = self._parse_json_response(response)
+                
+                if "error" not in parsed_result:
+                    if attempt > 0:
+                        success(f"✅ Retry {attempt} succeeded for {stage_name}")
+                    return parsed_result
+                    
+                error(f"❌ JSON parsing failed for {stage_name} (attempt {attempt + 1}): {parsed_result.get('error', 'Unknown error')}")
+                
+            except Exception as e:
+                error_msg = str(e).lower()
+                
+                # Check for quota/rate limit errors
+                if any(quota_term in error_msg for quota_term in [
+                    'quota', 'rate limit', 'billing', 'exceeded', 'exhausted', 
+                    'permission', 'insufficient', 'usage limit', 'credit'
+                ]):
+                    warning(f"🚫 Quota/Rate limit detected for {stage_name} with '{current_model}': {str(e)}")
+                    break  # Skip remaining retries with same model, go to backup immediately
+                else:
+                    error(f"❌ LLM query failed for {stage_name} (attempt {attempt + 1}): {str(e)}")
+        
+        # All retries with primary model failed, try backup model
+        if self.backup_model and self.backup_model != current_model:
+            warning(f"🔄 All retries failed with '{current_model}'. Switching to backup model '{self.backup_model}' for {stage_name}")
+            
+            # Temporarily switch to backup model
+            original_model = self.model_config['model']
+            original_llm_client = self.llm_client
+            
+            try:
+                # Update model config and recreate client
+                self.model_config['model'] = self.backup_model
+                self.llm_client = create_llm_client()
+                
+                info(f"🔄 Attempting {stage_name} with backup model '{self.backup_model}'")
+                response = self._query_llm_with_retry(prompt, screenshot_path, f"{stage_name}_backup")
+                parsed_result = self._parse_json_response(response)
+                
+                if "error" not in parsed_result:
+                    success(f"✅ Backup model '{self.backup_model}' succeeded for {stage_name}")
+                    return parsed_result
+                else:
+                    error(f"❌ Backup model also failed for {stage_name}: {parsed_result.get('error', 'Unknown error')}")
+                    
+            except Exception as e:
+                error_msg = str(e).lower()
+                if any(quota_term in error_msg for quota_term in [
+                    'quota', 'rate limit', 'billing', 'exceeded', 'exhausted', 
+                    'permission', 'insufficient', 'usage limit', 'credit'
+                ]):
+                    error(f"🚫 Backup model '{self.backup_model}' also has quota issues for {stage_name}: {str(e)}")
+                else:
+                    error(f"❌ Backup model '{self.backup_model}' failed for {stage_name}: {str(e)}")
+            finally:
+                # Restore original model and client
+                self.model_config['model'] = original_model
+                self.llm_client = original_llm_client
+                info(f"🔄 Restored primary model '{original_model}'")
+        
+        # All attempts failed
+        return {"error": f"All retry attempts failed for {stage_name} with both primary and backup models"}
+        
+        # All attempts failed
+        return {"error": f"All retry attempts failed for {stage_name} with both primary and backup models"}
     
     def _validate_mcc_selection(self, selected_mcc: int, text_content: str, candidate_mccs: pd.DataFrame) -> tuple[bool, str]:
         """
@@ -581,8 +675,7 @@ IMPORTANT:
             
             # 3. Stage 1: Category Classification
             stage1_prompt = self._create_stage1_prompt(text_content)
-            stage1_response = self._query_llm_with_retry(stage1_prompt, screenshot_path, "stage1")
-            stage1_result = self._parse_json_response(stage1_response)
+            stage1_result = self._query_llm_with_json_retry(stage1_prompt, screenshot_path, "stage1")
             
             result["stage1_result"] = stage1_result
             
@@ -652,8 +745,7 @@ IMPORTANT:
             # Found candidate MCC codes (count tracked internally)
             
             stage2_prompt = self._create_stage2_prompt(text_content, selected_range, candidate_mccs)
-            stage2_response = self._query_llm_with_retry(stage2_prompt, screenshot_path, "stage2")
-            stage2_result = self._parse_json_response(stage2_response)
+            stage2_result = self._query_llm_with_json_retry(stage2_prompt, screenshot_path, "stage2")
             
             result["stage2_result"] = stage2_result
             

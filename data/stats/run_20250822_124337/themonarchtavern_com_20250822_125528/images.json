@@ -1,0 +1,63 @@
+[
+  {
+    "index": 0,
+    "src": "https://images.squarespace-cdn.com/content/v1/5a34281fb7411c1532a3a1d0/1744756195495-G96IHQJLRSMHN7ZLOR9D/Celebrating+95+Years+-+YESTERDAY.jpeg",
+    "alt": "Celebrating 95 Years - YESTERDAY.jpeg",
+    "width": "664",
+    "height": "290"
+  },
+  {
+    "index": 4,
+    "src": "https://images.squarespace-cdn.com/content/v1/5a34281fb7411c1532a3a1d0/1744756403180-H6Z11787WI4EX5V2XTTQ/MonarchPint.jpg",
+    "alt": "MonarchPint.jpg",
+    "width": "336",
+    "height": "447"
+  },
+  {
+    "index": 10,
+    "src": "https://images.squarespace-cdn.com/content/v1/5a34281fb7411c1532a3a1d0/1744756477317-5D18X8M9YCERJ84YJN9T/live%2Bmusic.jpg",
+    "alt": "live+music.jpg",
+    "width": "463",
+    "height": "305"
+  },
+  {
+    "index": 11,
+    "src": "https://images.squarespace-cdn.com/content/v1/5a34281fb7411c1532a3a1d0/1744896736584-C4GRZO1VNTUA99C3WQLL/burlesque.jpg",
+    "alt": "burlesque.jpg",
+    "width": "173",
+    "height": "305"
+  },
+  {
+    "index": 19,
+    "src": "https://images.squarespace-cdn.com/content/v1/5a34281fb7411c1532a3a1d0/f66e3ccc-d453-4df1-bd07-71536de40c27/Smash%2BBurgers.jpg",
+    "alt": "Two hamburgers on plates with people dipping fried food into sauces on a wooden table.",
+    "width": "880",
+    "height": "587"
+  },
+  {
+    "index": "bg_0",
+    "src": "https://video.squarespace-cdn.com/content/v1/5a34281fb7411c1532a3a1d0/4f81f134-d50d-40de-b77d-271f2b50317f/thumbnail",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://video.squarespace-cdn.com/content/v1/5a34281fb7411c1532a3a1d0/4f81f134-d50d-40de-b77d-271f2b50317f/thumbnail\")",
+      "className": "plyr__poster",
+      "id": "",
+      "tagName": "DIV"
+    }
+  },
+  {
+    "index": "bg_1",
+    "src": "https://video.squarespace-cdn.com/content/v1/5a34281fb7411c1532a3a1d0/e4b3cc73-293a-42b8-9164-9a972f9122aa/thumbnail",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://video.squarespace-cdn.com/content/v1/5a34281fb7411c1532a3a1d0/e4b3cc73-293a-42b8-9164-9a972f9122aa/thumbnail\")",
+      "className": "plyr__poster",
+      "id": "",
+      "tagName": "DIV"
+    }
+  }
+]

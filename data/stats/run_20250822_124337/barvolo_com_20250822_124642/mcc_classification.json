@@ -1,0 +1,50 @@
+{
+  "domain": "barvolo_com",
+  "classification_success": true,
+  "stage1_result": {
+    "selected_category_range": "5700-7299",
+    "selected_category_name": "Miscellaneous Stores",
+    "confidence": 0.95,
+    "reasoning": "The website content indicates that Bar Volo is a restaurant/bar that serves food and alcoholic beverages. The text mentions 'Caffé Volo evolved into Bar Volo and became the vanguard of craft beer in Ontario' and 'three locations, a bottle shop, brewery'. The presence of 'MENU' in the navigation and 'Bottega Volo Open @ 8am For Coffee!' further confirms this. According to the CRITICAL CATEGORY SELECTION RULES, restaurants/dining establishments must be categorized under '5700-7299: Miscellaneous Stores' to access the restaurant-specific MCCs like 5812 (Eating Places, Restaurants) and 5813 (Bars, Cocktail Lounges).",
+    "key_indicators": [
+      "restaurant",
+      "bar",
+      "menu",
+      "brewery",
+      "coffee"
+    ],
+    "business_type_identified": "Restaurant/Bar"
+  },
+  "stage2_result": {
+    "selected_mcc": 5813,
+    "selected_mcc_description": "Bars, Cocktail Lounges, Discotheques, Nightclubs and Taverns Drinking Places Alcoholic Beverages",
+    "confidence": 0.95,
+    "reasoning": "The business is described as a bar that evolved from a restaurant and is now a vanguard of craft beer. The website also mentions a bottle shop. While it serves food, the primary focus appears to be alcoholic beverages and the atmosphere of a bar. Therefore, MCC 5813 is the most appropriate choice. The business also has a bottle shop, which supports the selection of 5813.",
+    "business_match_factors": [
+      "primary_activity",
+      "business_model",
+      "industry_type"
+    ],
+    "alternative_mccs_considered": [
+      {
+        "mcc": 5812,
+        "reason_rejected": "While it serves food, it is primarily a bar focused on alcoholic beverages."
+      },
+      {
+        "mcc": 5921,
+        "reason_rejected": "Package Stores Beer, Wine and Liquor - This is more for retail sale of packaged alcohol, not a bar/drinking establishment."
+      }
+    ]
+  },
+  "final_mcc": 5813,
+  "final_mcc_description": "Bars, Cocktail Lounges, Discotheques, Nightclubs and Taverns Drinking Places Alcoholic Beverages",
+  "final_confidence": 0.95,
+  "error": null,
+  "processing_metadata": {
+    "text_extraction_success": true,
+    "screenshot_found": true,
+    "stage1_completed": true,
+    "stage2_completed": true,
+    "model_used": "gemini-2.0-flash"
+  }
+}

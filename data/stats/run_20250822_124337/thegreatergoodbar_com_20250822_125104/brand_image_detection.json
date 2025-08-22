@@ -1,0 +1,49 @@
+{
+  "brand_image_found": true,
+  "confidence": 0.95,
+  "selected_image": {
+    "src": "https://images.squarespace-cdn.com/content/v1/57728c698419c230c8697f79/1467139566284-JKMORG41X016VUIWAUGX/GGcrest.png?format=1500w",
+    "alt": "The Greater Good ",
+    "class": ""
+  },
+  "reasoning": "The image with the alt text \"The Greater Good \" is located in the header and visually represents the brand's logo.",
+  "visual_description": "The brand image is a crest-like logo with two bears and text \"THE GREATER GOOD\" below it.",
+  "company_name": "The Greater Good",
+  "company_name_source": "Brand image alt text and page title",
+  "company_name_confidence": 0.95,
+  "alternative_names": [],
+  "address_found_in_branding": true,
+  "address_analysis": {
+    "addresses_found": [
+      "229 Geary Avenue, Toronto"
+    ],
+    "confidence": 0.85,
+    "primary_address": "229 Geary Avenue, Toronto",
+    "address_components": {
+      "house_number_street": "229 Geary Avenue",
+      "city": "Toronto",
+      "county": "",
+      "state": "Ontario",
+      "country": "Canada",
+      "postal_code": ""
+    },
+    "clean_address": "229 Geary Avenue, Toronto",
+    "source": "og:description meta tag",
+    "reasoning": "The address is found in the og:description meta tag, which describes the location of the craft beer bar."
+  },
+  "location_context": {
+    "city": "Toronto",
+    "state": "Ontario",
+    "country": "Canada",
+    "region": "",
+    "local_references": [],
+    "confidence": 0.8
+  },
+  "analysis_metadata": {
+    "model_used": "gemini-2.0-flash",
+    "total_images_analyzed": 2,
+    "html_length": 21129,
+    "screenshot_available": true,
+    "tokens_used": 12172
+  }
+}

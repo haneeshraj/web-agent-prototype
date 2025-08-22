@@ -1,0 +1,43 @@
+[
+  {
+    "index": 0,
+    "src": "https://images.squarespace-cdn.com/content/v1/531752e6e4b05fcac6a76326/38ff5fb9-47f0-4cea-a561-c0252b1f138b/Get+Well+Logo+WEBISODE.png?format=1500w",
+    "alt": "GET WELL",
+    "width": "403",
+    "height": "528"
+  },
+  {
+    "index": 1,
+    "src": "https://images.squarespace-cdn.com/content/v1/531752e6e4b05fcac6a76326/870a3d1b-a18a-4f44-985a-1c71058eb70e/Gracie%27sPizzalogo.png.jpg",
+    "alt": "",
+    "width": "382",
+    "height": "295"
+  },
+  {
+    "index": 2,
+    "src": "https://images.squarespace-cdn.com/content/v1/531752e6e4b05fcac6a76326/8c047f38-4820-42ae-8604-125344b640d5/get+well-1623.jpg",
+    "alt": "",
+    "width": "382",
+    "height": "255"
+  },
+  {
+    "index": 3,
+    "src": "https://images.squarespace-cdn.com/content/v1/531752e6e4b05fcac6a76326/41424ce2-e5a9-42df-b975-f7957baeea9a/get+well-133.jpg",
+    "alt": "",
+    "width": "382",
+    "height": "215"
+  },
+  {
+    "index": "bg_0",
+    "src": "https://images.squarespace-cdn.com/content/v1/531752e6e4b05fcac6a76326/1669643431713-N69FDSO16O9YRM4RKDPW/get+well-095.jpg",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://images.squarespace-cdn.com/content/v1/531752e6e4b05fcac6a76326/1669643431713-N69FDSO16O9YRM4RKDPW/get+well-095.jpg\")",
+      "className": "",
+      "id": "outerWrapper",
+      "tagName": "DIV"
+    }
+  }
+]

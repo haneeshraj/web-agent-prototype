@@ -1,0 +1,50 @@
+{
+  "domain": "shophendersonbrewing_com",
+  "classification_success": true,
+  "stage1_result": {
+    "selected_category_range": "5700-7299",
+    "selected_category_name": "Miscellaneous Stores",
+    "confidence": 0.95,
+    "reasoning": "The website is for a brewery (Henderson Brewing Company) that sells beer, food, snacks, and merchandise. They also have a taproom and host events. Since they serve alcoholic beverages and food, and sell merchandise, the '5700-7299: Miscellaneous Stores' category is the most appropriate as it contains MCC 5813 (Bars, Cocktail Lounges) and other relevant retail MCCs.",
+    "key_indicators": [
+      "Brewery",
+      "Taproom",
+      "Shop Beer",
+      "Food & Snacks",
+      "Events"
+    ],
+    "business_type_identified": "Brewery with taproom and retail sales"
+  },
+  "stage2_result": {
+    "selected_mcc": 5813,
+    "selected_mcc_description": "Bars, Cocktail Lounges, Discotheques, Nightclubs and Taverns Drinking Places Alcoholic Beverages",
+    "confidence": 0.95,
+    "reasoning": "The business is a brewery that sells beer and has a taproom. The primary activity is serving and selling alcoholic beverages. Therefore, MCC 5813 (Bars, Cocktail Lounges, Discotheques, Nightclubs and Taverns Drinking Places Alcoholic Beverages) is the most appropriate choice. This aligns with the BAR/PUB DETECTED validation rule.",
+    "business_match_factors": [
+      "primary_activity",
+      "business_model",
+      "industry_type"
+    ],
+    "alternative_mccs_considered": [
+      {
+        "mcc": 5812,
+        "reason_rejected": "While they serve drinks, 5813 is more specific to establishments focused on alcoholic beverages."
+      },
+      {
+        "mcc": 5921,
+        "reason_rejected": "Package Stores Beer, Wine and Liquor is for retail sale of packaged alcohol, not for consumption on premises."
+      }
+    ]
+  },
+  "final_mcc": 5813,
+  "final_mcc_description": "Bars, Cocktail Lounges, Discotheques, Nightclubs and Taverns Drinking Places Alcoholic Beverages",
+  "final_confidence": 0.95,
+  "error": null,
+  "processing_metadata": {
+    "text_extraction_success": true,
+    "screenshot_found": true,
+    "stage1_completed": true,
+    "stage2_completed": true,
+    "model_used": "gemini-2.0-flash"
+  }
+}

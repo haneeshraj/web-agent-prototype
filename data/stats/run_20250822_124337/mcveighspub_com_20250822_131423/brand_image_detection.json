@@ -1,0 +1,49 @@
+{
+  "brand_image_found": true,
+  "confidence": 0.95,
+  "selected_image": {
+    "src": "https://mcveighspub.com/wp-content/uploads/2025/02/logo-1.png",
+    "alt": "McVeighs Irish Pub",
+    "class": null
+  },
+  "reasoning": "The logo in the header of the website is the main brand image. It contains the company name and is used for navigation back to the homepage.",
+  "visual_description": "The brand image is the company logo, 'McVeigh's Irish Pub', in a stylized font with a green clover leaf.",
+  "company_name": "McVeighs Irish Pub",
+  "company_name_source": "Brand image alt text and page title",
+  "company_name_confidence": 0.95,
+  "alternative_names": [],
+  "address_found_in_branding": true,
+  "address_analysis": {
+    "addresses_found": [
+      "124 Church Street, Toronto, ON M5C 2G8"
+    ],
+    "confidence": 0.95,
+    "primary_address": "124 Church Street, Toronto, ON M5C 2G8",
+    "address_components": {
+      "house_number_street": "124 Church Street",
+      "city": "Toronto",
+      "county": null,
+      "state": "Ontario",
+      "country": "Canada",
+      "postal_code": "M5C 2G8"
+    },
+    "clean_address": "124 Church Street, Toronto, Ontario",
+    "source": "Footer and main page content",
+    "reasoning": "The address is found in the footer and in the 'Stop By For a Visit' section of the main page content, indicating it is the primary business address."
+  },
+  "location_context": {
+    "city": "Toronto",
+    "state": "Ontario",
+    "country": "Canada",
+    "region": "Toronto",
+    "local_references": [],
+    "confidence": 0.9
+  },
+  "analysis_metadata": {
+    "model_used": "gemini-2.0-flash",
+    "total_images_analyzed": 15,
+    "html_length": 87029,
+    "screenshot_available": true,
+    "tokens_used": 41421
+  }
+}

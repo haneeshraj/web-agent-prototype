@@ -1,0 +1,49 @@
+{
+  "brand_image_found": true,
+  "confidence": 0.95,
+  "selected_image": {
+    "src": "https://images.squarespace-cdn.com/content/v1/596ce5a120099ea7637ef05a/1500349906905-37R6K0H4FVCV9F54MRWE/logo+copy.jpg",
+    "alt": "Imperial Pub",
+    "class": "Header-branding-logo"
+  },
+  "reasoning": "The image with the alt text 'Imperial Pub' is used as the logo in the header, which is a strong indicator of the brand image.",
+  "visual_description": "The brand image is a circular logo with the text 'Imperial Pub' and an image of a building. The text 'The Imperial Pub' is also present below the circle.",
+  "company_name": "Imperial Pub",
+  "company_name_source": "Page title, logo alt text, and header branding",
+  "company_name_confidence": 0.95,
+  "alternative_names": [],
+  "address_found_in_branding": true,
+  "address_analysis": {
+    "addresses_found": [
+      "54 Dundas St. E., Toronto"
+    ],
+    "confidence": 0.85,
+    "primary_address": "54 Dundas St. E., Toronto",
+    "address_components": {
+      "house_number_street": "54 Dundas St. E.",
+      "city": "Toronto",
+      "county": "",
+      "state": "Ontario",
+      "country": "Canada",
+      "postal_code": ""
+    },
+    "clean_address": "54 Dundas St. E., Toronto",
+    "source": "OCR of the logo image",
+    "reasoning": "The address '54 Dundas St. E., Toronto' is found within the logo image. The state and country are inferred based on the city."
+  },
+  "location_context": {
+    "city": "Toronto",
+    "state": "Ontario",
+    "country": "Canada",
+    "region": "",
+    "local_references": [],
+    "confidence": 0.8
+  },
+  "analysis_metadata": {
+    "model_used": "gemini-2.0-flash",
+    "total_images_analyzed": 3,
+    "html_length": 31055,
+    "screenshot_available": true,
+    "tokens_used": 19460
+  }
+}

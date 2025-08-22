@@ -1,0 +1,88 @@
+{
+  "domain": "oldflamebrewingco_ca",
+  "company_name_used": "Old Flame Brewing Co.",
+  "business_type_used": "Brewery with online retail and taproom locations",
+  "location_context": {
+    "city": "Port Perry, Newmarket, Toronto",
+    "state": "Ontario",
+    "country": "Canada",
+    "region": "Durham, York Region",
+    "local_references": [],
+    "confidence": 0.8
+  },
+  "website_analysis": {
+    "address_found_in_website": false,
+    "extracted_address": "",
+    "address_confidence": 0.0,
+    "reasoning": "Website analysis performed in brand step"
+  },
+  "search_analysis": {
+    "address_found": true,
+    "extracted_address": "135 Perry Street, Port Perry, Ontario L9L 1B8",
+    "address_components": {
+      "house_number_street": "135 Perry Street",
+      "city": "Port Perry",
+      "county": null,
+      "state": "Ontario",
+      "country": "Canada",
+      "postal_code": "L9L 1B8"
+    },
+    "clean_address": "135 Perry Street, Port Perry, Ontario, Canada",
+    "address_confidence": 0.95,
+    "address_source": "ZoomInfo, Yelp, Tripadvisor",
+    "address_type": "original location",
+    "reasoning": "The address 135 Perry Street, Port Perry, Ontario L9L 1B8 is listed as the headquarters by ZoomInfo and is also present in the Yelp and Tripadvisor listings for Old Flame Brewing Co. in Port Perry. Given that Port Perry is mentioned first in the local results and that multiple sources point to this address, it is likely the original and primary location. The other locations appear to be expansions.",
+    "supporting_sources": [
+      "ZoomInfo",
+      "Yelp",
+      "Tripadvisor"
+    ],
+    "alternative_addresses": [
+      {
+        "address": "140 Main Street S, Newmarket, Ontario L3Y 3Y7",
+        "type": "taproom location",
+        "reason_not_selected": "This is a secondary location, not the original headquarters."
+      },
+      {
+        "address": "43 Tank House Lane, Toronto, Ontario M5A 3C4",
+        "type": "taproom location",
+        "reason_not_selected": "This is a secondary location, not the original headquarters."
+      }
+    ],
+    "geocoding": {
+      "lat": "44.1039313",
+      "lon": "-78.9434759",
+      "display_name": "Old Flame Brewing Co., 135, Perry Street, Downtown Port Perry, Port Perry, Scugog, Durham Region, Golden Horseshoe, Ontario, L9L 1A3, Canada",
+      "address_type": "place",
+      "place_id": 338148587,
+      "boundingbox": [
+        "44.1038813",
+        "44.1039813",
+        "-78.9435259",
+        "-78.9434259"
+      ],
+      "source": "structured_query"
+    }
+  },
+  "final_address": "Old Flame Brewing Co., 135, Perry Street, Downtown Port Perry, Port Perry, Scugog, Durham Region, Golden Horseshoe, Ontario, L9L 1A3, Canada",
+  "final_confidence": 0.95,
+  "final_source": "search_ZoomInfo, Yelp, Tripadvisor",
+  "address_extraction_method": "external_search_optimized",
+  "reasoning": "Address found via external search and validated: The address 135 Perry Street, Port Perry, Ontario L9L 1B8 is listed as the headquarters by ZoomInfo and is also present in the Yelp and Tripadvisor listings for Old Flame Brewing Co. in Port Perry. Given that Port Perry is mentioned first in the local results and that multiple sources point to this address, it is likely the original and primary location. The other locations appear to be expansions.",
+  "error": null,
+  "geocoding": {
+    "success": true,
+    "lat": 44.1039313,
+    "lon": -78.9434759,
+    "formatted_address": "Old Flame Brewing Co., 135, Perry Street, Downtown Port Perry, Port Perry, Scugog, Durham Region, Golden Horseshoe, Ontario, L9L 1A3, Canada",
+    "place_id": 338148587,
+    "address_type": "place",
+    "boundingbox": [
+      "44.1038813",
+      "44.1039813",
+      "-78.9435259",
+      "-78.9434259"
+    ],
+    "confidence": 4.28969253070423e-05
+  }
+}

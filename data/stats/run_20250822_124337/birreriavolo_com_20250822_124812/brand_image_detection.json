@@ -1,0 +1,49 @@
+{
+  "brand_image_found": true,
+  "confidence": 0.95,
+  "selected_image": {
+    "src": "https://images.squarespace-cdn.com/content/v1/67830d7a0d5c033da25f8833/fdae3119-55c8-4446-b8a1-f780934db252/Birreria+Volo+-+Illustration+%26+Name.png?format=1500w",
+    "alt": "Birreria Volo",
+    "class": "preFade fadeIn"
+  },
+  "reasoning": "The image located in the header with alt text 'Birreria Volo' is the main brand image. It is prominently displayed in the top-left corner of the header, which is a typical location for brand logos.",
+  "visual_description": "The brand image is a logo featuring an illustration and the text 'Birreria Volo'.",
+  "company_name": "Birreria Volo",
+  "company_name_source": "Brand image alt text and page title",
+  "company_name_confidence": 0.95,
+  "alternative_names": [],
+  "address_found_in_branding": true,
+  "address_analysis": {
+    "addresses_found": [
+      "612 College St. Toronto"
+    ],
+    "confidence": 0.85,
+    "primary_address": "612 College Street, Toronto, ON",
+    "address_components": {
+      "house_number_street": "612 College Street",
+      "city": "Toronto",
+      "county": "",
+      "state": "Ontario",
+      "country": "Canada",
+      "postal_code": ""
+    },
+    "clean_address": "612 College Street, Toronto",
+    "source": "Footer contact section",
+    "reasoning": "The address is found in the footer contact section and is a complete street address with city and state/province."
+  },
+  "location_context": {
+    "city": "Toronto",
+    "state": "Ontario",
+    "country": "Canada",
+    "region": "Little Italy",
+    "local_references": [],
+    "confidence": 0.8
+  },
+  "analysis_metadata": {
+    "model_used": "gemini-2.0-flash",
+    "total_images_analyzed": 11,
+    "html_length": 111810,
+    "screenshot_available": true,
+    "tokens_used": 61242
+  }
+}

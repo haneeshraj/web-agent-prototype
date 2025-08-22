@@ -1,0 +1,122 @@
+[
+  {
+    "index": 0,
+    "src": "https://www.leftfieldbrewery.ca/wp-content/themes/wptheme-lfb-0.2/dist/images/logo-bg.svg",
+    "alt": "",
+    "width": "219",
+    "height": "160"
+  },
+  {
+    "index": 1,
+    "src": "https://www.leftfieldbrewery.ca/wp-content/themes/wptheme-lfb-0.2/dist/images/wordmark-white.svg",
+    "alt": "",
+    "width": "300",
+    "height": "98"
+  },
+  {
+    "index": 2,
+    "src": "https://www.leftfieldbrewery.ca/wp-content/uploads/2025/08/MrOktober-473_web-700x700.jpg",
+    "alt": "",
+    "width": "636",
+    "height": "600"
+  },
+  {
+    "index": 3,
+    "src": "https://www.leftfieldbrewery.ca/wp-content/uploads/2025/08/GhostRunner-473_web-700x700.jpg",
+    "alt": "",
+    "width": "205",
+    "height": "200"
+  },
+  {
+    "index": 4,
+    "src": "https://www.leftfieldbrewery.ca/wp-content/uploads/2025/07/Oppo-CherryLime_web3-700x700.jpg",
+    "alt": "",
+    "width": "205",
+    "height": "200"
+  },
+  {
+    "index": 5,
+    "src": "https://www.leftfieldbrewery.ca/wp-content/uploads/2025/07/StCloudCan_shopify_f82bc11a-ea99-4675-af5e-47dc52a466c9-700x700.jpg",
+    "alt": "",
+    "width": "205",
+    "height": "200"
+  },
+  {
+    "index": "bg_0",
+    "src": "https://www.leftfieldbrewery.ca/wp-content/themes/wptheme-lfb-0.2/dist/bg.5bef2108.png",
+    "alt": "Background image from BODY",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://www.leftfieldbrewery.ca/wp-content/themes/wptheme-lfb-0.2/dist/bg.5bef2108.png\")",
+      "className": "home wp-singular page-template-default page page-id-4 page-parent wp-theme-wptheme-lfb-02",
+      "id": "",
+      "tagName": "BODY"
+    }
+  },
+  {
+    "index": "bg_1",
+    "src": "https://www.leftfieldbrewery.ca/wp-content/uploads/2025/02/LV_mural-2-e1739996431118.jpg",
+    "alt": "Background image from SECTION",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://www.leftfieldbrewery.ca/wp-content/uploads/2025/02/LV_mural-2-e1739996431118.jpg\")",
+      "className": "callout__inner bg-cream",
+      "id": "",
+      "tagName": "SECTION"
+    }
+  },
+  {
+    "index": "bg_2",
+    "src": "https://www.leftfieldbrewery.ca/wp-content/uploads/2024/11/LV_downstairsTaps.jpg",
+    "alt": "Background image from SECTION",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://www.leftfieldbrewery.ca/wp-content/uploads/2024/11/LV_downstairsTaps.jpg\")",
+      "className": "callout__inner bg-cream",
+      "id": "",
+      "tagName": "SECTION"
+    }
+  },
+  {
+    "index": "bg_3",
+    "src": "https://www.leftfieldbrewery.ca/wp-content/uploads/2025/02/LFB-LibertyVillage_Food-660x400-1.jpg",
+    "alt": "Background image from SECTION",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://www.leftfieldbrewery.ca/wp-content/uploads/2025/02/LFB-LibertyVillage_Food-660x400-1.jpg\")",
+      "className": "callout__inner bg-cream",
+      "id": "",
+      "tagName": "SECTION"
+    }
+  },
+  {
+    "index": "bg_4",
+    "src": "https://www.leftfieldbrewery.ca/wp-content/uploads/2024/11/WP-cover3.jpg",
+    "alt": "Background image from SECTION",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://www.leftfieldbrewery.ca/wp-content/uploads/2024/11/WP-cover3.jpg\")",
+      "className": "callout__inner bg-cream",
+      "id": "",
+      "tagName": "SECTION"
+    }
+  },
+  {
+    "index": "bg_5",
+    "src": "https://www.leftfieldbrewery.ca/wp-content/uploads/2021/01/03-08-IWD-1.jpg",
+    "alt": "Background image from SECTION",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://www.leftfieldbrewery.ca/wp-content/uploads/2021/01/03-08-IWD-1.jpg\")",
+      "className": "callout__inner bg-cream",
+      "id": "",
+      "tagName": "SECTION"
+    }
+  }
+]

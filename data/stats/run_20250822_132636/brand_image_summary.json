@@ -1,0 +1,11 @@
+[
+  {
+    "website": "https://shophendersonbrewing.com/",
+    "brand_image_url": "//shophendersonbrewing.com/cdn/shop/files/Henderson_-_Logo_-_White.png?crop=center&height=130&v=1741568092&width=440",
+    "downloaded_brand_image_path": "",
+    "reasoning": "The image located in the header with the alt text 'Henderson Brewing Company' is the most prominent brand image on the page. It is a logo and is positioned in the header, which is typical for brand images.",
+    "confidence": 0.95,
+    "company_name": "Henderson Brewing Company",
+    "company_name_confidence": 0.95
+  }
+]

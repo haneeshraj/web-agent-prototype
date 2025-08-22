@@ -1,0 +1,88 @@
+{
+  "domain": "sweatybettysbar_com",
+  "company_name_used": "Sweaty Betty's Bar",
+  "business_type_used": "Bar/Drinking Establishment",
+  "location_context": {
+    "city": "Toronto",
+    "state": "Ontario",
+    "country": "Canada",
+    "region": "Toronto, Ontario",
+    "local_references": [
+      "Sweaty Betty's Toronto (Facebook page name)"
+    ],
+    "confidence": 0.8
+  },
+  "website_analysis": {
+    "address_found_in_website": false,
+    "extracted_address": "",
+    "address_confidence": 0.0,
+    "reasoning": "Website analysis performed in brand step"
+  },
+  "search_analysis": {
+    "address_found": true,
+    "extracted_address": "13 Ossington Avenue, Toronto, Ontario M6J 2Y8",
+    "address_components": {
+      "house_number_street": "13 Ossington Avenue",
+      "city": "Toronto",
+      "county": null,
+      "state": "Ontario",
+      "country": "Canada",
+      "postal_code": "M6J 2Y8"
+    },
+    "clean_address": "13 Ossington Avenue, Toronto, Ontario, Canada",
+    "address_confidence": 0.95,
+    "address_source": "ZoomInfo",
+    "address_type": "original location",
+    "reasoning": "The address 13 Ossington Avenue, Toronto, Ontario M6J 2Y8 is consistently listed across multiple sources, including the official website's contact page, ZoomInfo, Destination Toronto, TripAdvisor, and Yelp. The \"About Us\" page on the official website states that Sweaty Betty's is located at this address and is a \"true neighbourhood original\", suggesting it is the original and primary location. ZoomInfo explicitly states this address as the headquarters. Therefore, this address is selected as the primary headquarters.",
+    "supporting_sources": [
+      "https://sweatybettysbar.com/pages/contact-us",
+      "https://www.zoominfo.com/c/sweaty-bettys/1131400007",
+      "https://www.destinationtoronto.com/listing/sweaty-bettys/33280/",
+      "https://www.tripadvisor.com/Attraction_Review-g155019-d8296852-Reviews-Sweaty_Betty_s-Toronto_Ontario.html",
+      "https://m.yelp.com/biz/sweaty-bettys-toronto",
+      "https://sweatybettysbar.com/pages/about-us"
+    ],
+    "alternative_addresses": [
+      {
+        "address": "Austin, TX",
+        "type": "other location",
+        "reason_not_selected": "The Austin location (The Betty) is a different establishment, not the primary headquarters of Sweaty Betty's Bar."
+      }
+    ],
+    "geocoding": {
+      "lat": "43.6445976",
+      "lon": "-79.4187776",
+      "display_name": "13, Ossington Avenue, Trinity-Bellwoods, Spadina—Fort York, Toronto, Golden Horseshoe, Ontario, M6J 2Z2, Canada",
+      "address_type": "building",
+      "place_id": 324222140,
+      "boundingbox": [
+        "43.6445265",
+        "43.6446613",
+        "-79.4188806",
+        "-79.4185568"
+      ],
+      "source": "structured_query"
+    }
+  },
+  "final_address": "13, Ossington Avenue, Trinity-Bellwoods, Spadina—Fort York, Toronto, Golden Horseshoe, Ontario, M6J 2Z2, Canada",
+  "final_confidence": 0.95,
+  "final_source": "search_ZoomInfo",
+  "address_extraction_method": "external_search_optimized",
+  "reasoning": "Address found via external search and validated: The address 13 Ossington Avenue, Toronto, Ontario M6J 2Y8 is consistently listed across multiple sources, including the official website's contact page, ZoomInfo, Destination Toronto, TripAdvisor, and Yelp. The \"About Us\" page on the official website states that Sweaty Betty's is located at this address and is a \"true neighbourhood original\", suggesting it is the original and primary location. ZoomInfo explicitly states this address as the headquarters. Therefore, this address is selected as the primary headquarters.",
+  "error": null,
+  "geocoding": {
+    "success": true,
+    "lat": 43.6445976,
+    "lon": -79.4187776,
+    "formatted_address": "13, Ossington Avenue, Trinity-Bellwoods, Spadina—Fort York, Toronto, Golden Horseshoe, Ontario, M6J 2Z2, Canada",
+    "place_id": 324222140,
+    "address_type": "building",
+    "boundingbox": [
+      "43.6445265",
+      "43.6446613",
+      "-79.4188806",
+      "-79.4185568"
+    ],
+    "confidence": 8.130235751883753e-05
+  }
+}

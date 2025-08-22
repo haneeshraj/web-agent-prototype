@@ -1,0 +1,49 @@
+{
+  "brand_image_found": true,
+  "confidence": 0.95,
+  "selected_image": {
+    "src": "https://sweatybettysbar.com/cdn/shop/files/sb_logo_300x300.png?v=1613768705",
+    "alt": "Sweaty Betty&#39;s Bar",
+    "class": "js lazyautosizes lazyloaded"
+  },
+  "reasoning": "The logo with the text 'Sweaty Betty's' inside two cherries is in the top left corner of the page. The alt text of the image also confirms that it is the logo for 'Sweaty Betty's Bar'.",
+  "visual_description": "The brand image is a logo featuring two red cherries with the text 'Sweaty Betty's' written across them in a stylized font. The cherries are connected by green stems and leaves.",
+  "company_name": "Sweaty Betty's Bar",
+  "company_name_source": "Page title, logo alt text, H1 tag, footer copyright",
+  "company_name_confidence": 0.95,
+  "alternative_names": [],
+  "address_found_in_branding": false,
+  "address_analysis": {
+    "addresses_found": [],
+    "confidence": 0.75,
+    "primary_address": "",
+    "address_components": {
+      "house_number_street": "",
+      "city": "",
+      "county": "",
+      "state": "",
+      "country": "",
+      "postal_code": ""
+    },
+    "clean_address": "",
+    "source": "",
+    "reasoning": "No physical address was found on the website. The 'Contact' page only has a contact form and a link to their Instagram page."
+  },
+  "location_context": {
+    "city": "Toronto",
+    "state": "Ontario",
+    "country": "Canada",
+    "region": "Toronto, Ontario",
+    "local_references": [
+      "Sweaty Betty's Toronto (Facebook page name)"
+    ],
+    "confidence": 0.8
+  },
+  "analysis_metadata": {
+    "model_used": "gemini-2.0-flash",
+    "total_images_analyzed": 7,
+    "html_length": 44904,
+    "screenshot_available": true,
+    "tokens_used": 26559
+  }
+}

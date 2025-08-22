@@ -1,0 +1,53 @@
+{
+  "domain": "shophendersonbrewing_com",
+  "company_name_used": "Henderson Brewing Company",
+  "business_type_used": "Brewery with taproom and retail sales",
+  "location_context": {
+    "city": "Toronto",
+    "state": "Ontario",
+    "country": "Canada",
+    "region": "Downtown Toronto",
+    "local_references": [
+      "Sterling Rd."
+    ],
+    "confidence": 0.85
+  },
+  "website_analysis": {
+    "address_found_in_website": true,
+    "extracted_address": "128a Sterling Rd., Toronto, ON, Canada M6R 2B7",
+    "address_components": {
+      "house_number_street": "128a Sterling Rd",
+      "city": "Toronto",
+      "county": "",
+      "state": "ON",
+      "country": "Canada",
+      "postal_code": "M6R 2B7"
+    },
+    "clean_address": "128 Sterling Rd, Toronto, ON, Canada",
+    "address_confidence": 0.9,
+    "address_source": "Footer Contact section",
+    "address_type": "primary store",
+    "reasoning": "Address extracted during brand image detection: The address is found in the footer under the contact section, which is a common place for business addresses. It is a complete address with street, city, state, country, and postal code.",
+    "geocoding": {
+      "success": false,
+      "error": "No geocoding results found",
+      "lat": null,
+      "lon": null,
+      "formatted_address": "128a Sterling Rd., Toronto, ON, Canada M6R 2B7"
+    }
+  },
+  "search_analysis": {},
+  "final_address": "128a Sterling Rd., Toronto, ON, Canada M6R 2B7",
+  "final_confidence": 0.7200000000000001,
+  "final_source": "brand_analysis_Footer Contact section",
+  "address_extraction_method": "optimized_brand_unvalidated",
+  "reasoning": "Address found in brand step but geocoding validation failed: The address is found in the footer under the contact section, which is a common place for business addresses. It is a complete address with street, city, state, country, and postal code.",
+  "error": null,
+  "geocoding": {
+    "success": false,
+    "error": "No geocoding results found",
+    "lat": null,
+    "lon": null,
+    "formatted_address": "128a Sterling Rd., Toronto, ON, Canada M6R 2B7"
+  }
+}

@@ -1,0 +1,136 @@
+[
+  {
+    "index": 0,
+    "src": "https://www.blacklab.beer/cdn/shop/files/logo2_300x300.png?v=1620832675",
+    "alt": "Black Lab Brewing",
+    "width": "80",
+    "height": "58"
+  },
+  {
+    "index": 8,
+    "src": "https://www.blacklab.beer/cdn/shop/files/PupLitesingle_110x110@2x.jpg?v=1747156345",
+    "alt": "Load image into Gallery viewer, Black Lab Brewing - Toronto - Pup Lite Canadian Golden Ale\n",
+    "width": "102",
+    "height": "137"
+  },
+  {
+    "index": 9,
+    "src": "https://www.blacklab.beer/cdn/shop/files/PupLite_6pack_small_1f913650-6227-499b-b126-391a7ad36009_110x110@2x.jpg?v=1747322986",
+    "alt": "Load image into Gallery viewer, Pup Lite Golden Ale (473ml Can)\n",
+    "width": "102",
+    "height": "104"
+  },
+  {
+    "index": 10,
+    "src": "https://www.blacklab.beer/cdn/shop/files/untappd-2752040-2284857_160x160@2x.png?v=1621264778",
+    "alt": "Untappd",
+    "width": "160",
+    "height": "160"
+  },
+  {
+    "index": 11,
+    "src": "https://www.blacklab.beer/cdn/shop/files/Untitled_design_48_160x160@2x.png?v=1621265013",
+    "alt": "",
+    "width": "160",
+    "height": "160"
+  },
+  {
+    "index": 12,
+    "src": "https://www.blacklab.beer/cdn/shop/files/logos_160x160@2x.png?v=1621265164",
+    "alt": "",
+    "width": "160",
+    "height": "160"
+  },
+  {
+    "index": 13,
+    "src": "https://www.blacklab.beer/cdn/shop/files/twitter_888da67d-b446-4218-9aeb-12f7be4f1fca_160x160@2x.png?v=1622582307",
+    "alt": "",
+    "width": "160",
+    "height": "160"
+  },
+  {
+    "index": 14,
+    "src": "https://www.blacklab.beer/cdn/shop/files/logos_1_160x160@2x.png?v=1621265164",
+    "alt": "",
+    "width": "160",
+    "height": "160"
+  },
+  {
+    "index": "bg_0",
+    "src": "https://www.blacklab.beer/cdn/shop/t/5/assets/ico-select.svg?v=29003672709104678581620834661",
+    "alt": "Background image from SELECT",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://www.blacklab.beer/cdn/shop/t/5/assets/ico-select.svg?v=29003672709104678581620834661\")",
+      "className": "",
+      "id": "bmonth",
+      "tagName": "SELECT"
+    }
+  },
+  {
+    "index": "bg_1",
+    "src": "https://www.blacklab.beer/cdn/shop/t/5/assets/ico-select.svg?v=29003672709104678581620834661",
+    "alt": "Background image from SELECT",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://www.blacklab.beer/cdn/shop/t/5/assets/ico-select.svg?v=29003672709104678581620834661\")",
+      "className": "",
+      "id": "bday",
+      "tagName": "SELECT"
+    }
+  },
+  {
+    "index": "bg_2",
+    "src": "https://www.blacklab.beer/cdn/shop/t/5/assets/ico-select.svg?v=29003672709104678581620834661",
+    "alt": "Background image from SELECT",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://www.blacklab.beer/cdn/shop/t/5/assets/ico-select.svg?v=29003672709104678581620834661\")",
+      "className": "",
+      "id": "byear",
+      "tagName": "SELECT"
+    }
+  },
+  {
+    "index": "bg_3",
+    "src": "https://www.blacklab.beer/cdn/shop/files/WhatsApp_Image_2023-09-01_at_11.23.08_AM.jpg?v=1693581991",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://www.blacklab.beer/cdn/shop/files/WhatsApp_Image_2023-09-01_at_11.23.08_AM.jpg?v=1693581991\")",
+      "className": "hero hero--large hero-hero-1 hero__overlay box ratio-container js lazyloaded",
+      "id": "Hero-hero-1",
+      "tagName": "DIV"
+    }
+  },
+  {
+    "index": "bg_4",
+    "src": "https://www.blacklab.beer/cdn/shop/t/5/assets/ico-select.svg?v=29003672709104678581620834661",
+    "alt": "Background image from SELECT",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://www.blacklab.beer/cdn/shop/t/5/assets/ico-select.svg?v=29003672709104678581620834661\")",
+      "className": "single-option-selector single-option-selector-162126556484f11a4a product-form__input",
+      "id": "SingleOptionSelector-162126556484f11a4a-0",
+      "tagName": "SELECT"
+    }
+  },
+  {
+    "index": "bg_5",
+    "src": "https://www.blacklab.beer/cdn/shop/t/5/assets/ico-select.svg?v=29003672709104678581620834661",
+    "alt": "Background image from SELECT",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://www.blacklab.beer/cdn/shop/t/5/assets/ico-select.svg?v=29003672709104678581620834661\")",
+      "className": "product-form__variants no-js",
+      "id": "ProductSelect-162126556484f11a4a",
+      "tagName": "SELECT"
+    }
+  }
+]

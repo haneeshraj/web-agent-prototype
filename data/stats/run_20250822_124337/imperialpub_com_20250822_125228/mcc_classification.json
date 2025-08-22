@@ -1,0 +1,49 @@
+{
+  "domain": "imperialpub_com",
+  "classification_success": true,
+  "stage1_result": {
+    "selected_category_range": "5700-7299",
+    "selected_category_name": "Miscellaneous Stores",
+    "confidence": 0.95,
+    "reasoning": "The business is named 'Imperial Pub' and the logo also includes 'Tavern'. The navigation includes 'Menu', indicating that it serves food and/or drinks. The presence of 'Pub' and 'Tavern' strongly suggests that this is a drinking establishment, and the 'Menu' link confirms it serves food/drinks. Therefore, based on the business-specific guidance, the appropriate category is '5700-7299: Miscellaneous Stores' to access MCC 5813 (Bars, Cocktail Lounges) and potentially 5812/5814 if it's a full restaurant.",
+    "key_indicators": [
+      "Pub",
+      "Tavern",
+      "Menu",
+      "Events"
+    ],
+    "business_type_identified": "Bar/Pub/Tavern"
+  },
+  "stage2_result": {
+    "selected_mcc": 5813,
+    "selected_mcc_description": "Bars, Cocktail Lounges, Discotheques, Nightclubs and Taverns Drinking Places Alcoholic Beverages",
+    "confidence": 0.95,
+    "reasoning": "The business name is Imperial Pub and the logo also says Tavern. The website navigation includes 'Menu' and 'Events', suggesting it is a drinking establishment. The CRITICAL VALIDATION RULES state that a BAR/PUB DETECTED must use MCC 5813 (Bars, Cocktail Lounges).",
+    "business_match_factors": [
+      "primary_activity",
+      "business_model",
+      "industry_type"
+    ],
+    "alternative_mccs_considered": [
+      {
+        "mcc": 5812,
+        "reason_rejected": "While it could serve food, the primary activity appears to be a bar/pub, making 5813 more appropriate."
+      },
+      {
+        "mcc": 5814,
+        "reason_rejected": "This is not a fast food establishment."
+      }
+    ]
+  },
+  "final_mcc": 5813,
+  "final_mcc_description": "Bars, Cocktail Lounges, Discotheques, Nightclubs and Taverns Drinking Places Alcoholic Beverages",
+  "final_confidence": 0.95,
+  "error": null,
+  "processing_metadata": {
+    "text_extraction_success": true,
+    "screenshot_found": true,
+    "stage1_completed": true,
+    "stage2_completed": true,
+    "model_used": "gemini-2.0-flash"
+  }
+}

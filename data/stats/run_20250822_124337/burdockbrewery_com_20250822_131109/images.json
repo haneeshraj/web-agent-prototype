@@ -1,0 +1,621 @@
+[
+  {
+    "index": 2,
+    "src": "https://burdockbrewery.com/cdn/shop/files/Bloor_Home_Page_533x.jpg?v=1748631613",
+    "alt": "",
+    "width": "900",
+    "height": "857"
+  },
+  {
+    "index": 3,
+    "src": "https://burdockbrewery.com/cdn/shop/files/Kensington_Home_Page_533x.jpg?v=1750278707",
+    "alt": "",
+    "width": "900",
+    "height": "857"
+  },
+  {
+    "index": 40,
+    "src": "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==",
+    "alt": "Burdock Brewery",
+    "width": "305",
+    "height": "305"
+  },
+  {
+    "index": "bg_0",
+    "src": "https://burdockbrewery.com/cdn/shop/files/BloorBanner_1950x.jpg?v=1694791152",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://burdockbrewery.com/cdn/shop/files/BloorBanner_1950x.jpg?v=1694791152\")",
+      "className": "background-size-cover lazyloaded",
+      "id": "",
+      "tagName": "DIV"
+    }
+  },
+  {
+    "index": "bg_1",
+    "src": "https://burdockbrewery.com/cdn/shop/files/RasbuArtboard1_720x.jpg?v=1739830158",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://burdockbrewery.com/cdn/shop/files/RasbuArtboard1_720x.jpg?v=1739830158\")",
+      "className": "product-item__bg lazyloaded",
+      "id": "",
+      "tagName": "DIV"
+    }
+  },
+  {
+    "index": "bg_2",
+    "src": "https://burdockbrewery.com/cdn/shop/files/RasbuArtboard2_720x.jpg?v=1739830158",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://burdockbrewery.com/cdn/shop/files/RasbuArtboard2_720x.jpg?v=1739830158\")",
+      "className": "product-item__bg__under lazyloaded",
+      "id": "",
+      "tagName": "DIV"
+    }
+  },
+  {
+    "index": "bg_3",
+    "src": "https://burdockbrewery.com/cdn/shop/files/DuckTallShopify4copy_720x.jpg?v=1739829821",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://burdockbrewery.com/cdn/shop/files/DuckTallShopify4copy_720x.jpg?v=1739829821\")",
+      "className": "product-item__bg lazyloaded",
+      "id": "",
+      "tagName": "DIV"
+    }
+  },
+  {
+    "index": "bg_4",
+    "src": "https://burdockbrewery.com/cdn/shop/files/Ruddy_tall_canShopifyMain_720x.jpg?v=1746548819",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://burdockbrewery.com/cdn/shop/files/Ruddy_tall_canShopifyMain_720x.jpg?v=1746548819\")",
+      "className": "product-item__bg__under lazyloaded",
+      "id": "",
+      "tagName": "DIV"
+    }
+  },
+  {
+    "index": "bg_5",
+    "src": "https://burdockbrewery.com/cdn/shop/files/NonAlcGoseShopifyMain_720x.jpg?v=1739830017",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://burdockbrewery.com/cdn/shop/files/NonAlcGoseShopifyMain_720x.jpg?v=1739830017\")",
+      "className": "product-item__bg lazyloaded",
+      "id": "",
+      "tagName": "DIV"
+    }
+  },
+  {
+    "index": "bg_6",
+    "src": "https://burdockbrewery.com/cdn/shop/files/Na_Lime_GoseShopifyMain_720x.jpg?v=1755286358",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://burdockbrewery.com/cdn/shop/files/Na_Lime_GoseShopifyMain_720x.jpg?v=1755286358\")",
+      "className": "product-item__bg__under lazyloaded",
+      "id": "",
+      "tagName": "DIV"
+    }
+  },
+  {
+    "index": "bg_7",
+    "src": "https://burdockbrewery.com/cdn/shop/files/ShopifyCansDUNK_720x.jpg?v=1739829976",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://burdockbrewery.com/cdn/shop/files/ShopifyCansDUNK_720x.jpg?v=1739829976\")",
+      "className": "product-item__bg lazyloaded",
+      "id": "",
+      "tagName": "DIV"
+    }
+  },
+  {
+    "index": "bg_8",
+    "src": "https://burdockbrewery.com/cdn/shop/files/DunkShopifyMain_720x.jpg?v=1749237956",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://burdockbrewery.com/cdn/shop/files/DunkShopifyMain_720x.jpg?v=1749237956\")",
+      "className": "product-item__bg__under lazyloaded",
+      "id": "",
+      "tagName": "DIV"
+    }
+  },
+  {
+    "index": "bg_9",
+    "src": "https://burdockbrewery.com/cdn/shop/files/ShopifyCansArtboard4_720x.jpg?v=1739829943",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://burdockbrewery.com/cdn/shop/files/ShopifyCansArtboard4_720x.jpg?v=1739829943\")",
+      "className": "product-item__bg lazyloaded",
+      "id": "",
+      "tagName": "DIV"
+    }
+  },
+  {
+    "index": "bg_10",
+    "src": "https://burdockbrewery.com/cdn/shop/files/ShopifyCansArtboard3_720x.jpg?v=1739829943",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://burdockbrewery.com/cdn/shop/files/ShopifyCansArtboard3_720x.jpg?v=1739829943\")",
+      "className": "product-item__bg__under lazyloaded",
+      "id": "",
+      "tagName": "DIV"
+    }
+  },
+  {
+    "index": "bg_11",
+    "src": "https://burdockbrewery.com/cdn/shop/files/ducks_royaleShopifyMain_720x.jpg?v=1747848975",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://burdockbrewery.com/cdn/shop/files/ducks_royaleShopifyMain_720x.jpg?v=1747848975\")",
+      "className": "product-item__bg lazyloaded",
+      "id": "",
+      "tagName": "DIV"
+    }
+  },
+  {
+    "index": "bg_12",
+    "src": "https://burdockbrewery.com/cdn/shop/files/Ducks_RoyaleShopify2_720x.jpg?v=1747848975",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://burdockbrewery.com/cdn/shop/files/Ducks_RoyaleShopify2_720x.jpg?v=1747848975\")",
+      "className": "product-item__bg__under lazyloaded",
+      "id": "",
+      "tagName": "DIV"
+    }
+  },
+  {
+    "index": "bg_13",
+    "src": "https://burdockbrewery.com/cdn/shop/files/ShopifyCansArtboard3_96a627f2-fef5-4d82-9ff7-82a0291b37e2_720x.jpg?v=1739829912",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://burdockbrewery.com/cdn/shop/files/ShopifyCansArtboard3_96a627f2-fef5-4d82-9ff7-82a0291b37e2_720x.jpg?v=1739829912\")",
+      "className": "product-item__bg lazyloaded",
+      "id": "",
+      "tagName": "DIV"
+    }
+  },
+  {
+    "index": "bg_14",
+    "src": "https://burdockbrewery.com/cdn/shop/files/ALT_355mlShopify2_720x.jpg?v=1744913373",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://burdockbrewery.com/cdn/shop/files/ALT_355mlShopify2_720x.jpg?v=1744913373\")",
+      "className": "product-item__bg__under lazyloaded",
+      "id": "",
+      "tagName": "DIV"
+    }
+  },
+  {
+    "index": "bg_15",
+    "src": "https://burdockbrewery.com/cdn/shop/files/ShopifyGrid_1_ShopifyMain_82f74f27-f1db-46f9-9ae9-a98133ca743c_720x.jpg?v=1750263285",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://burdockbrewery.com/cdn/shop/files/ShopifyGrid_1_ShopifyMain_82f74f27-f1db-46f9-9ae9-a98133ca743c_720x.jpg?v=1750263285\")",
+      "className": "product-item__bg lazyloaded",
+      "id": "",
+      "tagName": "DIV"
+    }
+  },
+  {
+    "index": "bg_16",
+    "src": "https://burdockbrewery.com/cdn/shop/files/caseShopifyMain_720x.jpg?v=1755291829",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://burdockbrewery.com/cdn/shop/files/caseShopifyMain_720x.jpg?v=1755291829\")",
+      "className": "product-item__bg__under lazyloaded",
+      "id": "",
+      "tagName": "DIV"
+    }
+  },
+  {
+    "index": "bg_17",
+    "src": "https://burdockbrewery.com/cdn/shop/files/DuckTallShopifyMain_720x.jpg?v=1739829822",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://burdockbrewery.com/cdn/shop/files/DuckTallShopifyMain_720x.jpg?v=1739829822\")",
+      "className": "product-item__bg lazyloaded",
+      "id": "",
+      "tagName": "DIV"
+    }
+  },
+  {
+    "index": "bg_18",
+    "src": "https://burdockbrewery.com/cdn/shop/files/Double_Ducks_473ShopifyMain_720x.jpg?v=1755279626",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://burdockbrewery.com/cdn/shop/files/Double_Ducks_473ShopifyMain_720x.jpg?v=1755279626\")",
+      "className": "product-item__bg__under lazyloaded",
+      "id": "",
+      "tagName": "DIV"
+    }
+  },
+  {
+    "index": "bg_19",
+    "src": "https://burdockbrewery.com/cdn/shop/files/pintail_355ShopifyMain_720x.jpg?v=1749485548",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://burdockbrewery.com/cdn/shop/files/pintail_355ShopifyMain_720x.jpg?v=1749485548\")",
+      "className": "product-item__bg lazyloaded",
+      "id": "",
+      "tagName": "DIV"
+    }
+  },
+  {
+    "index": "bg_20",
+    "src": "https://burdockbrewery.com/cdn/shop/files/pintail_355Shopify2_720x.jpg?v=1749485548",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://burdockbrewery.com/cdn/shop/files/pintail_355Shopify2_720x.jpg?v=1749485548\")",
+      "className": "product-item__bg__under lazyloaded",
+      "id": "",
+      "tagName": "DIV"
+    }
+  },
+  {
+    "index": "bg_21",
+    "src": "https://burdockbrewery.com/cdn/shop/files/Cabo375mLShopifyMain_720x.jpg?v=1739829760",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://burdockbrewery.com/cdn/shop/files/Cabo375mLShopifyMain_720x.jpg?v=1739829760\")",
+      "className": "product-item__bg lazyloaded",
+      "id": "",
+      "tagName": "DIV"
+    }
+  },
+  {
+    "index": "bg_22",
+    "src": "https://burdockbrewery.com/cdn/shop/files/Cabo_Shopify2_720x.jpg?v=1755276881",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://burdockbrewery.com/cdn/shop/files/Cabo_Shopify2_720x.jpg?v=1755276881\")",
+      "className": "product-item__bg__under lazyloaded",
+      "id": "",
+      "tagName": "DIV"
+    }
+  },
+  {
+    "index": "bg_23",
+    "src": "https://burdockbrewery.com/cdn/shop/files/GamayFrescoShopifyMain_720x.jpg?v=1739829816",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://burdockbrewery.com/cdn/shop/files/GamayFrescoShopifyMain_720x.jpg?v=1739829816\")",
+      "className": "product-item__bg lazyloaded",
+      "id": "",
+      "tagName": "DIV"
+    }
+  },
+  {
+    "index": "bg_24",
+    "src": "https://burdockbrewery.com/cdn/shop/files/DSC_6230_720x.jpg?v=1744914004",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://burdockbrewery.com/cdn/shop/files/DSC_6230_720x.jpg?v=1744914004\")",
+      "className": "product-item__bg__under lazyloaded",
+      "id": "",
+      "tagName": "DIV"
+    }
+  },
+  {
+    "index": "bg_25",
+    "src": "https://burdockbrewery.com/cdn/shop/files/SUBU355MLShopifyMain_720x.jpg?v=1739829757",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://burdockbrewery.com/cdn/shop/files/SUBU355MLShopifyMain_720x.jpg?v=1739829757\")",
+      "className": "product-item__bg lazyloaded",
+      "id": "",
+      "tagName": "DIV"
+    }
+  },
+  {
+    "index": "bg_26",
+    "src": "https://burdockbrewery.com/cdn/shop/files/SUBU355MLShopify2_720x.jpg?v=1739829757",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://burdockbrewery.com/cdn/shop/files/SUBU355MLShopify2_720x.jpg?v=1739829757\")",
+      "className": "product-item__bg__under lazyloaded",
+      "id": "",
+      "tagName": "DIV"
+    }
+  },
+  {
+    "index": "bg_27",
+    "src": "https://burdockbrewery.com/cdn/shop/files/BAHD355mlShopifyMain_720x.jpg?v=1742406087",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://burdockbrewery.com/cdn/shop/files/BAHD355mlShopifyMain_720x.jpg?v=1742406087\")",
+      "className": "product-item__bg lazyloaded",
+      "id": "",
+      "tagName": "DIV"
+    }
+  },
+  {
+    "index": "bg_28",
+    "src": "https://burdockbrewery.com/cdn/shop/files/BAHD355mlShopify2_720x.jpg?v=1749486975",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://burdockbrewery.com/cdn/shop/files/BAHD355mlShopify2_720x.jpg?v=1749486975\")",
+      "className": "product-item__bg__under lazyloaded",
+      "id": "",
+      "tagName": "DIV"
+    }
+  },
+  {
+    "index": "bg_29",
+    "src": "https://burdockbrewery.com/cdn/shop/files/North_StarShopifyMain_720x.jpg?v=1747245582",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://burdockbrewery.com/cdn/shop/files/North_StarShopifyMain_720x.jpg?v=1747245582\")",
+      "className": "product-item__bg lazyloaded",
+      "id": "",
+      "tagName": "DIV"
+    }
+  },
+  {
+    "index": "bg_30",
+    "src": "https://burdockbrewery.com/cdn/shop/files/North_StarShopify3_720x.jpg?v=1750260013",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://burdockbrewery.com/cdn/shop/files/North_StarShopify3_720x.jpg?v=1750260013\")",
+      "className": "product-item__bg__under lazyloaded",
+      "id": "",
+      "tagName": "DIV"
+    }
+  },
+  {
+    "index": "bg_31",
+    "src": "https://burdockbrewery.com/cdn/shop/files/mixedShopify3_720x.jpg?v=1750272989",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://burdockbrewery.com/cdn/shop/files/mixedShopify3_720x.jpg?v=1750272989\")",
+      "className": "product-item__bg lazyloaded",
+      "id": "",
+      "tagName": "DIV"
+    }
+  },
+  {
+    "index": "bg_32",
+    "src": "https://burdockbrewery.com/cdn/shop/files/Deluxe_473_with_glassShopifyMain_720x.jpg?v=1750272989",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://burdockbrewery.com/cdn/shop/files/Deluxe_473_with_glassShopifyMain_720x.jpg?v=1750272989\")",
+      "className": "product-item__bg__under lazyloaded",
+      "id": "",
+      "tagName": "DIV"
+    }
+  },
+  {
+    "index": "bg_33",
+    "src": "https://burdockbrewery.com/cdn/shop/files/mixedShopify4_720x.jpg?v=1750272652",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://burdockbrewery.com/cdn/shop/files/mixedShopify4_720x.jpg?v=1750272652\")",
+      "className": "product-item__bg lazyloaded",
+      "id": "",
+      "tagName": "DIV"
+    }
+  },
+  {
+    "index": "bg_34",
+    "src": "https://burdockbrewery.com/cdn/shop/files/DUCKS_473ShopifyMain_720x.jpg?v=1750272652",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://burdockbrewery.com/cdn/shop/files/DUCKS_473ShopifyMain_720x.jpg?v=1750272652\")",
+      "className": "product-item__bg__under lazyloaded",
+      "id": "",
+      "tagName": "DIV"
+    }
+  },
+  {
+    "index": "bg_35",
+    "src": "https://burdockbrewery.com/cdn/shop/files/Tuesday_473_mLShopifyMain_720x.jpg?v=1739830237",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://burdockbrewery.com/cdn/shop/files/Tuesday_473_mLShopifyMain_720x.jpg?v=1739830237\")",
+      "className": "product-item__bg lazyloaded",
+      "id": "",
+      "tagName": "DIV"
+    }
+  },
+  {
+    "index": "bg_36",
+    "src": "https://burdockbrewery.com/cdn/shop/files/Tuesday_473_mLShopify2_720x.jpg?v=1739830237",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://burdockbrewery.com/cdn/shop/files/Tuesday_473_mLShopify2_720x.jpg?v=1739830237\")",
+      "className": "product-item__bg__under lazyloaded",
+      "id": "",
+      "tagName": "DIV"
+    }
+  },
+  {
+    "index": "bg_37",
+    "src": "https://burdockbrewery.com/cdn/shop/files/Classic_473ShopifyMain_5266b18f-6b15-47d2-8d4e-c2c4935ed48c_720x.jpg?v=1743531642",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://burdockbrewery.com/cdn/shop/files/Classic_473ShopifyMain_5266b18f-6b15-47d2-8d4e-c2c4935ed48c_720x.jpg?v=1743531642\")",
+      "className": "product-item__bg lazyloaded",
+      "id": "",
+      "tagName": "DIV"
+    }
+  },
+  {
+    "index": "bg_38",
+    "src": "https://burdockbrewery.com/cdn/shop/files/Classic_473ShopifyMain_abfb5894-57dd-4e08-87f0-bdac0b0b90d9_720x.jpg?v=1743531675",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://burdockbrewery.com/cdn/shop/files/Classic_473ShopifyMain_abfb5894-57dd-4e08-87f0-bdac0b0b90d9_720x.jpg?v=1743531675\")",
+      "className": "product-item__bg__under lazyloaded",
+      "id": "",
+      "tagName": "DIV"
+    }
+  },
+  {
+    "index": "bg_39",
+    "src": "https://burdockbrewery.com/cdn/shop/files/Sun_BirdShopifyMain_720x.jpg?v=1750272555",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://burdockbrewery.com/cdn/shop/files/Sun_BirdShopifyMain_720x.jpg?v=1750272555\")",
+      "className": "product-item__bg lazyloaded",
+      "id": "",
+      "tagName": "DIV"
+    }
+  },
+  {
+    "index": "bg_40",
+    "src": "https://burdockbrewery.com/cdn/shop/files/SunBirdShopify2_720x.jpg?v=1750272555",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://burdockbrewery.com/cdn/shop/files/SunBirdShopify2_720x.jpg?v=1750272555\")",
+      "className": "product-item__bg__under lazyloaded",
+      "id": "",
+      "tagName": "DIV"
+    }
+  },
+  {
+    "index": "bg_41",
+    "src": "https://burdockbrewery.com/cdn/shop/files/no_alcShopifyMain_720x.jpg?v=1750259618",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://burdockbrewery.com/cdn/shop/files/no_alcShopifyMain_720x.jpg?v=1750259618\")",
+      "className": "product-item__bg lazyloaded",
+      "id": "",
+      "tagName": "DIV"
+    }
+  },
+  {
+    "index": "bg_42",
+    "src": "https://burdockbrewery.com/cdn/shop/files/Deluxe_Zero.5_355mLShopifyMain_720x.jpg?v=1750259618",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://burdockbrewery.com/cdn/shop/files/Deluxe_Zero.5_355mLShopifyMain_720x.jpg?v=1750259618\")",
+      "className": "product-item__bg__under lazyloaded",
+      "id": "",
+      "tagName": "DIV"
+    }
+  },
+  {
+    "index": "bg_43",
+    "src": "https://burdockbrewery.com/cdn/shop/files/no_alcShopify2_720x.jpg?v=1750271848",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://burdockbrewery.com/cdn/shop/files/no_alcShopify2_720x.jpg?v=1750271848\")",
+      "className": "product-item__bg lazyloaded",
+      "id": "",
+      "tagName": "DIV"
+    }
+  },
+  {
+    "index": "bg_44",
+    "src": "https://burdockbrewery.com/cdn/shop/files/Swish_355ShopifyMain_720x.jpg?v=1750271848",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://burdockbrewery.com/cdn/shop/files/Swish_355ShopifyMain_720x.jpg?v=1750271848\")",
+      "className": "product-item__bg__under lazyloaded",
+      "id": "",
+      "tagName": "DIV"
+    }
+  },
+  {
+    "index": "bg_45",
+    "src": "https://burdockbrewery.com/cdn/shop/files/ShopifyGrid_1_ShopifyMain_72f58ff2-1110-47bd-973c-d50b1480a84d_720x.jpg?v=1750264012",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://burdockbrewery.com/cdn/shop/files/ShopifyGrid_1_ShopifyMain_72f58ff2-1110-47bd-973c-d50b1480a84d_720x.jpg?v=1750264012\")",
+      "className": "product-item__bg lazyloaded",
+      "id": "",
+      "tagName": "DIV"
+    }
+  }
+]

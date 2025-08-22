@@ -1,0 +1,67 @@
+{
+  "domain": "getwellbar_com",
+  "company_name_used": "GET WELL",
+  "business_type_used": "Bar and Pizzeria with Arcade Games",
+  "location_context": {
+    "city": "Toronto",
+    "state": "Ontario",
+    "country": "Canada",
+    "region": "Dundas Street West",
+    "local_references": [],
+    "confidence": 0.8
+  },
+  "website_analysis": {
+    "address_found_in_website": true,
+    "extracted_address": "1181 Dundas St. West, Toronto, Canada",
+    "address_components": {
+      "house_number_street": "1181 Dundas St. West",
+      "city": "Toronto",
+      "county": "",
+      "state": "Ontario",
+      "country": "Canada",
+      "postal_code": ""
+    },
+    "clean_address": "1181 Dundas St. West, Toronto, Canada",
+    "address_confidence": 0.85,
+    "address_source": "Site location paragraph in title area",
+    "address_type": "primary store",
+    "reasoning": "Address extracted during brand image detection: The address is explicitly provided in the 'site-location' paragraph within the title area of the website.",
+    "geocoding": {
+      "success": true,
+      "lat": 43.6492509,
+      "lon": -79.4219201,
+      "formatted_address": "Get Well, 1181, Dundas Street West, Trinity-Bellwoods, Spadina—Fort York, Toronto, Golden Horseshoe, Ontario, M6H 1Y3, Canada",
+      "place_id": 324298171,
+      "address_type": "amenity",
+      "boundingbox": [
+        "43.6492009",
+        "43.6493009",
+        "-79.4219701",
+        "-79.4218701"
+      ],
+      "confidence": 8.130235751883753e-05
+    }
+  },
+  "search_analysis": {},
+  "final_address": "Get Well, 1181, Dundas Street West, Trinity-Bellwoods, Spadina—Fort York, Toronto, Golden Horseshoe, Ontario, M6H 1Y3, Canada",
+  "final_confidence": 0.85,
+  "final_source": "brand_analysis_Site location paragraph in title area",
+  "address_extraction_method": "optimized_brand_geocoding_only",
+  "reasoning": "Address found in brand step and validated via geocoding: The address is explicitly provided in the 'site-location' paragraph within the title area of the website.",
+  "error": null,
+  "geocoding": {
+    "success": true,
+    "lat": 43.6492509,
+    "lon": -79.4219201,
+    "formatted_address": "Get Well, 1181, Dundas Street West, Trinity-Bellwoods, Spadina—Fort York, Toronto, Golden Horseshoe, Ontario, M6H 1Y3, Canada",
+    "place_id": 324298171,
+    "address_type": "amenity",
+    "boundingbox": [
+      "43.6492009",
+      "43.6493009",
+      "-79.4219701",
+      "-79.4218701"
+    ],
+    "confidence": 8.130235751883753e-05
+  }
+}

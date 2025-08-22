@@ -821,8 +821,14 @@ Remember to focus on main business addresses (headquarters, main office, primary
             search_results = self.serpapi_client.search(primary_query, num_results=8)  # Increased for better coverage
             
             if search_results:
-                business_info = self.serpapi_client.extract_business_info(search_results)
-                all_business_info.extend(business_info)
+                # Send raw SerpAPI results directly to LLM instead of processing them first
+                # This bypasses potential errors in extract_business_info()
+                # Ensure search_results is a dictionary before sending to LLM
+                if isinstance(search_results, dict):
+                    all_business_info = search_results
+                else:
+                    # If search_results is not a dict, wrap it for safety
+                    all_business_info = {"raw_response": search_results}
                 # Found search results (count tracked internally)
             else:
                 return {
@@ -849,19 +855,26 @@ LOCATION CONTEXT (from website analysis):
 
 IMPORTANT: Use this location context to prioritize addresses in the primary location over expansion locations."""
 
-            user_prompt = f"""Please analyze these search results to extract the PRIMARY headquarters address for: {company_name}
+            user_prompt = f"""Please analyze these RAW SerpAPI search results to extract the PRIMARY headquarters address for: {company_name}
 
 COMPANY/BUSINESS NAME: {company_name}
 BUSINESS TYPE: {business_type if business_type else "Unknown"}
 {location_info}
 
-SEARCH RESULTS:
+RAW SERPAPI SEARCH RESULTS:
 ```json
 {json.dumps(all_business_info, indent=2)}
 ```
 
+INSTRUCTIONS FOR PARSING SERPAPI DATA:
+1. Look in "knowledge_graph" section for direct business info (title, description, address, phone, website)
+2. Look in "local_results" array for Google My Business listings (each has title, address, phone, etc.)
+3. Look in "organic_results" array for regular search results (title, link, snippet)
+4. Look in "answer_box" section for featured snippet information
+5. Prioritize addresses from knowledge_graph and local_results as they are most reliable
+
 TASK:
-1. Look through all the search results for address information
+1. Parse the SerpAPI structure above to find address information
 2. Find the PRIMARY headquarters address (original/founding location if multiple exist)
 3. If location context is provided above, prioritize addresses in that primary location
 4. For multi-location businesses, prefer the ORIGINAL headquarters over expansion offices
@@ -1127,9 +1140,32 @@ Focus on finding the PRIMARY business headquarters for {company_name}, especiall
                     if location_context.get('country'): location_info.append(location_context['country'])
                     info(f"Using location context: {', '.join(location_info)}")
                 
-                # Perform external search
-                search_result = self._search_for_address(company_name, business_type, location_context)
-                result["search_analysis"] = search_result
+                try:
+                    # Perform external search
+                    search_result = self._search_for_address(company_name, business_type, location_context)
+                    
+                    # Defensive programming: ensure search_result is a dictionary
+                    if not isinstance(search_result, dict):
+                        error(f"Unexpected search result type: {type(search_result)} - {search_result}")
+                        search_result = {
+                            "address_found": False,
+                            "extracted_address": "",
+                            "address_confidence": 0.0,
+                            "address_source": "",
+                            "address_type": "",
+                            "reasoning": f"Invalid search result format: {type(search_result)}",
+                            "supporting_sources": [],
+                            "alternative_addresses": []
+                        }
+                    
+                    result["search_analysis"] = search_result
+                except Exception as e:
+                    error(f"External search failed with error: {e}")
+                    result["search_analysis"] = {
+                        "address_found": False,
+                        "reasoning": f"External search error: {str(e)}"
+                    }
+                    search_result = result["search_analysis"]
                 
                 if (search_result.get("address_found", False) and 
                     search_result.get("address_confidence", 0.0) > 0.5):
@@ -1138,6 +1174,11 @@ Focus on finding the PRIMARY business headquarters for {company_name}, especiall
                     
                     # Geocode the search result address
                     geocoded_result = self._geocode_address(extracted_address)
+                    
+                    # Defensive programming: ensure geocoded_result is a dictionary
+                    if not isinstance(geocoded_result, dict):
+                        error(f"Unexpected geocoded result type: {type(geocoded_result)} - {geocoded_result}")
+                        geocoded_result = {"success": False, "error": f"Invalid geocoding result format: {type(geocoded_result)}"}
                     
                     if geocoded_result.get("success", False):
                         result["final_address"] = geocoded_result.get("formatted_address", extracted_address)

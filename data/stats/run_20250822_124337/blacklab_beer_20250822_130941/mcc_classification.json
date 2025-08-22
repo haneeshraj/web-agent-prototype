@@ -1,0 +1,50 @@
+{
+  "domain": "blacklab_beer",
+  "classification_success": true,
+  "stage1_result": {
+    "selected_category_range": "5700-7299",
+    "selected_category_name": "Miscellaneous Stores",
+    "confidence": 0.95,
+    "reasoning": "The website is for Black Lab Brewing, a brewery that sells beer online and has a tap room/beer garden. The presence of a tap room and beer garden, where alcoholic beverages are served, indicates a drinking establishment. The sale of beer online also points to retail activity. Therefore, the '5700-7299: Miscellaneous Stores' category is appropriate to access MCC 5813 (Bars, Cocktail Lounges) and other relevant retail MCCs.",
+    "key_indicators": [
+      "brewery",
+      "beer garden",
+      "tap room",
+      "online shop",
+      "beer club"
+    ],
+    "business_type_identified": "Brewery with tap room and online store"
+  },
+  "stage2_result": {
+    "selected_mcc": 5813,
+    "selected_mcc_description": "Bars, Cocktail Lounges, Discotheques, Nightclubs and Taverns Drinking Places Alcoholic Beverages",
+    "confidence": 0.95,
+    "reasoning": "The business is a brewery with a tap room and beer garden, selling alcoholic beverages for on-site consumption. This aligns perfectly with MCC 5813, which covers bars and similar establishments that primarily serve alcoholic beverages. The presence of a tap room and beer garden further supports this classification. The CRITICAL VALIDATION RULE for food businesses is met.",
+    "business_match_factors": [
+      "primary_activity",
+      "business_model",
+      "industry_type"
+    ],
+    "alternative_mccs_considered": [
+      {
+        "mcc": 5921,
+        "reason_rejected": "Package Stores Beer, Wine and Liquor - While they sell beer, the primary business is a tap room/bar, not just retail sales of packaged alcohol."
+      },
+      {
+        "mcc": 5812,
+        "reason_rejected": "Eating Places and Restaurants - While they might serve some food, the focus is on alcoholic beverages, making 5813 a better fit."
+      }
+    ]
+  },
+  "final_mcc": 5813,
+  "final_mcc_description": "Bars, Cocktail Lounges, Discotheques, Nightclubs and Taverns Drinking Places Alcoholic Beverages",
+  "final_confidence": 0.95,
+  "error": null,
+  "processing_metadata": {
+    "text_extraction_success": true,
+    "screenshot_found": true,
+    "stage1_completed": true,
+    "stage2_completed": true,
+    "model_used": "gemini-2.0-flash"
+  }
+}

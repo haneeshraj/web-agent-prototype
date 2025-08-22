@@ -1,0 +1,67 @@
+{
+  "domain": "barvolo_com",
+  "company_name_used": "Bar Volo",
+  "business_type_used": "Restaurant/Bar",
+  "location_context": {
+    "city": "Toronto",
+    "state": "Ontario",
+    "country": "Canada",
+    "region": "Toronto",
+    "local_references": [],
+    "confidence": 0.8
+  },
+  "website_analysis": {
+    "address_found_in_website": true,
+    "extracted_address": "17 St. Nicholas St., Toronto, ON M4Y 3G4, Canada",
+    "address_components": {
+      "house_number_street": "17 St. Nicholas St.",
+      "city": "Toronto",
+      "county": "",
+      "state": "Ontario",
+      "country": "Canada",
+      "postal_code": "M4Y 3G4"
+    },
+    "clean_address": "17 St. Nicholas St., Toronto, ON M4Y 3G4",
+    "address_confidence": 0.85,
+    "address_source": "Footer section",
+    "address_type": "primary store",
+    "reasoning": "Address extracted during brand image detection: The address is found in the footer section under the 'Contact' heading.",
+    "geocoding": {
+      "success": true,
+      "lat": 43.6655516,
+      "lon": -79.3856506,
+      "formatted_address": "17, St Nicholas Street, Bay-Cloverhill, Toronto Centre, Toronto, Golden Horseshoe, Ontario, M4Y 1Z8, Canada",
+      "place_id": 38737940,
+      "address_type": "place",
+      "boundingbox": [
+        "43.6655016",
+        "43.6656016",
+        "-79.3857006",
+        "-79.3856006"
+      ],
+      "confidence": 9.99999999995449e-06
+    }
+  },
+  "search_analysis": {},
+  "final_address": "17, St Nicholas Street, Bay-Cloverhill, Toronto Centre, Toronto, Golden Horseshoe, Ontario, M4Y 1Z8, Canada",
+  "final_confidence": 0.85,
+  "final_source": "brand_analysis_Footer section",
+  "address_extraction_method": "optimized_brand_geocoding_only",
+  "reasoning": "Address found in brand step and validated via geocoding: The address is found in the footer section under the 'Contact' heading.",
+  "error": null,
+  "geocoding": {
+    "success": true,
+    "lat": 43.6655516,
+    "lon": -79.3856506,
+    "formatted_address": "17, St Nicholas Street, Bay-Cloverhill, Toronto Centre, Toronto, Golden Horseshoe, Ontario, M4Y 1Z8, Canada",
+    "place_id": 38737940,
+    "address_type": "place",
+    "boundingbox": [
+      "43.6655016",
+      "43.6656016",
+      "-79.3857006",
+      "-79.3856006"
+    ],
+    "confidence": 9.99999999995449e-06
+  }
+}

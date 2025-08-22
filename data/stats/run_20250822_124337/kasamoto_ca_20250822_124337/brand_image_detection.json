@@ -1,0 +1,49 @@
+{
+  "brand_image_found": true,
+  "confidence": 0.95,
+  "selected_image": {
+    "src": "http://kasamoto.ca/wp-content/uploads/2023/11/KM-logo-e1700520198524.png",
+    "alt": "Background image from A",
+    "class": "ct-link-text logo"
+  },
+  "reasoning": "The brand image is located in the header and contains the company name 'Kasa Moto'. It is the most prominent visual element representing the brand.",
+  "visual_description": "The brand image consists of the text 'Kasa Moto' with a stylized fan-like graphic above it. It is located in the header of the website.",
+  "company_name": "Kasa Moto",
+  "company_name_source": "Brand image text, page title, About Us section",
+  "company_name_confidence": 0.95,
+  "alternative_names": [],
+  "address_found_in_branding": true,
+  "address_analysis": {
+    "addresses_found": [
+      "115 Yorkville Avenue, Toronto, ON M5R 1C1"
+    ],
+    "confidence": 0.85,
+    "primary_address": "115 Yorkville Avenue, Toronto, ON M5R 1C1",
+    "address_components": {
+      "house_number_street": "115 Yorkville Avenue",
+      "city": "Toronto",
+      "county": "",
+      "state": "Ontario",
+      "country": "Canada",
+      "postal_code": "M5R 1C1"
+    },
+    "clean_address": "115 Yorkville Avenue, Toronto, Ontario, Canada",
+    "source": "Footer Contact Us section",
+    "reasoning": "The address is found in the footer's 'Contact Us' section and is a complete, valid business address."
+  },
+  "location_context": {
+    "city": "Toronto",
+    "state": "Ontario",
+    "country": "Canada",
+    "region": "Yorkville",
+    "local_references": [],
+    "confidence": 0.8
+  },
+  "analysis_metadata": {
+    "model_used": "gemini-2.0-flash",
+    "total_images_analyzed": 47,
+    "html_length": 38927,
+    "screenshot_available": true,
+    "tokens_used": 28309
+  }
+}

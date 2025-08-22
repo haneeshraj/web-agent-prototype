@@ -1,0 +1,54 @@
+{
+  "brand_image_found": true,
+  "confidence": 0.95,
+  "selected_image": {
+    "src": "https://bellwoodsbrewery.com/cdn/shop/files/Bellwoods_red_x320.jpg?v=1630518005",
+    "alt": null,
+    "class": null
+  },
+  "reasoning": "The image in the top left corner of the website, within the header, is the main brand image. It contains a bell and the text 'BELLWOODS BREWERY'. Although the image itself is not directly available in the provided images list, the SVG code uses similar imagery and the alt text for the logo is null.",
+  "visual_description": "The brand image is a red bell with the text 'BELLWOODS BREWERY' underneath it.",
+  "company_name": "Bellwoods Brewery",
+  "company_name_source": "Brand image text, page title, meta tags",
+  "company_name_confidence": 0.95,
+  "alternative_names": [],
+  "address_found_in_branding": false,
+  "address_analysis": {
+    "addresses_found": [
+      "124 Ossington Ave., Toronto, ON M6J 2Z5",
+      "126 Ossington Ave., Toronto, ON",
+      "20 Hafis Rd., Toronto, ON M6M 2V7"
+    ],
+    "confidence": 0.85,
+    "primary_address": "",
+    "address_components": {
+      "house_number_street": "",
+      "city": "",
+      "county": "",
+      "state": "",
+      "country": "",
+      "postal_code": ""
+    },
+    "clean_address": "",
+    "source": "Footer and Bottle Shops pages",
+    "reasoning": "Multiple locations found, so address components are not extracted."
+  },
+  "location_context": {
+    "city": "Toronto",
+    "state": "Ontario",
+    "country": "Canada",
+    "region": "Ontario",
+    "local_references": [
+      "Ossington Ave",
+      "Hafis Rd"
+    ],
+    "confidence": 0.8
+  },
+  "analysis_metadata": {
+    "model_used": "gemini-2.0-flash",
+    "total_images_analyzed": 18,
+    "html_length": 414865,
+    "screenshot_available": true,
+    "tokens_used": 305368
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "domain": "themonarchtavern_com",
+  "classification_success": true,
+  "stage1_result": {
+    "selected_category_range": "5700-7299",
+    "selected_category_name": "Miscellaneous Stores",
+    "confidence": 0.95,
+    "reasoning": "The business is a tavern that serves food and drinks, including alcoholic beverages. The website mentions '20 local craft beers on tap' and 'food'. According to the BUSINESS-SPECIFIC GUIDANCE, businesses that serve prepared food and/or alcoholic beverages should be categorized under '5700-7299: Miscellaneous Stores' to access the restaurant and bar MCCs.",
+    "key_indicators": [
+      "tavern",
+      "pub",
+      "food",
+      "drink",
+      "live music"
+    ],
+    "business_type_identified": "Bar/Restaurant/Live Music Venue"
+  },
+  "stage2_result": {
+    "selected_mcc": 5813,
+    "selected_mcc_description": "Bars, Cocktail Lounges, Discotheques, Nightclubs and Taverns Drinking Places Alcoholic Beverages",
+    "confidence": 0.95,
+    "reasoning": "The website describes the business as a \"public house\" with \"20 local craft beers on tap and fine selection of bourbon, tequila and other top shelf spirits.\" This clearly indicates that the primary business activity is serving alcoholic beverages, which aligns with the description of MCC 5813. The presence of 'Food' in the navigation also suggests it is more than just a drinking place, but the emphasis on alcohol and the 'pub' description makes 5813 the most appropriate choice. The CRITICAL VALIDATION RULE for bars/pubs necessitates the use of MCC 5813.",
+    "business_match_factors": [
+      "primary_activity",
+      "business_model",
+      "industry_type"
+    ],
+    "alternative_mccs_considered": [
+      {
+        "mcc": 5812,
+        "reason_rejected": "While food is available, the primary focus seems to be on alcoholic beverages and the atmosphere of a pub/tavern, making 5813 a more accurate fit."
+      },
+      {
+        "mcc": 5814,
+        "reason_rejected": "The description does not suggest a fast-food model. It is a sit-down establishment."
+      }
+    ]
+  },
+  "final_mcc": 5813,
+  "final_mcc_description": "Bars, Cocktail Lounges, Discotheques, Nightclubs and Taverns Drinking Places Alcoholic Beverages",
+  "final_confidence": 0.95,
+  "error": null,
+  "processing_metadata": {
+    "text_extraction_success": true,
+    "screenshot_found": true,
+    "stage1_completed": true,
+    "stage2_completed": true,
+    "model_used": "gemini-2.0-flash"
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "brand_image_found": true,
+  "confidence": 0.95,
+  "selected_image": {
+    "src": "https://images.squarespace-cdn.com/content/v1/6813c74dc205632c80511387/01f531f4-c80e-4bd7-a665-8cc6d9b51a36/Bar+Volo+-+Logo+%28Master%29-03.png?format=1500w",
+    "alt": "Bar Volo",
+    "class": "preFade fadeIn"
+  },
+  "reasoning": "The image in the header with the alt text 'Bar Volo' is the main brand image. It is prominently displayed in the header and used as a link to the homepage.",
+  "visual_description": "The brand image is a logo with the text 'Bar Volo'.",
+  "company_name": "Bar Volo",
+  "company_name_source": "Page title, brand image alt text, header logo",
+  "company_name_confidence": 0.95,
+  "alternative_names": [],
+  "address_found_in_branding": true,
+  "address_analysis": {
+    "addresses_found": [
+      "17 St. Nicholas St. Toronto, M4Y 3G4"
+    ],
+    "confidence": 0.85,
+    "primary_address": "17 St. Nicholas St., Toronto, ON M4Y 3G4, Canada",
+    "address_components": {
+      "house_number_street": "17 St. Nicholas St.",
+      "city": "Toronto",
+      "county": "",
+      "state": "Ontario",
+      "country": "Canada",
+      "postal_code": "M4Y 3G4"
+    },
+    "clean_address": "17 St. Nicholas St., Toronto, ON M4Y 3G4",
+    "source": "Footer section",
+    "reasoning": "The address is found in the footer section under the 'Contact' heading."
+  },
+  "location_context": {
+    "city": "Toronto",
+    "state": "Ontario",
+    "country": "Canada",
+    "region": "Toronto",
+    "local_references": [],
+    "confidence": 0.8
+  },
+  "analysis_metadata": {
+    "model_used": "gemini-2.0-flash",
+    "total_images_analyzed": 14,
+    "html_length": 110867,
+    "screenshot_available": true,
+    "tokens_used": 58158
+  }
+}

@@ -1,0 +1,577 @@
+[
+  {
+    "website": "https://kasamoto.ca/",
+    "final_address": "Kasamoto, 115, Yorkville Avenue, Annex, University—Rosedale, Toronto, Golden Horseshoe, Ontario, M5R 1C1, Canada",
+    "address_confidence": 0.85,
+    "address_source": "brand_analysis_Footer Contact Us section",
+    "extraction_method": "optimized_brand_geocoding_only",
+    "website_analysis": {
+      "address_found": true,
+      "confidence": 0.85,
+      "source": "Footer Contact Us section",
+      "reasoning": "Address extracted during brand image detection: The address is found in the footer's 'Contact Us' section and is a complete, valid business address."
+    },
+    "search_analysis": {
+      "address_found": false,
+      "confidence": 0.0,
+      "source": "",
+      "reasoning": "No search analysis performed"
+    },
+    "company_name_used": "Kasa Moto",
+    "business_type_used": "Restaurant",
+    "error": null,
+    "extract_status": "success"
+  },
+  {
+    "website": "https://www.spotcoffee.com/",
+    "final_address": "225, Delaware Avenue, Theatre District, Downtown, Buffalo, Erie County, New York, 14202, United States",
+    "address_confidence": 0.95,
+    "address_source": "search_SPoT Coffee",
+    "extraction_method": "external_search_optimized",
+    "website_analysis": {
+      "address_found": false,
+      "confidence": 0.0,
+      "source": "",
+      "reasoning": "Website analysis performed in brand step"
+    },
+    "search_analysis": {
+      "address_found": true,
+      "confidence": 0.95,
+      "source": "SPoT Coffee",
+      "reasoning": "The address 225 Delaware Avenue, Buffalo, NY 14202 is listed on the official SPoT Coffee website under the 'Contact' page. This suggests it is the primary headquarters or at least a key administrative office. Buffalo is also where the company originated, making this a likely headquarters location."
+    },
+    "company_name_used": "SPoT Coffee",
+    "business_type_used": "Coffee shop/cafe",
+    "error": null,
+    "extract_status": "success"
+  },
+  {
+    "website": "https://www.barvolo.com/",
+    "final_address": "17, St Nicholas Street, Bay-Cloverhill, Toronto Centre, Toronto, Golden Horseshoe, Ontario, M4Y 1Z8, Canada",
+    "address_confidence": 0.85,
+    "address_source": "brand_analysis_Footer section",
+    "extraction_method": "optimized_brand_geocoding_only",
+    "website_analysis": {
+      "address_found": true,
+      "confidence": 0.85,
+      "source": "Footer section",
+      "reasoning": "Address extracted during brand image detection: The address is found in the footer section under the 'Contact' heading."
+    },
+    "search_analysis": {
+      "address_found": false,
+      "confidence": 0.0,
+      "source": "",
+      "reasoning": "No search analysis performed"
+    },
+    "company_name_used": "Bar Volo",
+    "business_type_used": "Restaurant/Bar",
+    "error": null,
+    "extract_status": "success"
+  },
+  {
+    "website": "https://birreriavolo.com/",
+    "final_address": "Birreria Volo, 612, College Street, Palmerston-Little Italy, University—Rosedale, Toronto, Golden Horseshoe, Ontario, M6G 1B4, Canada",
+    "address_confidence": 0.85,
+    "address_source": "brand_analysis_Footer contact section",
+    "extraction_method": "optimized_brand_geocoding_only",
+    "website_analysis": {
+      "address_found": true,
+      "confidence": 0.85,
+      "source": "Footer contact section",
+      "reasoning": "Address extracted during brand image detection: The address is found in the footer contact section and is a complete street address with city and state/province."
+    },
+    "search_analysis": {
+      "address_found": false,
+      "confidence": 0.0,
+      "source": "",
+      "reasoning": "No search analysis performed"
+    },
+    "company_name_used": "Birreria Volo",
+    "business_type_used": "Bar/Restaurant",
+    "error": null,
+    "extract_status": "success"
+  },
+  {
+    "website": "https://www.getwellbar.com/",
+    "final_address": "Get Well, 1181, Dundas Street West, Trinity-Bellwoods, Spadina—Fort York, Toronto, Golden Horseshoe, Ontario, M6H 1Y3, Canada",
+    "address_confidence": 0.85,
+    "address_source": "brand_analysis_Site location paragraph in title area",
+    "extraction_method": "optimized_brand_geocoding_only",
+    "website_analysis": {
+      "address_found": true,
+      "confidence": 0.85,
+      "source": "Site location paragraph in title area",
+      "reasoning": "Address extracted during brand image detection: The address is explicitly provided in the 'site-location' paragraph within the title area of the website."
+    },
+    "search_analysis": {
+      "address_found": false,
+      "confidence": 0.0,
+      "source": "",
+      "reasoning": "No search analysis performed"
+    },
+    "company_name_used": "GET WELL",
+    "business_type_used": "Bar and Pizzeria with Arcade Games",
+    "error": null,
+    "extract_status": "success"
+  },
+  {
+    "website": "https://www.thegreatergoodbar.com/",
+    "final_address": "229, Geary Avenue, Wallace Emerson, Davenport, Toronto, Golden Horseshoe, Ontario, M6H 3A7, Canada",
+    "address_confidence": 0.85,
+    "address_source": "brand_analysis_og:description meta tag",
+    "extraction_method": "optimized_brand_geocoding_only",
+    "website_analysis": {
+      "address_found": true,
+      "confidence": 0.85,
+      "source": "og:description meta tag",
+      "reasoning": "Address extracted during brand image detection: The address is found in the og:description meta tag, which describes the location of the craft beer bar."
+    },
+    "search_analysis": {
+      "address_found": false,
+      "confidence": 0.0,
+      "source": "",
+      "reasoning": "No search analysis performed"
+    },
+    "company_name_used": "The Greater Good",
+    "business_type_used": "Bar/Drinking Establishment",
+    "error": null,
+    "extract_status": "success"
+  },
+  {
+    "website": "https://imperialpub.com/",
+    "final_address": "54, Dundas Street East, Downtown Yonge East, Toronto Centre, Toronto, Golden Horseshoe, Ontario, M5B 1C6, Canada",
+    "address_confidence": 0.85,
+    "address_source": "brand_analysis_OCR of the logo image",
+    "extraction_method": "optimized_brand_geocoding_only",
+    "website_analysis": {
+      "address_found": true,
+      "confidence": 0.85,
+      "source": "OCR of the logo image",
+      "reasoning": "Address extracted during brand image detection: The address '54 Dundas St. E., Toronto' is found within the logo image. The state and country are inferred based on the city."
+    },
+    "search_analysis": {
+      "address_found": false,
+      "confidence": 0.0,
+      "source": "",
+      "reasoning": "No search analysis performed"
+    },
+    "company_name_used": "Imperial Pub",
+    "business_type_used": "Bar/Pub/Tavern",
+    "error": null,
+    "extract_status": "success"
+  },
+  {
+    "website": "https://sweatybettysbar.com/",
+    "final_address": "13, Ossington Avenue, Trinity-Bellwoods, Spadina—Fort York, Toronto, Golden Horseshoe, Ontario, M6J 2Z2, Canada",
+    "address_confidence": 0.95,
+    "address_source": "search_ZoomInfo",
+    "extraction_method": "external_search_optimized",
+    "website_analysis": {
+      "address_found": false,
+      "confidence": 0.0,
+      "source": "",
+      "reasoning": "Website analysis performed in brand step"
+    },
+    "search_analysis": {
+      "address_found": true,
+      "confidence": 0.95,
+      "source": "ZoomInfo",
+      "reasoning": "The address 13 Ossington Avenue, Toronto, Ontario M6J 2Y8 is consistently listed across multiple sources, including the official website's contact page, ZoomInfo, Destination Toronto, TripAdvisor, and Yelp. The \"About Us\" page on the official website states that Sweaty Betty's is located at this address and is a \"true neighbourhood original\", suggesting it is the original and primary location. ZoomInfo explicitly states this address as the headquarters. Therefore, this address is selected as the primary headquarters."
+    },
+    "company_name_used": "Sweaty Betty's Bar",
+    "business_type_used": "Bar/Drinking Establishment",
+    "error": null,
+    "extract_status": "success"
+  },
+  {
+    "website": "https://www.themonarchtavern.com/",
+    "final_address": "Monarch Tavern, 12, Clinton Street, Trinity-Bellwoods, University—Rosedale, Toronto, Golden Horseshoe, Ontario, M6J 2N8, Canada",
+    "address_confidence": 0.85,
+    "address_source": "brand_analysis_Contact section",
+    "extraction_method": "optimized_brand_geocoding_only",
+    "website_analysis": {
+      "address_found": true,
+      "confidence": 0.85,
+      "source": "Contact section",
+      "reasoning": "Address extracted during brand image detection: The address is found in the contact section of the website."
+    },
+    "search_analysis": {
+      "address_found": false,
+      "confidence": 0.0,
+      "source": "",
+      "reasoning": "No search analysis performed"
+    },
+    "company_name_used": "The Monarch Tavern",
+    "business_type_used": "Bar/Restaurant/Live Music Venue",
+    "error": null,
+    "extract_status": "success"
+  },
+  {
+    "website": "https://graceomalleyspub.com/",
+    "final_address": "2400 US Hwy 27, Clermont, FL 34711",
+    "address_confidence": 0.68,
+    "address_source": "brand_analysis_Footer section of the website",
+    "extraction_method": "optimized_brand_unvalidated",
+    "website_analysis": {
+      "address_found": true,
+      "confidence": 0.85,
+      "source": "Footer section of the website",
+      "reasoning": "Address extracted during brand image detection: The address is found in the footer section under the \"Visit Us\" heading, which is likely the primary business address."
+    },
+    "search_analysis": {
+      "address_found": false,
+      "confidence": 0.0,
+      "source": "",
+      "reasoning": "No search analysis performed"
+    },
+    "company_name_used": "Grace O'Malley's",
+    "business_type_used": "Irish Pub and Restaurant",
+    "error": null,
+    "extract_status": "success"
+  },
+  {
+    "website": "https://tedscollision.com/",
+    "final_address": "125, Shoppers Drive, Winchester, Clark County, Kentucky, 40391, United States",
+    "address_confidence": 0.85,
+    "address_source": "brand_analysis_Find a location dropdown, location card",
+    "extraction_method": "optimized_brand_geocoding_only",
+    "website_analysis": {
+      "address_found": true,
+      "confidence": 0.85,
+      "source": "Find a location dropdown, location card",
+      "reasoning": "Address extracted during brand image detection: The address is found in the find a location dropdown and location card. This is the primary business address."
+    },
+    "search_analysis": {
+      "address_found": false,
+      "confidence": 0.0,
+      "source": "",
+      "reasoning": "No search analysis performed"
+    },
+    "company_name_used": "Ted's Collision Center",
+    "business_type_used": "Auto Collision Repair Service",
+    "error": null,
+    "extract_status": "success"
+  },
+  {
+    "website": "https://www.theonlycafe.com/",
+    "final_address": "The One in the Only, 966, Danforth Avenue, Danforth, Toronto—Danforth, East York, Toronto, Golden Horseshoe, Ontario, M4J 1L9, Canada",
+    "address_confidence": 0.85,
+    "address_source": "brand_analysis_Meta description, section text, footer",
+    "extraction_method": "optimized_brand_geocoding_only",
+    "website_analysis": {
+      "address_found": true,
+      "confidence": 0.85,
+      "source": "Meta description, section text, footer",
+      "reasoning": "Address extracted during brand image detection: The address is consistently mentioned in the meta description, in a section on the homepage, and in the footer, indicating it is the primary business address."
+    },
+    "search_analysis": {
+      "address_found": false,
+      "confidence": 0.0,
+      "source": "",
+      "reasoning": "No search analysis performed"
+    },
+    "company_name_used": "The Only Cafe",
+    "business_type_used": "Bar/Cafe",
+    "error": null,
+    "extract_status": "success"
+  },
+  {
+    "website": "https://www.collectiveartsbrewing.com/",
+    "final_address": "207 Burlington Street East, Hamilton, Ontario L8L 4H2, Canada",
+    "address_confidence": 0.693,
+    "address_source": "search_knowledge_graph",
+    "extraction_method": "external_search_unvalidated_optimized",
+    "website_analysis": {
+      "address_found": false,
+      "confidence": 0.0,
+      "source": "",
+      "reasoning": "Website analysis performed in brand step"
+    },
+    "search_analysis": {
+      "address_found": true,
+      "confidence": 0.99,
+      "source": "knowledge_graph",
+      "reasoning": "The address 207 Burlington Street East, Hamilton, Ontario L8L 4H2, Canada is consistently listed as the headquarters for Collective Arts Brewing across multiple sources including the Knowledge Graph, PitchBook, ZoomInfo, CB Insights, Yelp, and Dun & Bradstreet. The Knowledge Graph directly provides this address, and several organic search results confirm it as the 'Corporate Office' or 'Headquarters'. Wikipedia also lists Hamilton, Ontario as the headquarters location. This consistency and the designation as 'Corporate Office' make it the most reliable primary headquarters address."
+    },
+    "company_name_used": "Collective Arts Brewing",
+    "business_type_used": "Brewery and drinking establishment with retail sales",
+    "error": null,
+    "extract_status": "success"
+  },
+  {
+    "website": "https://www.rainhardbrewing.com/",
+    "final_address": "Rainhard Brewing, 100, Symes Road, Junction Area, York South—Weston, Toronto, Golden Horseshoe, Ontario, M6N 3T1, Canada",
+    "address_confidence": 0.95,
+    "address_source": "search_knowledge_graph",
+    "extraction_method": "external_search_optimized",
+    "website_analysis": {
+      "address_found": false,
+      "confidence": 0.0,
+      "source": "",
+      "reasoning": "Website analysis performed in brand step"
+    },
+    "search_analysis": {
+      "address_found": true,
+      "confidence": 0.95,
+      "source": "knowledge_graph",
+      "reasoning": "The Knowledge Graph provides the address '100 Symes Rd, Toronto, ON M6N 0A8, Canada' directly associated with Rainhard Brewing Co. This is further supported by multiple organic search results, including the company's 'About Us' page, Yelp, Destination Toronto, RocketReach, Tripadvisor, and ContactOut, all listing this address. This consistency across multiple reliable sources strongly indicates that this is the primary and original location of Rainhard Brewing Co."
+    },
+    "company_name_used": "Rainhard Brewing Co.",
+    "business_type_used": "Brewery and Retailer of Beer",
+    "error": null,
+    "extract_status": "success"
+  },
+  {
+    "website": "https://oldflamebrewingco.ca/",
+    "final_address": "Old Flame Brewing Co., 135, Perry Street, Downtown Port Perry, Port Perry, Scugog, Durham Region, Golden Horseshoe, Ontario, L9L 1A3, Canada",
+    "address_confidence": 0.95,
+    "address_source": "search_ZoomInfo, Yelp, Tripadvisor",
+    "extraction_method": "external_search_optimized",
+    "website_analysis": {
+      "address_found": false,
+      "confidence": 0.0,
+      "source": "",
+      "reasoning": "Website analysis performed in brand step"
+    },
+    "search_analysis": {
+      "address_found": true,
+      "confidence": 0.95,
+      "source": "ZoomInfo, Yelp, Tripadvisor",
+      "reasoning": "The address 135 Perry Street, Port Perry, Ontario L9L 1B8 is listed as the headquarters by ZoomInfo and is also present in the Yelp and Tripadvisor listings for Old Flame Brewing Co. in Port Perry. Given that Port Perry is mentioned first in the local results and that multiple sources point to this address, it is likely the original and primary location. The other locations appear to be expansions."
+    },
+    "company_name_used": "Old Flame Brewing Co.",
+    "business_type_used": "Brewery with online retail and taproom locations",
+    "error": null,
+    "extract_status": "success"
+  },
+  {
+    "website": "https://bellwoodsbrewery.com/",
+    "final_address": "Bellwoods Brewery, 124, Ossington Avenue, Trinity-Bellwoods, Spadina—Fort York, Toronto, Golden Horseshoe, Ontario, M6J 2Z5, Canada",
+    "address_confidence": 0.95,
+    "address_source": "search_knowledge_graph",
+    "extraction_method": "external_search_optimized",
+    "website_analysis": {
+      "address_found": false,
+      "confidence": 0.0,
+      "source": "",
+      "reasoning": "Website analysis performed in brand step"
+    },
+    "search_analysis": {
+      "address_found": true,
+      "confidence": 0.95,
+      "source": "knowledge_graph",
+      "reasoning": "The address 124 Ossington Avenue, Toronto, Ontario M6J 2Z5, Canada is consistently listed across multiple sources including the Knowledge Graph, the official website (snippet from organic result), ZoomInfo, Dun & Bradstreet, RocketReach, and Tripadvisor. This consistency suggests it is the primary and likely original location of Bellwoods Brewery. The FAQ page on the Bellwoods Brewery website lists a different address (20 Hafis Rd), but this is likely a secondary location or production facility, not the primary headquarters."
+    },
+    "company_name_used": "Bellwoods Brewery",
+    "business_type_used": "Brewery with retail and potentially bar/drinking establishment operations",
+    "error": null,
+    "extract_status": "success"
+  },
+  {
+    "website": "https://www.leftfieldbrewery.ca/",
+    "final_address": "36, Wagstaff Drive, South Riverdale, Toronto—Danforth, Toronto, Golden Horseshoe, Ontario, M4J 5B2, Canada",
+    "address_confidence": 0.95,
+    "address_source": "search_ZoomInfo",
+    "extraction_method": "external_search_optimized",
+    "website_analysis": {
+      "address_found": false,
+      "confidence": 0.0,
+      "source": "",
+      "reasoning": "Website analysis performed in brand step"
+    },
+    "search_analysis": {
+      "address_found": true,
+      "confidence": 0.95,
+      "source": "ZoomInfo",
+      "reasoning": "ZoomInfo identifies 36 Wagstaff Dr, Toronto, Ontario, M4L 3W9, Canada as the headquarters. This is further supported by Yelp, Destination Toronto, and the company's website, making it the most likely primary headquarters. The company's website also lists this address. D&B lists a different address (10 Coatsworth Cres Toronto, ON, M4C 5P6 Canada), but this is likely a business registration address and not the primary headquarters."
+    },
+    "company_name_used": "Left Field Brewery",
+    "business_type_used": "Brewery with tap rooms and bottle shops",
+    "error": null,
+    "extract_status": "success"
+  },
+  {
+    "website": "https://www.blacklab.beer/",
+    "final_address": "818, Eastern Avenue, Greenwood-Coxwell, Toronto—Danforth, Toronto, Golden Horseshoe, Ontario, M4M 1L6, Canada",
+    "address_confidence": 0.95,
+    "address_source": "brand_analysis_Footer and Map Section",
+    "extraction_method": "optimized_brand_geocoding_only",
+    "website_analysis": {
+      "address_found": true,
+      "confidence": 0.95,
+      "source": "Footer and Map Section",
+      "reasoning": "Address extracted during brand image detection: The address is found in the footer and map section, indicating the primary business location."
+    },
+    "search_analysis": {
+      "address_found": false,
+      "confidence": 0.0,
+      "source": "",
+      "reasoning": "No search analysis performed"
+    },
+    "company_name_used": "Black Lab Brewing",
+    "business_type_used": "Brewery with tap room and online store",
+    "error": null,
+    "extract_status": "success"
+  },
+  {
+    "website": "https://burdockbrewery.com/",
+    "final_address": "1184, Bloor Street West, Wallace Emerson, Davenport, Toronto, Golden Horseshoe, Ontario, M6H 1N4, Canada",
+    "address_confidence": 0.95,
+    "address_source": "search_ZoomInfo",
+    "extraction_method": "external_search_optimized",
+    "website_analysis": {
+      "address_found": false,
+      "confidence": 0.0,
+      "source": "",
+      "reasoning": "Website analysis performed in brand step"
+    },
+    "search_analysis": {
+      "address_found": true,
+      "confidence": 0.95,
+      "source": "ZoomInfo",
+      "reasoning": "Multiple sources, including ZoomInfo, Destination Toronto, Yelp, and LinkedIn, confirm that 1184 Bloor Street West, Toronto, Ontario, M6H 1N2, Canada is the headquarters address for Burdock Brewery. LinkedIn also indicates that the company was founded in 2015 and lists this address as a location. The official website's contact page also lists this address. This consistency across multiple sources makes it the most reliable primary headquarters address."
+    },
+    "company_name_used": "Burdock Brewery",
+    "business_type_used": "Brewery with restaurant/bar and online retail",
+    "error": null,
+    "extract_status": "success"
+  },
+  {
+    "website": "https://www.saintjohnstavern.com/",
+    "final_address": "The Office Pub, 117, John Street, Wellington Place, Spadina—Fort York, Toronto, Golden Horseshoe, Ontario, M5V 2E2, Canada",
+    "address_confidence": 0.95,
+    "address_source": "search_knowledge_graph",
+    "extraction_method": "external_search_optimized",
+    "website_analysis": {
+      "address_found": false,
+      "confidence": 0.0,
+      "source": "",
+      "reasoning": "Website analysis performed in brand step"
+    },
+    "search_analysis": {
+      "address_found": true,
+      "confidence": 0.95,
+      "source": "knowledge_graph",
+      "reasoning": "The Knowledge Graph provides the address '117 John St, Toronto, ON M5V 2E2, Canada' for Saint John's Tavern. This is further confirmed by the official website in the organic results. Given the context of the search and the information available, this is the primary location for the business."
+    },
+    "company_name_used": "SAINT JOHN'S TAVERN",
+    "business_type_used": "Restaurant/Bar",
+    "error": null,
+    "extract_status": "success"
+  },
+  {
+    "website": "https://mcveighspub.com/",
+    "final_address": "McVeigh's, 124, Church Street, Downtown Yonge East, Toronto Centre, Toronto, Golden Horseshoe, Ontario, M5C 2G8, Canada",
+    "address_confidence": 0.95,
+    "address_source": "brand_analysis_Footer and main page content",
+    "extraction_method": "optimized_brand_geocoding_only",
+    "website_analysis": {
+      "address_found": true,
+      "confidence": 0.95,
+      "source": "Footer and main page content",
+      "reasoning": "Address extracted during brand image detection: The address is found in the footer and in the 'Stop By For a Visit' section of the main page content, indicating it is the primary business address."
+    },
+    "search_analysis": {
+      "address_found": false,
+      "confidence": 0.0,
+      "source": "",
+      "reasoning": "No search analysis performed"
+    },
+    "company_name_used": "McVeighs Irish Pub",
+    "business_type_used": "Irish Pub",
+    "error": null,
+    "extract_status": "success"
+  },
+  {
+    "website": "https://dukesrefresher.ca/",
+    "final_address": "Duke's Refresher + Bar, 382, Yonge Street, Downtown Yonge East, Toronto Centre, Toronto, Golden Horseshoe, Ontario, M5B 1S8, Canada",
+    "address_confidence": 0.95,
+    "address_source": "search_LinkedIn, Toronto Life, BizBash, Yelp, Service Inspired Restaurants - SIR Corp",
+    "extraction_method": "external_search_optimized",
+    "website_analysis": {
+      "address_found": false,
+      "confidence": 0.0,
+      "source": "",
+      "reasoning": "Website analysis performed in brand step"
+    },
+    "search_analysis": {
+      "address_found": true,
+      "confidence": 0.95,
+      "source": "LinkedIn, Toronto Life, BizBash, Yelp, Service Inspired Restaurants - SIR Corp",
+      "reasoning": "Multiple sources, including LinkedIn, Toronto Life, BizBash, Yelp, and Service Inspired Restaurants - SIR Corp, list 382 Yonge Street, Toronto, Ontario M5B 1S8, Canada as a location for Duke's Refresher + Bar. Toronto Life article from 2013 suggests this is likely the original location. While the Knowledge Graph lists 73 Front St E, Toronto, ON M5E 1V9, Canada, the Yonge Street address is more consistently referenced across different sources and is likely the original location."
+    },
+    "company_name_used": "Duke's Refresher + Bar",
+    "business_type_used": "Bar/Drinking Establishment",
+    "error": null,
+    "extract_status": "success"
+  },
+  {
+    "website": "https://comedybar.ca/",
+    "final_address": "Comedy Bar, 945, Bloor Street West, Palmerston-Little Italy, Davenport, Toronto, Golden Horseshoe, Ontario, M6H 1L5, Canada",
+    "address_confidence": 0.9,
+    "address_source": "brand_analysis_Footer copyright information",
+    "extraction_method": "optimized_brand_geocoding_only",
+    "website_analysis": {
+      "address_found": true,
+      "confidence": 0.9,
+      "source": "Footer copyright information",
+      "reasoning": "Address extracted during brand image detection: The address found in the footer is the primary business address. The other address is a second location."
+    },
+    "search_analysis": {
+      "address_found": false,
+      "confidence": 0.0,
+      "source": "",
+      "reasoning": "No search analysis performed"
+    },
+    "company_name_used": "Comedy Bar",
+    "business_type_used": "Entertainment Services (Comedy Bar)",
+    "error": null,
+    "extract_status": "success"
+  },
+  {
+    "website": "https://shophendersonbrewing.com/",
+    "final_address": "",
+    "address_confidence": 0.0,
+    "address_source": "",
+    "extraction_method": "none_optimized",
+    "website_analysis": {
+      "address_found": false,
+      "confidence": 0.0,
+      "source": "",
+      "reasoning": "Website analysis performed in brand step"
+    },
+    "search_analysis": {
+      "address_found": false,
+      "confidence": 0.0,
+      "source": "",
+      "reasoning": "No company name provided for external search"
+    },
+    "company_name_used": "",
+    "business_type_used": "Brewery with taproom and retail sales",
+    "error": null,
+    "extract_status": "success"
+  },
+  {
+    "website": "https://www.n15salon.com/",
+    "final_address": "N15 Hair Salon, 831, Bay Street, Bay-Cloverhill, Toronto Centre, Toronto, Golden Horseshoe, Ontario, M5S 3M4, Canada",
+    "address_confidence": 0.95,
+    "address_source": "search_ZoomInfo",
+    "extraction_method": "external_search_optimized",
+    "website_analysis": {
+      "address_found": false,
+      "confidence": 0.0,
+      "source": "",
+      "reasoning": "Website analysis performed in brand step"
+    },
+    "search_analysis": {
+      "address_found": true,
+      "confidence": 0.95,
+      "source": "ZoomInfo",
+      "reasoning": "ZoomInfo lists 831 Bay St, Toronto, Ontario, M5S 3M4, Canada as the headquarters. Yelp also confirms this address. This is the most likely primary location based on the search results."
+    },
+    "company_name_used": "N15 Salon",
+    "business_type_used": "Hair and Beauty Salon",
+    "error": null,
+    "extract_status": "success"
+  }
+]

@@ -1,0 +1,67 @@
+{
+  "domain": "birreriavolo_com",
+  "company_name_used": "Birreria Volo",
+  "business_type_used": "Bar/Restaurant",
+  "location_context": {
+    "city": "Toronto",
+    "state": "Ontario",
+    "country": "Canada",
+    "region": "Little Italy",
+    "local_references": [],
+    "confidence": 0.8
+  },
+  "website_analysis": {
+    "address_found_in_website": true,
+    "extracted_address": "612 College Street, Toronto, ON",
+    "address_components": {
+      "house_number_street": "612 College Street",
+      "city": "Toronto",
+      "county": "",
+      "state": "Ontario",
+      "country": "Canada",
+      "postal_code": ""
+    },
+    "clean_address": "612 College Street, Toronto",
+    "address_confidence": 0.85,
+    "address_source": "Footer contact section",
+    "address_type": "primary store",
+    "reasoning": "Address extracted during brand image detection: The address is found in the footer contact section and is a complete street address with city and state/province.",
+    "geocoding": {
+      "success": true,
+      "lat": 43.6551875,
+      "lon": -79.4146032,
+      "formatted_address": "Birreria Volo, 612, College Street, Palmerston-Little Italy, University—Rosedale, Toronto, Golden Horseshoe, Ontario, M6G 1B4, Canada",
+      "place_id": 325841459,
+      "address_type": "amenity",
+      "boundingbox": [
+        "43.6551375",
+        "43.6552375",
+        "-79.4146532",
+        "-79.4145532"
+      ],
+      "confidence": 8.130235751883753e-05
+    }
+  },
+  "search_analysis": {},
+  "final_address": "Birreria Volo, 612, College Street, Palmerston-Little Italy, University—Rosedale, Toronto, Golden Horseshoe, Ontario, M6G 1B4, Canada",
+  "final_confidence": 0.85,
+  "final_source": "brand_analysis_Footer contact section",
+  "address_extraction_method": "optimized_brand_geocoding_only",
+  "reasoning": "Address found in brand step and validated via geocoding: The address is found in the footer contact section and is a complete street address with city and state/province.",
+  "error": null,
+  "geocoding": {
+    "success": true,
+    "lat": 43.6551875,
+    "lon": -79.4146032,
+    "formatted_address": "Birreria Volo, 612, College Street, Palmerston-Little Italy, University—Rosedale, Toronto, Golden Horseshoe, Ontario, M6G 1B4, Canada",
+    "place_id": 325841459,
+    "address_type": "amenity",
+    "boundingbox": [
+      "43.6551375",
+      "43.6552375",
+      "-79.4146532",
+      "-79.4145532"
+    ],
+    "confidence": 8.130235751883753e-05
+  }
+}

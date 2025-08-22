@@ -1,0 +1,14 @@
+[
+  {
+    "website": "https://shophendersonbrewing.com/",
+    "company_name": "Henderson Brewing Company",
+    "final_mcc_code": 5813,
+    "final_mcc_description": "Bars, Cocktail Lounges, Discotheques, Nightclubs and Taverns Drinking Places Alcoholic Beverages",
+    "confidence": 0.95,
+    "classification_success": true,
+    "stage1_category": "Miscellaneous Stores",
+    "stage1_range": "5700-7299",
+    "error": null,
+    "business_type_identified": "Brewery with taproom and retail sales"
+  }
+]

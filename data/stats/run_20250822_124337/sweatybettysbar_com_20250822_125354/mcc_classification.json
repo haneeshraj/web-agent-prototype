@@ -1,0 +1,49 @@
+{
+  "domain": "sweatybettysbar_com",
+  "classification_success": true,
+  "stage1_result": {
+    "selected_category_range": "5700-7299",
+    "selected_category_name": "Miscellaneous Stores",
+    "confidence": 0.95,
+    "reasoning": "The business is clearly a bar, as indicated by the name \"Sweaty Betty's Bar\", the presence of cocktails and drinks, and the general atmosphere depicted in the screenshot. The text content also mentions \"cocktails\" and \"putting the 'spit' in hospitality\". According to the BUSINESS-SPECIFIC GUIDANCE and CRITICAL CATEGORY SELECTION RULES, bars fall under the '5700-7299: Miscellaneous Stores' category to access MCC 5813 (Bars, Cocktail Lounges).",
+    "key_indicators": [
+      "Bar name",
+      "Cocktails",
+      "Menu",
+      "Shop"
+    ],
+    "business_type_identified": "Bar/Drinking Establishment"
+  },
+  "stage2_result": {
+    "selected_mcc": 5813,
+    "selected_mcc_description": "Bars, Cocktail Lounges, Discotheques, Nightclubs and Taverns Drinking Places Alcoholic Beverages",
+    "confidence": 0.95,
+    "reasoning": "The website content explicitly mentions that the business serves cocktails and hosts events like drag shows, which are typical of bars and nightclubs. The presence of a 'Menu' navigation link further supports this classification. The business sells alcohol and operates as a drinking place, aligning perfectly with MCC 5813. This selection adheres to the critical validation rule that food/drink businesses must be classified with a food-related MCC.",
+    "business_match_factors": [
+      "primary_activity",
+      "business_model",
+      "industry_type"
+    ],
+    "alternative_mccs_considered": [
+      {
+        "mcc": 5812,
+        "reason_rejected": "While the business may serve some food items, the primary focus is on alcoholic beverages and the atmosphere of a bar/lounge, making 5813 a more accurate fit."
+      },
+      {
+        "mcc": 5921,
+        "reason_rejected": "Package Stores Beer, Wine and Liquor is for retail sale of alcohol to be consumed off-premises, not for on-site consumption in a bar setting."
+      }
+    ]
+  },
+  "final_mcc": 5813,
+  "final_mcc_description": "Bars, Cocktail Lounges, Discotheques, Nightclubs and Taverns Drinking Places Alcoholic Beverages",
+  "final_confidence": 0.95,
+  "error": null,
+  "processing_metadata": {
+    "text_extraction_success": true,
+    "screenshot_found": true,
+    "stage1_completed": true,
+    "stage2_completed": true,
+    "model_used": "gemini-2.0-flash"
+  }
+}

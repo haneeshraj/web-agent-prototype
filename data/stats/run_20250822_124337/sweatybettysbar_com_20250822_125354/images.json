@@ -1,0 +1,69 @@
+[
+  {
+    "index": 0,
+    "src": "https://sweatybettysbar.com/cdn/shop/files/sb_logo_300x300.png?v=1613768705",
+    "alt": "Sweaty Betty&#39;s Bar",
+    "width": "100",
+    "height": "96"
+  },
+  {
+    "index": 1,
+    "src": "https://sweatybettysbar.com/cdn/shop/files/Sweatys_300x300.jpg?v=1613774234",
+    "alt": "",
+    "width": "1950",
+    "height": "2600"
+  },
+  {
+    "index": 2,
+    "src": "https://sweatybettysbar.com/cdn/shop/files/sweatysbar_300x300.jpg?v=1613768788",
+    "alt": "",
+    "width": "1023",
+    "height": "676"
+  },
+  {
+    "index": 3,
+    "src": "https://sweatybettysbar.com/cdn/shop/files/maytip_300x300.jpg?v=1613768710",
+    "alt": "",
+    "width": "1030",
+    "height": "685"
+  },
+  {
+    "index": "bg_0",
+    "src": "https://sweatybettysbar.com/cdn/shop/files/Sweatys_1950x.jpg?v=1613774234",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://sweatybettysbar.com/cdn/shop/files/Sweatys_1950x.jpg?v=1613774234\")",
+      "className": "slideshow__image box ratio-container js lazyloaded",
+      "id": "",
+      "tagName": "DIV"
+    }
+  },
+  {
+    "index": "bg_1",
+    "src": "https://sweatybettysbar.com/cdn/shop/files/sweatysbar.jpg?v=1613768788",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://sweatybettysbar.com/cdn/shop/files/sweatysbar.jpg?v=1613768788\")",
+      "className": "slideshow__image box ratio-container lazypreload js lazyloaded",
+      "id": "",
+      "tagName": "DIV"
+    }
+  },
+  {
+    "index": "bg_2",
+    "src": "https://sweatybettysbar.com/cdn/shop/files/maytip.jpg?v=1613768710",
+    "alt": "Background image from DIV",
+    "width": "auto",
+    "height": "auto",
+    "element_info": {
+      "backgroundImage": "url(\"https://sweatybettysbar.com/cdn/shop/files/maytip.jpg?v=1613768710\")",
+      "className": "slideshow__image box ratio-container lazypreload js lazyloaded",
+      "id": "",
+      "tagName": "DIV"
+    }
+  }
+]

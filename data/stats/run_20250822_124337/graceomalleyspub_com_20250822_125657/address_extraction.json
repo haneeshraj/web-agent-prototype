@@ -1,0 +1,51 @@
+{
+  "domain": "graceomalleyspub_com",
+  "company_name_used": "Grace O'Malley's",
+  "business_type_used": "Irish Pub and Restaurant",
+  "location_context": {
+    "city": "Clermont",
+    "state": "Florida",
+    "country": "United States",
+    "region": "Central Florida",
+    "local_references": [],
+    "confidence": 0.8
+  },
+  "website_analysis": {
+    "address_found_in_website": true,
+    "extracted_address": "2400 US Hwy 27, Clermont, FL 34711",
+    "address_components": {
+      "house_number_street": "2400 US Hwy 27",
+      "city": "Clermont",
+      "county": "",
+      "state": "Florida",
+      "country": "United States",
+      "postal_code": "34711"
+    },
+    "clean_address": "2400 US Hwy 27, Clermont, FL",
+    "address_confidence": 0.85,
+    "address_source": "Footer section of the website",
+    "address_type": "primary store",
+    "reasoning": "Address extracted during brand image detection: The address is found in the footer section under the \"Visit Us\" heading, which is likely the primary business address.",
+    "geocoding": {
+      "success": false,
+      "error": "No geocoding results found",
+      "lat": null,
+      "lon": null,
+      "formatted_address": "2400 US Hwy 27, Clermont, FL 34711"
+    }
+  },
+  "search_analysis": {},
+  "final_address": "2400 US Hwy 27, Clermont, FL 34711",
+  "final_confidence": 0.68,
+  "final_source": "brand_analysis_Footer section of the website",
+  "address_extraction_method": "optimized_brand_unvalidated",
+  "reasoning": "Address found in brand step but geocoding validation failed: The address is found in the footer section under the \"Visit Us\" heading, which is likely the primary business address.",
+  "error": null,
+  "geocoding": {
+    "success": false,
+    "error": "No geocoding results found",
+    "lat": null,
+    "lon": null,
+    "formatted_address": "2400 US Hwy 27, Clermont, FL 34711"
+  }
+}

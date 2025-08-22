@@ -1,0 +1,67 @@
+{
+  "domain": "kasamoto_ca",
+  "company_name_used": "Kasa Moto",
+  "business_type_used": "Restaurant",
+  "location_context": {
+    "city": "Toronto",
+    "state": "Ontario",
+    "country": "Canada",
+    "region": "Yorkville",
+    "local_references": [],
+    "confidence": 0.8
+  },
+  "website_analysis": {
+    "address_found_in_website": true,
+    "extracted_address": "115 Yorkville Avenue, Toronto, ON M5R 1C1",
+    "address_components": {
+      "house_number_street": "115 Yorkville Avenue",
+      "city": "Toronto",
+      "county": "",
+      "state": "Ontario",
+      "country": "Canada",
+      "postal_code": "M5R 1C1"
+    },
+    "clean_address": "115 Yorkville Avenue, Toronto, Ontario, Canada",
+    "address_confidence": 0.85,
+    "address_source": "Footer Contact Us section",
+    "address_type": "primary store",
+    "reasoning": "Address extracted during brand image detection: The address is found in the footer's 'Contact Us' section and is a complete, valid business address.",
+    "geocoding": {
+      "success": true,
+      "lat": 43.6705829,
+      "lon": -79.3927546,
+      "formatted_address": "Kasamoto, 115, Yorkville Avenue, Annex, University—Rosedale, Toronto, Golden Horseshoe, Ontario, M5R 1C1, Canada",
+      "place_id": 327944958,
+      "address_type": "amenity",
+      "boundingbox": [
+        "43.6704925",
+        "43.6707494",
+        "-79.3928785",
+        "-79.3926629"
+      ],
+      "confidence": 8.130235751883753e-05
+    }
+  },
+  "search_analysis": {},
+  "final_address": "Kasamoto, 115, Yorkville Avenue, Annex, University—Rosedale, Toronto, Golden Horseshoe, Ontario, M5R 1C1, Canada",
+  "final_confidence": 0.85,
+  "final_source": "brand_analysis_Footer Contact Us section",
+  "address_extraction_method": "optimized_brand_geocoding_only",
+  "reasoning": "Address found in brand step and validated via geocoding: The address is found in the footer's 'Contact Us' section and is a complete, valid business address.",
+  "error": null,
+  "geocoding": {
+    "success": true,
+    "lat": 43.6705829,
+    "lon": -79.3927546,
+    "formatted_address": "Kasamoto, 115, Yorkville Avenue, Annex, University—Rosedale, Toronto, Golden Horseshoe, Ontario, M5R 1C1, Canada",
+    "place_id": 327944958,
+    "address_type": "amenity",
+    "boundingbox": [
+      "43.6704925",
+      "43.6707494",
+      "-79.3928785",
+      "-79.3926629"
+    ],
+    "confidence": 8.130235751883753e-05
+  }
+}

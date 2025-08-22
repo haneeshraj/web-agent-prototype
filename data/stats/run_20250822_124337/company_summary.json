@@ -1,0 +1,261 @@
+[
+  {
+    "website": "https://kasamoto.ca/",
+    "company_name": "Kasa Moto",
+    "company_name_confidence": 0.95,
+    "company_name_source": "Brand image text, page title, About Us section",
+    "alternative_names": [],
+    "extraction_success": true,
+    "brand_image_found": true,
+    "error": ""
+  },
+  {
+    "website": "https://www.spotcoffee.com/",
+    "company_name": "SPoT Coffee",
+    "company_name_confidence": 0.95,
+    "company_name_source": "Brand image, page title, footer copyright",
+    "alternative_names": [],
+    "extraction_success": true,
+    "brand_image_found": true,
+    "error": ""
+  },
+  {
+    "website": "https://www.barvolo.com/",
+    "company_name": "Bar Volo",
+    "company_name_confidence": 0.95,
+    "company_name_source": "Page title, brand image alt text, header logo",
+    "alternative_names": [],
+    "extraction_success": true,
+    "brand_image_found": true,
+    "error": ""
+  },
+  {
+    "website": "https://birreriavolo.com/",
+    "company_name": "Birreria Volo",
+    "company_name_confidence": 0.95,
+    "company_name_source": "Brand image alt text and page title",
+    "alternative_names": [],
+    "extraction_success": true,
+    "brand_image_found": true,
+    "error": ""
+  },
+  {
+    "website": "https://www.getwellbar.com/",
+    "company_name": "GET WELL",
+    "company_name_confidence": 0.95,
+    "company_name_source": "Brand image alt text and page title",
+    "alternative_names": [],
+    "extraction_success": true,
+    "brand_image_found": true,
+    "error": ""
+  },
+  {
+    "website": "https://www.thegreatergoodbar.com/",
+    "company_name": "The Greater Good",
+    "company_name_confidence": 0.95,
+    "company_name_source": "Brand image alt text and page title",
+    "alternative_names": [],
+    "extraction_success": true,
+    "brand_image_found": true,
+    "error": ""
+  },
+  {
+    "website": "https://imperialpub.com/",
+    "company_name": "Imperial Pub",
+    "company_name_confidence": 0.95,
+    "company_name_source": "Page title, logo alt text, and header branding",
+    "alternative_names": [],
+    "extraction_success": true,
+    "brand_image_found": true,
+    "error": ""
+  },
+  {
+    "website": "https://sweatybettysbar.com/",
+    "company_name": "Sweaty Betty's Bar",
+    "company_name_confidence": 0.95,
+    "company_name_source": "Page title, logo alt text, H1 tag, footer copyright",
+    "alternative_names": [],
+    "extraction_success": true,
+    "brand_image_found": true,
+    "error": ""
+  },
+  {
+    "website": "https://www.themonarchtavern.com/",
+    "company_name": "The Monarch Tavern",
+    "company_name_confidence": 0.95,
+    "company_name_source": "Page title, header, and site title",
+    "alternative_names": [],
+    "extraction_success": true,
+    "brand_image_found": true,
+    "error": ""
+  },
+  {
+    "website": "https://graceomalleyspub.com/",
+    "company_name": "Grace O'Malley's",
+    "company_name_confidence": 0.95,
+    "company_name_source": "Brand image text, page title, meta description, and multiple headings",
+    "alternative_names": [
+      "Grace O'Malley's Pub & Kitchen",
+      "Grace O'Malley's Public House"
+    ],
+    "extraction_success": true,
+    "brand_image_found": true,
+    "error": ""
+  },
+  {
+    "website": "https://tedscollision.com/",
+    "company_name": "Ted's Collision Center",
+    "company_name_confidence": 0.95,
+    "company_name_source": "Brand image text, page title, H1, location card",
+    "alternative_names": [],
+    "extraction_success": true,
+    "brand_image_found": true,
+    "error": ""
+  },
+  {
+    "website": "https://www.theonlycafe.com/",
+    "company_name": "The Only Cafe",
+    "company_name_confidence": 0.95,
+    "company_name_source": "Brand image, page title, navigation menu",
+    "alternative_names": [],
+    "extraction_success": true,
+    "brand_image_found": true,
+    "error": ""
+  },
+  {
+    "website": "https://www.collectiveartsbrewing.com/",
+    "company_name": "Collective Arts Brewing",
+    "company_name_confidence": 0.95,
+    "company_name_source": "Brand image, page title, header",
+    "alternative_names": [
+      "Collective Arts"
+    ],
+    "extraction_success": true,
+    "brand_image_found": true,
+    "error": ""
+  },
+  {
+    "website": "https://www.rainhardbrewing.com/",
+    "company_name": "Rainhard Brewing Co.",
+    "company_name_confidence": 0.95,
+    "company_name_source": "Page title, header logo, meta tags",
+    "alternative_names": [],
+    "extraction_success": true,
+    "brand_image_found": true,
+    "error": ""
+  },
+  {
+    "website": "https://oldflamebrewingco.ca/",
+    "company_name": "Old Flame Brewing Co.",
+    "company_name_confidence": 0.95,
+    "company_name_source": "Brand image text, page title, meta tags",
+    "alternative_names": [],
+    "extraction_success": true,
+    "brand_image_found": true,
+    "error": ""
+  },
+  {
+    "website": "https://bellwoodsbrewery.com/",
+    "company_name": "Bellwoods Brewery",
+    "company_name_confidence": 0.95,
+    "company_name_source": "Brand image text, page title, meta tags",
+    "alternative_names": [],
+    "extraction_success": true,
+    "brand_image_found": true,
+    "error": ""
+  },
+  {
+    "website": "https://www.leftfieldbrewery.ca/",
+    "company_name": "Left Field Brewery",
+    "company_name_confidence": 0.95,
+    "company_name_source": "Page title, brand image, meta tags",
+    "alternative_names": [],
+    "extraction_success": true,
+    "brand_image_found": true,
+    "error": ""
+  },
+  {
+    "website": "https://www.blacklab.beer/",
+    "company_name": "Black Lab Brewing",
+    "company_name_confidence": 0.95,
+    "company_name_source": "Brand image alt text and page title",
+    "alternative_names": [
+      "Black Lab Brewing Inc."
+    ],
+    "extraction_success": true,
+    "brand_image_found": true,
+    "error": ""
+  },
+  {
+    "website": "https://burdockbrewery.com/",
+    "company_name": "Burdock Brewery",
+    "company_name_confidence": 0.95,
+    "company_name_source": "brand image text",
+    "alternative_names": [],
+    "extraction_success": true,
+    "brand_image_found": true,
+    "error": ""
+  },
+  {
+    "website": "https://www.saintjohnstavern.com/",
+    "company_name": "SAINT JOHN'S TAVERN",
+    "company_name_confidence": 0.95,
+    "company_name_source": "Brand image alt text and page title",
+    "alternative_names": [],
+    "extraction_success": true,
+    "brand_image_found": true,
+    "error": ""
+  },
+  {
+    "website": "https://mcveighspub.com/",
+    "company_name": "McVeighs Irish Pub",
+    "company_name_confidence": 0.95,
+    "company_name_source": "Brand image alt text and page title",
+    "alternative_names": [],
+    "extraction_success": true,
+    "brand_image_found": true,
+    "error": ""
+  },
+  {
+    "website": "https://dukesrefresher.ca/",
+    "company_name": "Duke's Refresher + Bar",
+    "company_name_confidence": 0.95,
+    "company_name_source": "Page title and meta tags",
+    "alternative_names": [
+      "Duke's Refresher"
+    ],
+    "extraction_success": true,
+    "brand_image_found": true,
+    "error": ""
+  },
+  {
+    "website": "https://comedybar.ca/",
+    "company_name": "Comedy Bar",
+    "company_name_confidence": 0.95,
+    "company_name_source": "Brand image text and page title",
+    "alternative_names": [],
+    "extraction_success": true,
+    "brand_image_found": true,
+    "error": ""
+  },
+  {
+    "website": "https://shophendersonbrewing.com/",
+    "company_name": "",
+    "company_name_confidence": 0.0,
+    "company_name_source": "",
+    "alternative_names": [],
+    "extraction_success": false,
+    "brand_image_found": true,
+    "error": ""
+  },
+  {
+    "website": "https://www.n15salon.com/",
+    "company_name": "N15 Salon",
+    "company_name_confidence": 0.95,
+    "company_name_source": "Brand image and page title",
+    "alternative_names": [],
+    "extraction_success": true,
+    "brand_image_found": true,
+    "error": ""
+  }
+]

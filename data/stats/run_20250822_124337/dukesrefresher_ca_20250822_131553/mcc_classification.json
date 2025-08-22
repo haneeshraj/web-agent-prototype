@@ -1,0 +1,48 @@
+{
+  "domain": "dukesrefresher_ca",
+  "classification_success": true,
+  "stage1_result": {
+    "selected_category_range": "5700-7299",
+    "selected_category_name": "Miscellaneous Stores",
+    "confidence": 0.95,
+    "reasoning": "The business is identified as \"Duke's Refresher + Bar\". The images show storefronts with \"BAR\" clearly visible. Therefore, this falls under the category of a bar/drinking establishment. According to the business-specific guidance, any business that primarily serves alcoholic beverages must select '5700-7299: Miscellaneous Stores' to access MCC 5813 (Bars, Cocktail Lounges).",
+    "key_indicators": [
+      "Bar",
+      "Refresher",
+      "Alcoholic Beverages"
+    ],
+    "business_type_identified": "Bar/Drinking Establishment"
+  },
+  "stage2_result": {
+    "selected_mcc": 5813,
+    "selected_mcc_description": "Bars, Cocktail Lounges, Discotheques, Nightclubs and Taverns Drinking Places Alcoholic Beverages",
+    "confidence": 0.95,
+    "reasoning": "The business name is \"Duke's Refresher + Bar\". The images show the word \"BAR\" prominently displayed on the building. This clearly indicates that the primary business activity is serving alcoholic beverages in a bar setting. Therefore, MCC 5813 (Bars, Cocktail Lounges, Discotheques, Nightclubs and Taverns Drinking Places Alcoholic Beverages) is the most appropriate choice. This selection also complies with the CRITICAL VALIDATION RULES for food businesses and bars.",
+    "business_match_factors": [
+      "primary_activity",
+      "business_model",
+      "industry_type"
+    ],
+    "alternative_mccs_considered": [
+      {
+        "mcc": 5812,
+        "reason_rejected": "While it could serve food, the primary focus appears to be alcoholic beverages, making 5813 a more accurate fit."
+      },
+      {
+        "mcc": 5814,
+        "reason_rejected": "This is not a fast food establishment."
+      }
+    ]
+  },
+  "final_mcc": 5813,
+  "final_mcc_description": "Bars, Cocktail Lounges, Discotheques, Nightclubs and Taverns Drinking Places Alcoholic Beverages",
+  "final_confidence": 0.95,
+  "error": null,
+  "processing_metadata": {
+    "text_extraction_success": true,
+    "screenshot_found": true,
+    "stage1_completed": true,
+    "stage2_completed": true,
+    "model_used": "gemini-2.0-flash"
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "domain": "comedybar_ca",
+  "company_name_used": "Comedy Bar",
+  "business_type_used": "Entertainment Services (Comedy Bar)",
+  "location_context": {
+    "city": "Toronto",
+    "state": "Ontario",
+    "country": "Canada",
+    "region": "Toronto",
+    "local_references": [],
+    "confidence": 0.85
+  },
+  "website_analysis": {
+    "address_found_in_website": true,
+    "extracted_address": "945 Bloor Street W, Toronto ON M6H 1L5",
+    "address_components": {
+      "house_number_street": "945 Bloor Street West",
+      "city": "Toronto",
+      "county": "",
+      "state": "Ontario",
+      "country": "Canada",
+      "postal_code": "M6H 1L5"
+    },
+    "clean_address": "945 Bloor Street West, Toronto, Ontario M6H 1L5",
+    "address_confidence": 0.9,
+    "address_source": "Footer copyright information",
+    "address_type": "primary store",
+    "reasoning": "Address extracted during brand image detection: The address found in the footer is the primary business address. The other address is a second location.",
+    "geocoding": {
+      "success": true,
+      "lat": 43.6613623,
+      "lon": -79.4278718,
+      "formatted_address": "Comedy Bar, 945, Bloor Street West, Palmerston-Little Italy, Davenport, Toronto, Golden Horseshoe, Ontario, M6H 1L5, Canada",
+      "place_id": 327699641,
+      "address_type": "amenity",
+      "boundingbox": [
+        "43.6613123",
+        "43.6614123",
+        "-79.4279218",
+        "-79.4278218"
+      ],
+      "confidence": 8.130235751883753e-05
+    }
+  },
+  "search_analysis": {},
+  "final_address": "Comedy Bar, 945, Bloor Street West, Palmerston-Little Italy, Davenport, Toronto, Golden Horseshoe, Ontario, M6H 1L5, Canada",
+  "final_confidence": 0.9,
+  "final_source": "brand_analysis_Footer copyright information",
+  "address_extraction_method": "optimized_brand_geocoding_only",
+  "reasoning": "Address found in brand step and validated via geocoding: The address found in the footer is the primary business address. The other address is a second location.",
+  "error": null,
+  "geocoding": {
+    "success": true,
+    "lat": 43.6613623,
+    "lon": -79.4278718,
+    "formatted_address": "Comedy Bar, 945, Bloor Street West, Palmerston-Little Italy, Davenport, Toronto, Golden Horseshoe, Ontario, M6H 1L5, Canada",
+    "place_id": 327699641,
+    "address_type": "amenity",
+    "boundingbox": [
+      "43.6613123",
+      "43.6614123",
+      "-79.4279218",
+      "-79.4278218"
+    ],
+    "confidence": 8.130235751883753e-05
+  }
+}

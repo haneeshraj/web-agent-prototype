@@ -1,0 +1,49 @@
+{
+  "domain": "tedscollision_com",
+  "classification_success": true,
+  "stage1_result": {
+    "selected_category_range": "1500-2999",
+    "selected_category_name": "Contracted Services",
+    "confidence": 0.95,
+    "reasoning": "The website content clearly indicates that Ted's Collision Center provides collision repair services for vehicles. This falls under the category of 'Contracted Services' as it involves a service contract for repairing vehicles. The services include collision repair, estimate and claim guidance, and paint services, all of which are related to vehicle repair and restoration.",
+    "key_indicators": [
+      "Collision Repair",
+      "Estimate & Claim Guidance",
+      "Paint Services",
+      "Collision Center"
+    ],
+    "business_type_identified": "Auto Collision Repair Service"
+  },
+  "stage2_result": {
+    "selected_mcc": 1799,
+    "selected_mcc_description": "Contractors, Special Trade Contractors not elsewhere classified",
+    "confidence": 0.95,
+    "reasoning": "Ted's Collision Center provides collision repair services, estimate and claim guidance, and paint services. This falls under the category of specialized trade contractors. While some MCCs like 1761 (Roofing and Siding, Sheet Metal Work Contractors) might seem relevant due to the 'paint services,' the primary focus is collision repair, making 1799 the most appropriate choice as it encompasses a broader range of specialized contracting services not explicitly covered by other MCCs in the list. The business is a service business, so it is not a retail business.",
+    "business_match_factors": [
+      "primary_activity",
+      "business_model",
+      "industry_type"
+    ],
+    "alternative_mccs_considered": [
+      {
+        "mcc": 1761,
+        "reason_rejected": "While paint services are offered, the primary business is collision repair, not roofing/siding or sheet metal work."
+      },
+      {
+        "mcc": 1711,
+        "reason_rejected": "This MCC is for Air Conditioning, Heating and Plumbing Contractors, which is not relevant to the services offered by Ted's Collision Center."
+      }
+    ]
+  },
+  "final_mcc": 1799,
+  "final_mcc_description": "Contractors, Special Trade Contractors not elsewhere classified",
+  "final_confidence": 0.95,
+  "error": null,
+  "processing_metadata": {
+    "text_extraction_success": true,
+    "screenshot_found": true,
+    "stage1_completed": true,
+    "stage2_completed": true,
+    "model_used": "gemini-2.0-flash"
+  }
+}
