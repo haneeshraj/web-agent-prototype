@@ -57,7 +57,7 @@ def load_website_data() -> tuple:
         with open(json_file_path, 'w') as json_file:
             json.dump(processed_data, json_file, indent=2)
         
-        print(f"Loaded {len(websites)} unique websites for processing")
+        # Websites loaded silently
         return (json_file_path, run_data_dir)
         
     except FileNotFoundError:

@@ -3,6 +3,8 @@ import json
 import time
 import base64
 import re
+import sys
+import threading
 from datetime import datetime
 from urllib.parse import urlparse, urljoin, urlunparse
 from typing import List, Dict, Any
@@ -24,6 +26,83 @@ from utils.terminal_prettify import success, error, warning, info, processing, c
 from agent.brand_image_detector import BrandImageDetector
 from agent.mcc_classifier import MCCClassifier
 from agent.address_extractor import AddressExtractor
+
+
+class LoadingAnimation:
+    """Simple loading animation for long-running tasks"""
+    def __init__(self, message="Loading"):
+        self.message = message
+        self.running = False
+        self.thread = None
+        
+    def start(self):
+        self.running = True
+        self.thread = threading.Thread(target=self._animate)
+        self.thread.daemon = True
+        self.thread.start()
+        
+    def stop(self):
+        self.running = False
+        if self.thread:
+            self.thread.join()
+        # Clear the line
+        sys.stdout.write('\r' + ' ' * (len(self.message) + 10) + '\r')
+        sys.stdout.flush()
+        
+    def _animate(self):
+        chars = "⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"
+        i = 0
+        while self.running:
+            sys.stdout.write(f'\r{chars[i % len(chars)]} {self.message}...')
+            sys.stdout.flush()
+            time.sleep(0.1)
+            i += 1
+
+
+def print_tree_item(text, level=1, is_last=False, status="processing"):
+    """Print formatted tree-style output with proper indentation"""
+    # Tree characters
+    if level == 1:
+        prefix = "    ├─ " if not is_last else "    └─ "
+    elif level == 2:
+        prefix = "       ├─ " if not is_last else "       └─ "
+    else:
+        prefix = "    " * level + ("├─ " if not is_last else "└─ ")
+    
+    # Status icons and colors
+    if status == "processing":
+        icon = "⏳"
+        color = "\033[96m"  # Cyan
+    elif status == "success":
+        icon = "✓"
+        color = "\033[92m"  # Green
+    elif status == "warning":
+        icon = "⚠"
+        color = "\033[93m"  # Yellow
+    elif status == "error":
+        icon = "✗"
+        color = "\033[91m"  # Red
+    elif status == "info":
+        icon = "ℹ"
+        color = "\033[94m"  # Blue
+    else:
+        icon = "•"
+        color = "\033[97m"  # White
+    
+    reset = "\033[0m"
+    print(f"{color}{prefix}{icon} {text}{reset}")
+
+
+def print_website_header(index, total, url):
+    """Print website processing header"""
+    print(f"\n\033[1m\033[96m⏳ [{index}/{total}] {url}\033[0m")
+
+
+def suppress_chrome_logs():
+    """Suppress Chrome GPU and other unwanted logs"""
+    # Redirect stderr to devnull to suppress Chrome logs
+    devnull = open(os.devnull, 'w')
+    os.dup2(devnull.fileno(), sys.stderr.fileno())
 
 
 class WebsiteInformationExtractor:
@@ -50,10 +129,8 @@ class WebsiteInformationExtractor:
             os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Suppress TensorFlow logs
             os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'  # Disable oneDNN optimizations logs
             
-            # Suppress Chrome DevTools and other Chrome logs by redirecting stderr
-            import sys
-            from contextlib import redirect_stderr
-            from io import StringIO
+            # Suppress Chrome DevTools and other Chrome logs
+            import subprocess
             
             chrome_options = Options()
             # Run in headless mode to avoid browser popup
@@ -66,7 +143,7 @@ class WebsiteInformationExtractor:
             chrome_options.add_argument("--disable-plugins")
             chrome_options.add_argument("--disable-images")  # Speed up loading
             
-            # Suppress Chrome logs and warnings
+            # Comprehensive log suppression
             chrome_options.add_argument("--log-level=3")  # Suppress INFO, WARNING, ERROR
             chrome_options.add_argument("--silent")
             chrome_options.add_argument("--disable-logging")
@@ -79,7 +156,12 @@ class WebsiteInformationExtractor:
             chrome_options.add_argument("--disable-backgrounding-occluded-windows")
             chrome_options.add_argument("--disable-renderer-backgrounding")
             chrome_options.add_argument("--disable-features=TranslateUI,VizDisplayCompositor")
+
+            # Disable GPU hardware acceleration
+            chrome_options.add_argument("--disable-gpu")
+            chrome_options.add_argument("--disable-software-rasterizer")
             
+
             chrome_options.add_experimental_option("excludeSwitches", ["enable-automation", "enable-logging"])
             chrome_options.add_experimental_option('useAutomationExtension', False)
             chrome_options.add_experimental_option("detach", True)
@@ -88,12 +170,16 @@ class WebsiteInformationExtractor:
             # Set Chrome logging preferences to suppress console output
             chrome_options.set_capability('goog:loggingPrefs', {'browser': 'OFF', 'driver': 'OFF', 'performance': 'OFF'})
             
+            # Suppress stderr during Chrome startup
+            original_stderr = sys.stderr
+            sys.stderr = open(os.devnull, 'w')
+            
             # Try multiple approaches to fix Windows WebDriver issue
             driver_path = None
             
             try:
                 # Method 1: Try with explicit version and architecture
-                info("Attempting Method 1: ChromeDriverManager with explicit settings...")
+                print_tree_item("Attempting Method 1: ChromeDriverManager with explicit settings", level=1, status="info")
                 driver_path = ChromeDriverManager().install()
                 
                 # Check if the downloaded file is actually executable
@@ -102,36 +188,32 @@ class WebsiteInformationExtractor:
                     import stat
                     os.chmod(driver_path, stat.S_IREAD | stat.S_IWRITE | stat.S_IEXEC)
                 
-                # Suppress stderr during WebDriver initialization
-                with redirect_stderr(StringIO()):
-                    service = Service(driver_path, log_path=os.devnull)
-                    self.driver = webdriver.Chrome(service=service, options=chrome_options)
+                service = Service(driver_path, log_path=os.devnull)
+                self.driver = webdriver.Chrome(service=service, options=chrome_options)
                 
             except Exception as e1:
-                warning(f"Method 1 failed: {e1}")
+                print_tree_item(f"Method 1 failed: {e1}", level=1, status="warning")
                 
                 try:
                     # Method 2: Clean cache and try again
-                    info("Attempting Method 2: Clearing cache and reinstalling...")
+                    print_tree_item("Attempting Method 2: Clearing cache and reinstalling", level=1, status="info")
                     import shutil
-                    import tempfile
                     
                     # Clear webdriver manager cache
                     cache_dir = os.path.join(os.path.expanduser("~"), ".wdm")
                     if os.path.exists(cache_dir):
                         shutil.rmtree(cache_dir)
-                        info("Cleared WebDriver cache")
+                        print_tree_item("Cleared WebDriver cache", level=2, status="info")
                     
                     driver_path = ChromeDriverManager().install()
-                    
                     service = Service(driver_path, log_path=os.devnull)
                     self.driver = webdriver.Chrome(service=service, options=chrome_options)
                     
                 except Exception as e2:
-                    warning(f"Method 2 failed: {e2}")
+                    print_tree_item(f"Method 2 failed: {e2}", level=1, status="warning")
                     
                     # Method 3: Try using system Chrome if available
-                    info("Attempting Method 3: Using system Chrome installation...")
+                    print_tree_item("Attempting Method 3: Using system Chrome installation", level=1, status="info")
                     
                     # Common Chrome paths on Windows
                     chrome_paths = [
@@ -148,20 +230,23 @@ class WebsiteInformationExtractor:
                     
                     if chrome_binary:
                         chrome_options.binary_location = chrome_binary
-                        info(f"Found Chrome at: {chrome_binary}")
+                        print_tree_item(f"Found Chrome at: {chrome_binary}", level=2, status="info")
                         
                         # Try without specifying chromedriver path (let system find it)
                         try:
-                            with redirect_stderr(StringIO()):
-                                self.driver = webdriver.Chrome(options=chrome_options)
+                            self.driver = webdriver.Chrome(options=chrome_options)
                         except:
                             # Last resort: download a specific version
                             driver_path = ChromeDriverManager(version="131.0.6778.85").install()
                             service = Service(driver_path, log_path=os.devnull)
-                            with redirect_stderr(StringIO()):
-                                self.driver = webdriver.Chrome(service=service, options=chrome_options)
+                            self.driver = webdriver.Chrome(service=service, options=chrome_options)
                     else:
                         raise Exception("Chrome browser not found on system")
+            
+            finally:
+                # Restore stderr
+                sys.stderr.close()
+                sys.stderr = original_stderr
             
             # Test the driver
             self.driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
@@ -414,7 +499,6 @@ class WebsiteInformationExtractor:
     def extract_website_information(self, url: str) -> Dict[str, Any]:
         """Extract information from a single website"""
         start_time = time.time()
-        processing(f"Extracting information from: {url}")
         
         # Create domain-specific directory
         domain_name = self.get_domain_name(url)
@@ -450,6 +534,7 @@ class WebsiteInformationExtractor:
         
         try:
             # Navigate to the website
+            print_tree_item("Loading website", level=1, status="processing")
             self.driver.get(url)
             
             # Wait for page to load (5 seconds as requested)
@@ -489,20 +574,42 @@ class WebsiteInformationExtractor:
                 json.dump(images_data, f, indent=2, ensure_ascii=False)
             extraction_data["files_created"].append("images.json")
             
-            # Perform brand image detection using all three files (screenshot, HTML, images)
-            # This also performs initial address analysis (stages 0-1) to optimize LLM calls
-            info("   🔍 Detecting brand image & extracting company name + initial address analysis...")
-            brand_image_result = self.brand_image_detector.detect_brand_image(domain_dir, domain_name)
-            extraction_data["brand_image_detection"] = brand_image_result
+            # Phase 1: Brand Detection & Initial Analysis
+            print_tree_item("Brand detection & initial analysis", level=1, status="processing")
             
-            # Extract company name data from brand image detection result
-            if brand_image_result.get('company_name'):
-                extraction_data["company_name"] = brand_image_result['company_name']
-                extraction_data["company_name_confidence"] = brand_image_result.get('company_name_confidence', 0.0)
-                extraction_data["company_name_source"] = brand_image_result.get('company_name_source', '')
-                success(f"   🏢 Company: {extraction_data['company_name']} (confidence: {extraction_data['company_name_confidence']:.2f})")
-            else:
-                warning("   🏢 Company name not identified")
+            # Start loading animation for brand detection
+            brand_animation = LoadingAnimation("Analyzing brand images and extracting company info")
+            brand_animation.start()
+            
+            try:
+                brand_image_result = self.brand_image_detector.detect_brand_image(domain_dir, domain_name)
+                extraction_data["brand_image_detection"] = brand_image_result
+                brand_animation.stop()
+                
+                # Extract company name data from brand image detection result
+                if brand_image_result.get('company_name'):
+                    extraction_data["company_name"] = brand_image_result['company_name']
+                    extraction_data["company_name_confidence"] = brand_image_result.get('company_name_confidence', 0.0)
+                    extraction_data["company_name_source"] = brand_image_result.get('company_name_source', '')
+                    print_tree_item(f"Company: {extraction_data['company_name']} (confidence: {extraction_data['company_name_confidence']:.2f})", level=2, status="success")
+                else:
+                    print_tree_item("Company name not identified", level=2, status="warning")
+                
+                # Handle brand image download
+                if brand_image_result.get('brand_image_found') and brand_image_result.get('selected_image'):
+                    brand_image_url = brand_image_result['selected_image'].get('src', '')
+                    if brand_image_url:
+                        print_tree_item(f"Downloading brand image: {brand_image_url[:50]}...", level=2, status="info")
+                        downloaded_path = self.download_brand_image(brand_image_url, domain_name, timestamp)
+                        if downloaded_path:
+                            extraction_data["downloaded_brand_image_path"] = downloaded_path
+                            print_tree_item("Brand image saved successfully", level=2, status="success")
+                        else:
+                            print_tree_item("Failed to download brand image", level=2, status="warning")
+                
+            except Exception as e:
+                brand_animation.stop()
+                print_tree_item(f"Brand detection failed: {str(e)}", level=2, status="error")
             
             # Extract initial address analysis from brand image detection result
             address_analysis = brand_image_result.get('address_analysis', {})
@@ -515,56 +622,73 @@ class WebsiteInformationExtractor:
                 extraction_data["final_address"] = address_analysis.get('primary_address', '')
                 extraction_data["address_confidence"] = 0.8 if address_analysis.get('confidence') == 'high' else 0.6
                 extraction_data["address_source"] = f"brand_analysis_{address_analysis.get('source', '')}"
-                success(f"   🏠 Address (from brand analysis): {extraction_data['final_address']}")
+                print_tree_item(f"Address found in brand analysis: {extraction_data['final_address']}", level=2, status="success")
             elif address_analysis.get('addresses_found'):
-                info(f"   📍 Found {len(address_analysis['addresses_found'])} potential addresses in brand analysis")
+                print_tree_item(f"Found {len(address_analysis['addresses_found'])} potential addresses in brand analysis", level=2, status="info")
             
-            # Check location context
-            if location_context.get('city') or location_context.get('state'):
+            # Check location context (with null safety)
+            if location_context and (location_context.get('city') or location_context.get('state')):
                 location_info = []
-                if location_context.get('city'): location_info.append(location_context['city'])
-                if location_context.get('state'): location_info.append(location_context['state'])
-                if location_context.get('country'): location_info.append(location_context['country'])
-                info(f"   🌍 Location context: {', '.join(location_info)}")
-            
-            # Download brand image if one was detected
-            if brand_image_result.get('brand_image_found') and brand_image_result.get('selected_image'):
-                brand_image_url = brand_image_result['selected_image'].get('src', '')
-                if brand_image_url:
-                    info(f"   📥 Downloading brand image: {brand_image_url}")
-                    downloaded_path = self.download_brand_image(brand_image_url, domain_name, timestamp)
-                    if downloaded_path:
-                        extraction_data["downloaded_brand_image_path"] = downloaded_path
-                        success(f"   ✅ Brand image saved: {downloaded_path}")
-                    else:
-                        warning("   ❌ Failed to download brand image")
+                if location_context.get('city') and location_context['city'].strip():
+                    location_info.append(location_context['city'].strip())
+                if location_context.get('state') and location_context['state'].strip():
+                    location_info.append(location_context['state'].strip())
+                if location_context.get('country') and location_context['country'].strip():
+                    location_info.append(location_context['country'].strip())
+                if location_info:
+                    print_tree_item(f"Location context: {', '.join(location_info)}", level=2, status="info")
             
             # Save brand image detection result
             brand_image_file_path = self.brand_image_detector.save_brand_image_result(domain_dir, brand_image_result)
             if brand_image_file_path:
                 extraction_data["files_created"].append("brand_image_detection.json")
             
-            # Perform MCC classification
-            info("   🏷️  Classifying MCC code...")
-            mcc_result = self.mcc_classifier.classify_mcc(domain_dir, domain_name)
-            extraction_data["mcc_classification"] = mcc_result
+            # Phase 2: MCC Classification
+            print_tree_item("Business classification (MCC)", level=1, status="processing")
             
-            # Extract key MCC results for easy access
-            if mcc_result.get("classification_success"):
-                extraction_data["final_mcc_code"] = mcc_result.get("final_mcc")
-                extraction_data["mcc_confidence"] = mcc_result.get("final_confidence", 0.0)
-                success(f"   🎯 MCC: {extraction_data['final_mcc_code']} (confidence: {extraction_data['mcc_confidence']:.2f})")
-            else:
-                warning(f"   ❌ MCC classification failed: {mcc_result.get('error', 'Unknown error')}")
+            mcc_animation = LoadingAnimation("Analyzing business type and determining MCC code")
+            mcc_animation.start()
+            
+            try:
+                mcc_result = self.mcc_classifier.classify_mcc(domain_dir, domain_name)
+                extraction_data["mcc_classification"] = mcc_result
+                mcc_animation.stop()
+                
+                # Show MCC stages with proper tree structure
+                if mcc_result.get("stage1_result"):
+                    stage1 = mcc_result["stage1_result"]
+                    stage1_range = stage1.get('selected_category_range', 'Unknown range')
+                    stage1_name = stage1.get('selected_category_name', '')
+                    range_display = f"{stage1_range} - {stage1_name}" if stage1_name else stage1_range
+                    print_tree_item(f"Stage 1 complete: {range_display}", level=2, status="success")
+                
+                if mcc_result.get("stage2_result"):
+                    stage2 = mcc_result["stage2_result"]
+                    print_tree_item(f"Stage 2: MCC code selected", level=2, status="success")
+                
+                # Extract key MCC results for easy access
+                if mcc_result.get("classification_success"):
+                    extraction_data["final_mcc_code"] = mcc_result.get("final_mcc")
+                    extraction_data["mcc_confidence"] = mcc_result.get("final_confidence", 0.0)
+                    
+                    # Get MCC description from the result
+                    mcc_description = mcc_result.get("final_mcc_description", f"MCC {extraction_data['final_mcc_code']}")
+                    print_tree_item(f"Business MCC: {extraction_data['final_mcc_code']} - {mcc_description} (confidence: {extraction_data['mcc_confidence']:.2f})", level=2, status="success")
+                else:
+                    print_tree_item(f"MCC classification failed: {mcc_result.get('error', 'Unknown error')}", level=2, status="error")
+                    
+            except Exception as e:
+                mcc_animation.stop()
+                print_tree_item(f"MCC classification error: {str(e)}", level=2, status="error")
             
             # Save MCC classification result
             mcc_file_path = self.mcc_classifier.save_mcc_result(domain_dir, mcc_result)
             if mcc_file_path:
                 extraction_data["files_created"].append("mcc_classification.json")
             
-            # Perform address extraction (only if needed)
+            # Phase 3: Address Extraction
             if address_found_in_brand_analysis:
-                info("   📍 Address already found in brand analysis - skipping detailed extraction")
+                print_tree_item("Address extraction (already found in brand analysis)", level=1, status="success")
                 # Create a minimal address result that matches the expected format
                 address_result = {
                     'final_address': extraction_data["final_address"],
@@ -578,78 +702,121 @@ class WebsiteInformationExtractor:
                     'optimized_extraction': True
                 }
                 extraction_data["address_extraction"] = address_result
+                print_tree_item(f"Address: {extraction_data['final_address']} (confidence: {extraction_data['address_confidence']:.2f})", level=2, status="success")
+                
+                # Display source
+                source_display = extraction_data["address_source"].replace("_", " ").replace("brand analysis ", "Brand analysis ")
+                print_tree_item(f"Source: {source_display}", level=2, status="info")
             else:
-                info("   📍 Running detailed address extraction...")
-                company_name = extraction_data.get("company_name", "")
-                business_type = ""
+                print_tree_item("Detailed address extraction", level=1, status="processing")
                 
-                # Try to extract business type from MCC classification for better search context
-                if mcc_result.get("classification_success"):
-                    stage1_result = mcc_result.get("stage1_result", {})
-                    business_type = stage1_result.get("business_type_identified", "")
+                address_animation = LoadingAnimation("Searching for business address information")
+                address_animation.start()
                 
-                # Pass the brand analysis results to avoid redundant work
-                address_result = self.address_extractor.extract_address(
-                    domain_dir, domain_name, company_name, business_type,
-                    brand_address_analysis=address_analysis,
-                    brand_location_context=location_context
-                )
-                extraction_data["address_extraction"] = address_result
-                
-                # Extract key address results for easy access
-                if address_result.get("final_address"):
-                    extraction_data["final_address"] = address_result.get("final_address", "")
-                    extraction_data["address_confidence"] = address_result.get("final_confidence", 0.0)
-                    extraction_data["address_source"] = address_result.get("final_source", "")
-                    success(f"   🏠 Address: {extraction_data['final_address']} (confidence: {extraction_data['address_confidence']:.2f})")
-                else:
-                    warning(f"   ❌ No address found: {address_result.get('reasoning', 'Unknown reason')}")
+                try:
+                    company_name = extraction_data.get("company_name", "")
+                    business_type = ""
+                    
+                    # Try to extract business type from MCC classification for better search context
+                    if mcc_result.get("classification_success"):
+                        stage1_result = mcc_result.get("stage1_result", {})
+                        business_type = stage1_result.get("business_type_identified", "")
+                    
+                    # Pass the brand analysis results to avoid redundant work
+                    address_result = self.address_extractor.extract_address(
+                        domain_dir, domain_name, company_name, business_type,
+                        brand_address_analysis=address_analysis,
+                        brand_location_context=location_context
+                    )
+                    extraction_data["address_extraction"] = address_result
+                    address_animation.stop()
+                    
+                    # Show address extraction stages
+                    stages_completed = address_result.get('stages_completed', [])
+                    if 'stage_0' in stages_completed:
+                        print_tree_item("Stage 0: Location context analysis complete", level=2, status="success")
+                    if 'stage_1' in stages_completed:
+                        print_tree_item("Stage 1: Website content analysis complete", level=2, status="success") 
+                    if 'stage_2' in stages_completed:
+                        print_tree_item("Stage 2: External search analysis complete", level=2, status="success")
+                    
+                    # Extract key address results for easy access
+                    if address_result.get("final_address"):
+                        extraction_data["final_address"] = address_result.get("final_address", "")
+                        extraction_data["address_confidence"] = address_result.get("final_confidence", 0.0)
+                        extraction_data["address_source"] = address_result.get("final_source", "")
+                        
+                        # Display address with confidence - handle both numeric and string confidence
+                        confidence = extraction_data["address_confidence"]
+                        if isinstance(confidence, (int, float)):
+                            confidence_str = f"{confidence:.2f}"
+                        else:
+                            confidence_str = str(confidence)
+                        print_tree_item(f"Address: {extraction_data['final_address']} (confidence: {confidence_str})", level=2, status="success")
+                        
+                        # Display source
+                        source_display = extraction_data["address_source"].replace("_", " ").replace("search ", "SerpAPI ").replace("website", "Website content")
+                        print_tree_item(f"Source: {source_display}", level=2, status="info")
+                        
+                        # Display coordinates if available
+                        geocoding_result = address_result.get("geocoding_result", {})
+                        if geocoding_result and geocoding_result.get("lat") and geocoding_result.get("lon"):
+                            print_tree_item("Coordinates:", level=2, status="info")
+                            print_tree_item(f"Latitude: {geocoding_result['lat']}", level=3, status="info")
+                            print_tree_item(f"Longitude: {geocoding_result['lon']}", level=3, status="info")
+                    else:
+                        print_tree_item(f"No address found: {address_result.get('reasoning', 'Unknown reason')}", level=2, status="warning")
+                        
+                except Exception as e:
+                    address_animation.stop()
+                    print_tree_item(f"Address extraction error: {str(e)}", level=2, status="error")
             
             # Save address extraction result
             address_file_path = self.address_extractor.save_address_result(domain_dir, address_result)
             if address_file_path:
                 extraction_data["files_created"].append("address_extraction.json")
             
-            # Add delay to respect rate limits
-            info("   ⏳ Rate limit delay...")
+            # Rate limiting with better display
+            print_tree_item("Rate limit delay (10 seconds)", level=1, status="info")
             time.sleep(10)
             
             extraction_data["status"] = "success"
             extraction_data["load_time_seconds"] = round(time.time() - start_time, 2)
             
-            success(f"✅ {url}")
+            # Final summary
+            print_tree_item("Extraction Summary:", level=1, status="success")
             
-            # Show summary of all extractions
             if brand_image_result.get('brand_image_found'):
-                info(f"   🎯 Brand image detected ({brand_image_result.get('confidence', 'unknown')} confidence)")
+                print_tree_item(f"Brand image: Detected ({brand_image_result.get('confidence', 'unknown')} confidence)", level=2, status="success")
             else:
-                info(f"   ❌ No brand image found")
+                print_tree_item("Brand image: Not found", level=2, status="warning")
             
             if extraction_data["final_mcc_code"]:
-                info(f"   🏷️  MCC: {extraction_data['final_mcc_code']}")
+                print_tree_item(f"MCC: {extraction_data['final_mcc_code']}", level=2, status="success")
             else:
-                info(f"   🏷️  MCC: Classification failed")
+                print_tree_item("MCC: Classification failed", level=2, status="warning")
             
             if extraction_data["final_address"]:
-                info(f"   📍 Address: Found via {extraction_data['address_source']}")
+                source_display = extraction_data["address_source"].replace("_", " ").replace("search ", "search: ")
+                print_tree_item(f"Address: Found via {source_display}", level=2, status="success")
             else:
-                info(f"   📍 Address: Not found")
+                print_tree_item("Address: Not found", level=2, status="warning")
                 
-            info(f"   📁 {domain_name}_{timestamp}/ • {len(images_data)} images")
+            print_tree_item(f"Files: {domain_name}_{timestamp}/ • {len(images_data)} images", level=2, status="info")
             
         except TimeoutException:
             error_msg = f"⏱️ Timeout loading {url}"
-            error(error_msg)
+            print_tree_item(error_msg, level=1, status="error")
             extraction_data["error"] = error_msg
             
         except WebDriverException as e:
             error_msg = f"🚫 WebDriver error: {url}"
-            error(error_msg)
+            print_tree_item(error_msg, level=1, status="error")
             extraction_data["error"] = error_msg
             
         except Exception as e:
             error_msg = f"❌ Failed: {url}"
-            error(error_msg)
+            print_tree_item(error_msg, level=1, status="error")
             extraction_data["error"] = error_msg
         
         extraction_data["load_time_seconds"] = round(time.time() - start_time, 2)
@@ -661,6 +828,11 @@ class WebsiteInformationExtractor:
         
         # Calculate company name statistics
         companies_identified = sum(1 for site in self.summary_data if site.get("company_name", ""))
+        
+        # Convert string confidence values to numeric for averaging
+        # Calculate confidence statistics
+        companies_identified = sum(1 for site in self.summary_data if site.get("company_name", ""))
+        
         average_company_confidence = 0.0
         if companies_identified > 0:
             total_confidence = sum(site.get("company_name_confidence", 0.0) for site in self.summary_data if site.get("company_name", ""))
@@ -672,6 +844,27 @@ class WebsiteInformationExtractor:
         if addresses_found > 0:
             total_address_confidence = sum(site.get("address_confidence", 0.0) for site in self.summary_data if site.get("final_address", ""))
             average_address_confidence = round(total_address_confidence / addresses_found, 3)
+        
+        # Calculate token usage statistics
+        total_input_tokens = 0
+        total_output_tokens = 0
+        total_tokens = 0
+        
+        for site in self.summary_data:
+            # Brand image detection tokens
+            brand_metadata = site.get("brand_image_detection", {}).get("analysis_metadata", {})
+            if brand_metadata.get("tokens_used"):
+                total_tokens += brand_metadata["tokens_used"]
+            
+            # MCC classification tokens (if available)
+            mcc_metadata = site.get("mcc_metadata", {})
+            if mcc_metadata.get("tokens_used"):
+                total_tokens += mcc_metadata["tokens_used"]
+            
+            # Address extraction tokens (if available)
+            address_metadata = site.get("address_metadata", {})
+            if address_metadata.get("tokens_used"):
+                total_tokens += address_metadata["tokens_used"]
         
         summary = {
             "run_timestamp": self.run_timestamp,
@@ -691,13 +884,18 @@ class WebsiteInformationExtractor:
             "addresses_from_website": sum(1 for site in self.summary_data if site.get("address_source", "").startswith("website")),
             "addresses_from_search": sum(1 for site in self.summary_data if site.get("address_source", "").startswith("search")),
             "average_load_time": round(sum(site.get("load_time_seconds", 0) for site in self.summary_data) / len(self.summary_data), 2) if self.summary_data else 0,
+            "token_usage": {
+                "total_tokens": total_tokens,
+                "total_input_tokens": total_input_tokens,
+                "total_output_tokens": total_output_tokens
+            },
             "websites": self.summary_data
         }
         
         with open(summary_file_path, 'w', encoding='utf-8') as f:
             json.dump(summary, f, indent=2, ensure_ascii=False)
         
-        success(f"Summary saved: summary.json")
+        # Summary saved silently
         
         # Create brand image summary, company summary, MCC summary, and address summary
         self.save_brand_image_summary()
@@ -740,7 +938,7 @@ class WebsiteInformationExtractor:
         with open(brand_image_summary_path, 'w', encoding='utf-8') as f:
             json.dump(brand_image_summary, f, indent=2, ensure_ascii=False)
         
-        success(f"Brand image summary saved: brand_image_summary.json")
+        # Brand image summary saved silently
         return brand_image_summary_path
     
     def save_company_summary(self):
@@ -769,7 +967,7 @@ class WebsiteInformationExtractor:
         with open(company_summary_path, 'w', encoding='utf-8') as f:
             json.dump(company_summary, f, indent=2, ensure_ascii=False)
         
-        success(f"Company summary saved: company_summary.json")
+        # Company summary saved silently
         return company_summary_path
     
     def save_mcc_summary(self):
@@ -800,7 +998,7 @@ class WebsiteInformationExtractor:
         with open(mcc_summary_path, 'w', encoding='utf-8') as f:
             json.dump(mcc_summary, f, indent=2, ensure_ascii=False)
         
-        success(f"MCC summary saved: mcc_summary.json")
+        # MCC summary saved silently
         return mcc_summary_path
     
     def save_address_summary(self):
@@ -842,12 +1040,35 @@ class WebsiteInformationExtractor:
         with open(address_summary_path, 'w', encoding='utf-8') as f:
             json.dump(address_summary, f, indent=2, ensure_ascii=False)
         
-        success(f"Address summary saved: address_summary.json")
+        # Address summary saved silently
         return address_summary_path
     
     def run(self):
         """Main execution method"""
-        header("Website Information Extractor Agent with Brand Image Detection & MCC Classification")
+        header("Business Insights - AI-Powered Business Intelligence Extraction")
+        
+        # Display LLM configuration
+        try:
+            from utils.config import get_model_config
+            model_config = get_model_config("classifier-agent")
+            model_name = model_config.get('model', 'Unknown')
+            provider = "Unknown"
+            
+            # Determine provider based on model name
+            if 'gpt' in model_name.lower():
+                provider = "OpenAI"
+            elif 'claude' in model_name.lower() or 'anthropic' in model_name.lower():
+                provider = "Anthropic"
+            elif 'gemini' in model_name.lower() or 'google' in model_name.lower():
+                provider = "Google"
+            elif 'llama' in model_name.lower():
+                provider = "Meta"
+            else:
+                provider = "Custom"
+            
+            info(f"AI Model: {provider} {model_name}")
+        except Exception:
+            info("AI Model: Configuration not available")
         
         # Setup WebDriver
         if not self.setup_driver():
@@ -855,7 +1076,6 @@ class WebsiteInformationExtractor:
         
         try:
             # Load websites from file
-            info("Loading websites from data/load_websites.txt...")
             json_file_path, run_data_dir = load_website_data()
             
             if not json_file_path or not run_data_dir:
@@ -870,12 +1090,12 @@ class WebsiteInformationExtractor:
             with open(json_file_path, 'r') as f:
                 websites_data = json.load(f)
             
-            info(f"Loaded {len(websites_data)} websites to extract")
-            
-            # Scrape each website
+            # Process each website with cleaner output
             for i, website_info in enumerate(websites_data, 1):
                 url = website_info["url"]
-                processing(f"[{i}/{len(websites_data)}] {url}")
+                
+                # Display website header with index
+                print_website_header(i, len(websites_data), url)
                 
                 extract_result = self.extract_website_information(url)
                 self.summary_data.append(extract_result)
@@ -887,44 +1107,40 @@ class WebsiteInformationExtractor:
             # Save summary
             summary_path = self.save_summary()
             
-            # Final report with location statistics
-            header("Scraping Completed!")
-            completed(f"Run timestamp: {self.run_timestamp}")
-            completed(f"Total websites processed: {len(self.summary_data)}")
-            completed(f"Successful: {sum(1 for site in self.summary_data if site['status'] == 'success')}")
-            completed(f"Failed: {sum(1 for site in self.summary_data if site['status'] == 'failed')}")
-            completed(f"Total images found: {sum(site.get('total_images', 0) for site in self.summary_data)}")
-            completed(f"Brand images detected: {sum(1 for site in self.summary_data if site.get('brand_image_detection', {}).get('brand_image_found', False))}")
-            completed(f"Brand images downloaded: {sum(1 for site in self.summary_data if site.get('downloaded_brand_image_path', ''))}")
+            # Final report - simplified
+            header("Extraction Complete")
+            completed(f"Processed: {len(self.summary_data)} websites")
+            completed(f"Success rate: {sum(1 for site in self.summary_data if site['status'] == 'success')}/{len(self.summary_data)}")
             
-            # Company name statistics
-            companies_identified = sum(1 for site in self.summary_data if site.get("company_name", ""))
-            completed(f"Company names extracted: {companies_identified}")
-            if companies_identified > 0:
-                avg_company_confidence = sum(site.get("company_name_confidence", 0.0) for site in self.summary_data if site.get("company_name", "")) / companies_identified
-                completed(f"Average company name confidence: {avg_company_confidence:.2f}")
-            
-            # MCC statistics
-            completed(f"MCC classifications successful: {sum(1 for site in self.summary_data if site.get('final_mcc_code') is not None)}")
-            mcc_successful_sites = [site for site in self.summary_data if site.get('mcc_confidence', 0.0) > 0]
-            if mcc_successful_sites:
-                avg_mcc_confidence = sum(site.get('mcc_confidence', 0.0) for site in mcc_successful_sites) / len(mcc_successful_sites)
-                completed(f"Average MCC confidence: {avg_mcc_confidence:.2f}")
-            
-            # Address statistics
+            # Key metrics
+            brands_found = sum(1 for site in self.summary_data if site.get('brand_image_detection', {}).get('brand_image_found', False))
+            mcc_found = sum(1 for site in self.summary_data if site.get('final_mcc_code') is not None)
             addresses_found = sum(1 for site in self.summary_data if site.get("final_address", ""))
-            completed(f"Addresses found: {addresses_found}")
-            if addresses_found > 0:
-                avg_address_confidence = sum(site.get("address_confidence", 0.0) for site in self.summary_data if site.get("final_address", "")) / addresses_found
-                completed(f"Average address confidence: {avg_address_confidence:.2f}")
-                
-                # Address source breakdown
-                website_addresses = sum(1 for site in self.summary_data if site.get("address_source", "").startswith("website"))
-                search_addresses = sum(1 for site in self.summary_data if site.get("address_source", "").startswith("search"))
-                completed(f"Addresses from website: {website_addresses}")
-                completed(f"Addresses from search: {search_addresses}")
             
-            completed(f"Data saved in: {self.base_data_dir}")
+            # Calculate total tokens
+            total_tokens = 0
+            for site in self.summary_data:
+                # Brand image detection tokens
+                brand_metadata = site.get("brand_image_detection", {}).get("analysis_metadata", {})
+                if brand_metadata.get("tokens_used"):
+                    total_tokens += brand_metadata["tokens_used"]
+                
+                # MCC classification tokens (if available)
+                mcc_metadata = site.get("mcc_metadata", {})
+                if mcc_metadata.get("tokens_used"):
+                    total_tokens += mcc_metadata["tokens_used"]
+                
+                # Address extraction tokens (if available)
+                address_metadata = site.get("address_metadata", {})
+                if address_metadata.get("tokens_used"):
+                    total_tokens += address_metadata["tokens_used"]
+            
+            completed(f"Brand images: {brands_found} detected")
+            completed(f"MCC codes: {mcc_found} classified") 
+            completed(f"Addresses: {addresses_found} extracted")
+            if total_tokens > 0:
+                completed(f"Total tokens used: {total_tokens:,}")
+            completed(f"Summary: {summary_path}")
             
         except KeyboardInterrupt:
             warning("Scraping interrupted by user")

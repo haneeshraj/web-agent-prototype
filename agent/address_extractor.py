@@ -214,8 +214,6 @@ IMPORTANT:
             str: Model response or fallback response
         """
         try:
-            info(f"Querying {self.model_config['model']} for {context}...")
-            info(f"Max tokens configured: {self.model_config['max_tokens']}")
             
             response = self.llm_client.query(
                 model=self.model_config['model'],
@@ -225,15 +223,9 @@ IMPORTANT:
                 temperature=self.model_config.get('temperature', 0.3)
             )
             
-            info(f"{self.model_config['model']} query completed successfully")
-            # Log token usage if available
-            if 'usage' in response:
-                usage = response['usage']
-                info(f"Token usage - Prompt: {usage.get('prompt_tokens', 'N/A')}, "
-                     f"Completion: {usage.get('completion_tokens', 'N/A')}, "
-                     f"Total: {usage.get('total_tokens', 'N/A')}")
-            
-            return response['content'].strip()
+            # Query completed successfully
+            content = response.get('content') if response else None
+            return content.strip() if content else ""
             
         except Exception as e:
             error_str = str(e)
@@ -303,9 +295,93 @@ IMPORTANT:
                 "alternative_addresses": []
             })
 
-    def _geocode_address(self, address_components: Dict[str, str], full_address: str) -> Optional[Dict[str, Any]]:
+    def _geocode_address(self, address: str) -> Dict[str, Any]:
         """
-        Geocode address using OpenStreetMap Nominatim API.
+        Simple geocoding method that validates an address string and returns coordinates.
+        
+        Args:
+            address (str): Full address string to geocode
+            
+        Returns:
+            Dict[str, Any]: Geocoding result with success status, coordinates, and formatted address
+        """
+        try:
+            if not address or not address.strip():
+                return {
+                    "success": False,
+                    "error": "Empty address provided",
+                    "lat": None,
+                    "lon": None,
+                    "formatted_address": ""
+                }
+            
+            # Make request to Nominatim API
+            params = {
+                'q': address.strip(),
+                'format': 'json',
+                'limit': '1',
+                'addressdetails': '1'
+            }
+            
+            headers = {
+                'User-Agent': 'LLMAgentPrototype/1.0 (business-address-extraction)',
+                'Accept': 'application/json'
+            }
+            
+            # Rate limiting - Nominatim allows 1 request per second
+            time.sleep(1)
+            
+            response = requests.get(
+                "https://nominatim.openstreetmap.org/search", 
+                params=params, 
+                headers=headers, 
+                timeout=10
+            )
+            response.raise_for_status()
+            
+            results = response.json()
+            
+            if results and len(results) > 0:
+                result = results[0]
+                return {
+                    "success": True,
+                    "lat": float(result.get('lat', 0)),
+                    "lon": float(result.get('lon', 0)),
+                    "formatted_address": result.get('display_name', address),
+                    "place_id": result.get('place_id'),
+                    "address_type": result.get('addresstype'),
+                    "boundingbox": result.get('boundingbox'),
+                    "confidence": float(result.get('importance', 0.5))
+                }
+            else:
+                return {
+                    "success": False,
+                    "error": "No geocoding results found",
+                    "lat": None,
+                    "lon": None,
+                    "formatted_address": address
+                }
+                
+        except requests.exceptions.RequestException as e:
+            return {
+                "success": False,
+                "error": f"Geocoding API request failed: {str(e)}",
+                "lat": None,
+                "lon": None,
+                "formatted_address": address
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": f"Geocoding failed: {str(e)}",
+                "lat": None,
+                "lon": None,
+                "formatted_address": address
+            }
+
+    def _geocode_address_detailed(self, address_components: Dict[str, str], full_address: str) -> Optional[Dict[str, Any]]:
+        """
+        Geocode address using OpenStreetMap Nominatim API with detailed components.
         
         Args:
             address_components (Dict[str, str]): Structured address components
@@ -335,7 +411,6 @@ IMPORTANT:
                 params['limit'] = '5'
                 
                 if params:
-                    info(f"Geocoding structured address: {params}")
                     response = self._make_nominatim_request(params)
                     if response and len(response) > 0:
                         result = response[0]  # Take first result
@@ -351,13 +426,12 @@ IMPORTANT:
             
             # Fallback: Try with full address string
             if full_address:
-                info(f"Geocoding full address string: {full_address}")
-                params = {
+                fallback_params = {
                     'q': full_address,
                     'format': 'json',
                     'limit': '5'
                 }
-                response = self._make_nominatim_request(params)
+                response = self._make_nominatim_request(fallback_params)
                 if response and len(response) > 0:
                     result = response[0]  # Take first result
                     return {
@@ -403,7 +477,6 @@ IMPORTANT:
             response.raise_for_status()
             
             result = response.json()
-            info(f"Nominatim returned {len(result)} results")
             return result
             
         except requests.exceptions.RequestException as e:
@@ -458,10 +531,8 @@ IMPORTANT:
             Dict[str, Any]: Location context information
         """
         try:
-            # Truncate HTML if too long to avoid token limits
-            max_html_length = 15000
-            if len(html_content) > max_html_length:
-                html_content = html_content[:max_html_length] + "\n... [HTML truncated for length]"
+            # Don't truncate HTML - location context might be anywhere on the page
+            # Let the LLM analyze the complete content for geographic indicators
             
             user_prompt = f"""Please analyze this website content to identify the geographic location context for this business.
 
@@ -495,6 +566,10 @@ Focus on finding the ORIGINAL or PRIMARY business location that would help ident
                     "reasoning": "No location context could be extracted"
                 }
             
+            # Ensure raw_response is a string
+            if not isinstance(raw_response, str):
+                raw_response = str(raw_response) if raw_response else ""
+            
             # Try to extract JSON from the response
             import re
             json_match = re.search(r'\{.*\}', raw_response, re.DOTALL)
@@ -505,7 +580,7 @@ Focus on finding the ORIGINAL or PRIMARY business location that would help ident
             
             # Parse JSON response
             result = json.loads(json_str)
-            info(f"Location context extraction completed")
+            # Location context extraction complete
             return result
             
         except Exception as e:
@@ -530,10 +605,8 @@ Focus on finding the ORIGINAL or PRIMARY business location that would help ident
             Dict[str, Any]: Address analysis results
         """
         try:
-            # Truncate HTML if too long to avoid token limits
-            max_html_length = 20000
-            if len(html_content) > max_html_length:
-                html_content = html_content[:max_html_length] + "\n... [HTML truncated for length]"
+            # Don't truncate HTML - addresses are often in footers/contact sections at the end
+            # Let the LLM see the complete page content to find addresses anywhere
             
             user_prompt = f"""Please analyze this website HTML content to detect if a business address is present and extract it.
 
@@ -557,9 +630,6 @@ Remember to focus on main business addresses (headquarters, main office, primary
                 "website_analysis"
             )
             
-            # Debug: Log the raw response
-            info(f"LLM response length: {len(raw_response)} characters")
-            
             if not raw_response:
                 error("LLM returned empty response")
                 return {
@@ -570,6 +640,10 @@ Remember to focus on main business addresses (headquarters, main office, primary
                     "address_type": "",
                     "reasoning": "LLM returned empty response"
                 }
+            
+            # Ensure raw_response is a string
+            if not isinstance(raw_response, str):
+                raw_response = str(raw_response) if raw_response else ""
             
             # Try to extract JSON from the response (in case there's extra text)
             import re
@@ -593,8 +667,6 @@ Remember to focus on main business addresses (headquarters, main office, primary
             
             # Add geocoding if address was found
             if result.get("address_found_in_website", False) and result.get("extracted_address"):
-                info("Adding geocoding validation to extracted address...")
-                
                 # Get address components for structured geocoding
                 address_components = result.get("address_components", {})
                 full_address = result.get("extracted_address", "")
@@ -617,23 +689,22 @@ Remember to focus on main business addresses (headquarters, main office, primary
                                             '', clean_components['house_number_street'], flags=re.IGNORECASE).strip()
                         clean_components['house_number_street'] = clean_street
                     
-                    geocoding_result = self._geocode_address(clean_components, clean_address)
+                    geocoding_result = self._geocode_address_detailed(clean_components, clean_address)
                 
                 # Fallback to full address if clean address geocoding failed
                 if not geocoding_result and full_address != clean_address:
                     warning("Clean address geocoding failed, trying full address...")
-                    geocoding_result = self._geocode_address(address_components, full_address)
+                    geocoding_result = self._geocode_address_detailed(address_components, full_address)
                 
                 # Add geocoding results to response
                 if geocoding_result:
                     result["geocoding"] = geocoding_result
-                    success(f"Address geocoded successfully: {geocoding_result.get('display_name')}")
-                    info(f"Coordinates: {geocoding_result.get('lat')}, {geocoding_result.get('lon')}")
+                    # Address geocoded successfully (displayed in main script)
                 else:
                     result["geocoding"] = None
                     warning("Address geocoding failed - no coordinates available")
             
-            info(f"Website address analysis completed")
+            # Website address analysis complete
             return result
             
         except json.JSONDecodeError as e:
@@ -734,7 +805,7 @@ Remember to focus on main business addresses (headquarters, main office, primary
                         f"{company_name} founded in {location_str} headquarters"
                     ]
                     base_queries = location_queries + base_queries
-                    info(f"Using location context: {location_str}")
+                    # Using location context for search
             
             # Add business type specific queries if available
             if business_type:
@@ -752,7 +823,7 @@ Remember to focus on main business addresses (headquarters, main office, primary
             if search_results:
                 business_info = self.serpapi_client.extract_business_info(search_results)
                 all_business_info.extend(business_info)
-                info(f"Found {len(business_info)} search results for address extraction")
+                # Found search results (count tracked internally)
             else:
                 return {
                     "address_found": False,
@@ -805,9 +876,6 @@ Focus on finding the PRIMARY business headquarters for {company_name}, especiall
                 "search_analysis"
             )
             
-            # Debug: Log the raw response
-            info(f"LLM response length: {len(raw_response)} characters")
-            
             if not raw_response:
                 error("LLM returned empty response for search analysis")
                 return {
@@ -820,6 +888,10 @@ Focus on finding the PRIMARY business headquarters for {company_name}, especiall
                     "supporting_sources": [],
                     "alternative_addresses": []
                 }
+            
+            # Ensure raw_response is a string
+            if not isinstance(raw_response, str):
+                raw_response = str(raw_response) if raw_response else ""
             
             # Try to extract JSON from the response (in case there's extra text)
             import re
@@ -834,8 +906,6 @@ Focus on finding the PRIMARY business headquarters for {company_name}, especiall
             
             # Add geocoding if address was found
             if result.get("address_found", False) and result.get("extracted_address"):
-                info("Adding geocoding validation to search-extracted address...")
-                
                 # Get address components for structured geocoding
                 address_components = result.get("address_components", {})
                 full_address = result.get("extracted_address", "")
@@ -858,23 +928,22 @@ Focus on finding the PRIMARY business headquarters for {company_name}, especiall
                                             '', clean_components['house_number_street'], flags=re.IGNORECASE).strip()
                         clean_components['house_number_street'] = clean_street
                     
-                    geocoding_result = self._geocode_address(clean_components, clean_address)
+                    geocoding_result = self._geocode_address_detailed(clean_components, clean_address)
                 
                 # Fallback to full address if clean address geocoding failed
                 if not geocoding_result and full_address != clean_address:
                     warning("Clean address geocoding failed, trying full address...")
-                    geocoding_result = self._geocode_address(address_components, full_address)
+                    geocoding_result = self._geocode_address_detailed(address_components, full_address)
                 
                 # Add geocoding results to response
                 if geocoding_result:
                     result["geocoding"] = geocoding_result
-                    success(f"Search address geocoded successfully: {geocoding_result.get('display_name')}")
-                    info(f"Coordinates: {geocoding_result.get('lat')}, {geocoding_result.get('lon')}")
+                    # Search address geocoded successfully (displayed in main script)
                 else:
                     result["geocoding"] = None
                     warning("Search address geocoding failed - no coordinates available")
             
-            info(f"Search-based address extraction completed")
+            # Search-based address extraction complete
             return result
             
         except json.JSONDecodeError as e:
@@ -907,8 +976,9 @@ Focus on finding the PRIMARY business headquarters for {company_name}, especiall
                        brand_address_analysis: Optional[Dict[str, Any]] = None, 
                        brand_location_context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """
-        Extract business address using a two-stage approach: website analysis + search fallback.
-        Optimized to use results from brand image analysis when available to reduce LLM calls.
+        Extract business address using a clean 2-stage approach:
+        Stage 0: Thorough website analysis for complete addresses
+        Stage 1: External SerpAPI search if Stage 0 fails
         
         Args:
             domain_dir (str): Directory containing website data
@@ -921,14 +991,13 @@ Focus on finding the PRIMARY business headquarters for {company_name}, especiall
         Returns:
             Dict[str, Any]: Complete address extraction results
         """
-        info(f"Starting address extraction for {domain_name}")
         
         result = {
             "domain": domain_name,
             "company_name_used": company_name,
             "business_type_used": business_type,
-            "location_context": brand_location_context or {},
-            "website_analysis": brand_address_analysis or {},
+            "location_context": {},
+            "website_analysis": {},
             "search_analysis": {},
             "final_address": "",
             "final_confidence": 0.0,
@@ -939,133 +1008,149 @@ Focus on finding the PRIMARY business headquarters for {company_name}, especiall
         }
         
         try:
-            # Check if we have usable results from brand image analysis (optimization)
-            skip_stage_0 = brand_location_context and brand_location_context.get('confidence') in ['high', 'medium']
-            skip_stage_1 = (brand_address_analysis and 
-                           brand_address_analysis.get('addresses_found') and 
-                           brand_address_analysis.get('confidence') in ['high', 'medium'])
+            # Load HTML content
+            html_path = os.path.join(domain_dir, "page.html")
+            html_content = self._load_html_content(html_path)
             
-            # Stage 0: Extract location context from website (skip if already done in brand image analysis)
-            if skip_stage_0:
-                info("Stage 0: Using location context from brand image analysis (optimization)")
+            if not html_content:
+                result["error"] = "HTML file not found or could not be loaded"
+                return result
+            
+            # ================================================================
+            # STAGE 0: THOROUGH WEBSITE ANALYSIS FOR COMPLETE ADDRESSES
+            # ================================================================
+            
+            # Check if brand analysis already found a complete address
+            if (brand_address_analysis and 
+                brand_address_analysis.get("confidence") in ["high", "medium"] and 
+                brand_address_analysis.get("primary_address")):
+                
+                website_result = brand_address_analysis
+                result["website_analysis"] = website_result
+                
+                # Use the address from brand analysis
+                result["final_address"] = website_result.get("primary_address", "")
+                result["final_confidence"] = 0.9 if website_result.get("confidence") == "high" else 0.7
+                result["final_source"] = f"website_brand_analysis_{website_result.get('source', '')}"
+                result["address_extraction_method"] = "stage_0_brand_analysis"
+                result["reasoning"] = f"Complete address found during brand image analysis: {website_result.get('reasoning', '')}"
+                
+                # Extract location context for completeness
+                if brand_location_context:
+                    result["location_context"] = brand_location_context
+                else:
+                    result["location_context"] = self._extract_location_context(html_content)
+                
+                success(f"Address: {result['final_address']} (confidence: {result['final_confidence']:.2f})")
+                return result
+            
+            # Perform detailed website analysis for complete addresses
+            website_result = self._analyze_website_for_address(html_content)
+            result["website_analysis"] = website_result
+            
+            # If complete address found on website, use it and geocode
+            if (website_result.get("address_found_in_website", False) and 
+                website_result.get("address_confidence", 0.0) >= 0.6):
+                
+                extracted_address = website_result.get("extracted_address", "")
+                
+                # Geocode the address to validate and get coordinates
+                geocoded_result = self._geocode_address(extracted_address)
+                
+                if geocoded_result.get("success", False):
+                    result["final_address"] = geocoded_result.get("formatted_address", extracted_address)
+                    result["final_confidence"] = min(website_result.get("address_confidence", 0.0), 0.95)
+                    result["final_source"] = f"website_{website_result.get('address_source', '')}"
+                    result["address_extraction_method"] = "stage_0_website_direct"
+                    result["reasoning"] = f"Complete address found on website and validated via geocoding: {website_result.get('reasoning', '')}"
+                    result["geocoding"] = geocoded_result
+                    
+                    success(f"Address: {result['final_address']} (confidence: {result['final_confidence']:.2f})")
+                    return result
+                else:
+                    # Address found but geocoding failed - still use it with lower confidence
+                    result["final_address"] = extracted_address
+                    result["final_confidence"] = website_result.get("address_confidence", 0.0) * 0.7  # Reduce confidence
+                    result["final_source"] = f"website_{website_result.get('address_source', '')}"
+                    result["address_extraction_method"] = "stage_0_website_unvalidated"
+                    result["reasoning"] = f"Address found on website but geocoding validation failed: {website_result.get('reasoning', '')}"
+                    result["geocoding"] = geocoded_result
+                    
+                    warning(f"Address found but unvalidated: {result['final_address']} (confidence: {result['final_confidence']:.2f})")
+                    return result
+            
+            # ================================================================
+            # STAGE 1: EXTERNAL SEARCH (Only if Stage 0 failed)
+            # ================================================================
+            
+            # Extract location context for search
+            if brand_location_context:
                 location_context = brand_location_context
-                result["location_context"] = location_context
-                if location_context.get('city') or location_context.get('state'):
+            else:
+                location_context = self._extract_location_context(html_content)
+            
+            result["location_context"] = location_context
+            
+            # Only proceed to external search if we have company name
+            if company_name:
+                # Display location context being used
+                if location_context.get('city') or location_context.get('state') or location_context.get('country'):
                     location_info = []
                     if location_context.get('city'): location_info.append(location_context['city'])
                     if location_context.get('state'): location_info.append(location_context['state'])
                     if location_context.get('country'): location_info.append(location_context['country'])
-                    info(f"Using brand image analysis location context: {', '.join(location_info)}")
-            else:
-                html_path = os.path.join(domain_dir, "page.html")
-                html_content = self._load_html_content(html_path)
+                    info(f"Using location context: {', '.join(location_info)}")
                 
-                if not html_content:
-                    result["error"] = "HTML file not found or could not be loaded"
-                    return result
-                
-                info("Stage 0: Extracting location context...")
-                location_context = self._extract_location_context(html_content)
-                result["location_context"] = location_context
-                
-                if location_context.get("location_confidence", 0.0) > 0.3:
-                    primary_location = []
-                    if location_context.get("primary_city"):
-                        primary_location.append(location_context["primary_city"])
-                    if location_context.get("primary_state_province"):
-                        primary_location.append(location_context["primary_state_province"])
-                    if location_context.get("primary_country"):
-                        primary_location.append(location_context["primary_country"])
-                    if primary_location:
-                        info(f"Identified primary location context: {', '.join(primary_location)}")
-            
-            # Stage 1: Analyze website HTML for address (skip if already done in brand image analysis)
-            if skip_stage_1:
-                info("Stage 1: Using website address analysis from brand image analysis (optimization)")
-                website_result = brand_address_analysis
-                result["website_analysis"] = website_result
-                
-                # If address found in brand image analysis with high confidence, use it
-                if (website_result.get("confidence") == "high" and 
-                    website_result.get("primary_address")):
-                    
-                    result["final_address"] = website_result.get("primary_address", "")
-                    result["final_confidence"] = 0.8  # High confidence from brand image analysis
-                    result["final_source"] = f"brand_analysis_{website_result.get('source', '')}"
-                    result["address_extraction_method"] = "brand_analysis_optimization"
-                    result["reasoning"] = f"Address found during brand image analysis with high confidence: {website_result.get('reasoning', '')}"
-                    
-                    success(f"Address found via brand image analysis: {result['final_address']}")
-                    return result
-            else:
-                # Get HTML content if not already loaded
-                if 'html_content' not in locals():
-                    html_path = os.path.join(domain_dir, "page.html")
-                    html_content = self._load_html_content(html_path)
-                    
-                    if not html_content:
-                        result["error"] = "HTML file not found or could not be loaded"
-                        return result
-                
-                info("Stage 1: Analyzing website content for address...")
-                website_result = self._analyze_website_for_address(html_content)
-                result["website_analysis"] = website_result
-                
-                # If address found in website with high confidence, use it
-                if (website_result.get("address_found_in_website", False) and 
-                    website_result.get("address_confidence", 0.0) >= 0.7):
-                    
-                    result["final_address"] = website_result.get("extracted_address", "")
-                    result["final_confidence"] = website_result.get("address_confidence", 0.0)
-                    result["final_source"] = f"website_{website_result.get('address_source', '')}"
-                    result["address_extraction_method"] = "website_direct"
-                    result["reasoning"] = f"Address found directly on website with high confidence: {website_result.get('reasoning', '')}"
-                    
-                    success(f"Address found on website: {result['final_address']}")
-                    return result
-            
-            # Stage 2: Search for address using SerpAPI (if address not found on website or low confidence)
-            if company_name:
-                info("Stage 2: Searching for address using SerpAPI...")
+                # Perform external search
                 search_result = self._search_for_address(company_name, business_type, location_context)
                 result["search_analysis"] = search_result
                 
                 if (search_result.get("address_found", False) and 
-                    search_result.get("address_confidence", 0.0) > 0.0):
+                    search_result.get("address_confidence", 0.0) > 0.5):
                     
-                    result["final_address"] = search_result.get("extracted_address", "")
-                    result["final_confidence"] = search_result.get("address_confidence", 0.0)
-                    result["final_source"] = f"search_{search_result.get('address_source', '')}"
-                    result["address_extraction_method"] = "search_based"
-                    result["reasoning"] = f"Address found via search after website analysis: {search_result.get('reasoning', '')}"
+                    extracted_address = search_result.get("extracted_address", "")
                     
-                    success(f"Address found via search: {result['final_address']}")
-                    return result
+                    # Geocode the search result address
+                    geocoded_result = self._geocode_address(extracted_address)
+                    
+                    if geocoded_result.get("success", False):
+                        result["final_address"] = geocoded_result.get("formatted_address", extracted_address)
+                        result["final_confidence"] = min(search_result.get("address_confidence", 0.0), 0.95)
+                        result["final_source"] = f"search_{search_result.get('address_source', '')}"
+                        result["address_extraction_method"] = "stage_1_external_search"
+                        result["reasoning"] = f"Address found via external search and validated: {search_result.get('reasoning', '')}"
+                        result["geocoding"] = geocoded_result
+                        
+                        success(f"Address found via search: {result['final_address']} (confidence: {result['final_confidence']:.2f})")
+                        return result
+                    else:
+                        # Search found address but geocoding failed
+                        result["final_address"] = extracted_address
+                        result["final_confidence"] = search_result.get("address_confidence", 0.0) * 0.7
+                        result["final_source"] = f"search_{search_result.get('address_source', '')}"
+                        result["address_extraction_method"] = "stage_1_search_unvalidated"
+                        result["reasoning"] = f"Address found via search but geocoding failed: {search_result.get('reasoning', '')}"
+                        result["geocoding"] = geocoded_result
+                        
+                        warning(f"Search address unvalidated: {result['final_address']} (confidence: {result['final_confidence']:.2f})")
+                        return result
             else:
-                info("Stage 2 skipped: No company name provided for search")
                 result["search_analysis"] = {
                     "address_found": False,
-                    "reasoning": "No company name provided for search"
+                    "reasoning": "No company name provided for external search"
                 }
             
-            # No address found
-            if website_result.get("address_found_in_website", False):
-                # Found on website but low confidence
-                result["final_address"] = website_result.get("extracted_address", "")
-                result["final_confidence"] = website_result.get("address_confidence", 0.0)
-                result["final_source"] = f"website_{website_result.get('address_source', '')}"
-                result["address_extraction_method"] = "website_low_confidence"
-                result["reasoning"] = f"Address found on website but with low confidence: {website_result.get('reasoning', '')}"
-                warning(f"Address found but with low confidence: {result['final_address']}")
-            else:
-                # No address found anywhere
-                result["final_address"] = ""
-                result["final_confidence"] = 0.0
-                result["final_source"] = ""
-                result["address_extraction_method"] = "none"
-                result["reasoning"] = "No address found on website or through search"
-                warning("No business address could be found")
+            # ================================================================
+            # NO ADDRESS FOUND
+            # ================================================================
             
+            result["final_address"] = ""
+            result["final_confidence"] = 0.0
+            result["final_source"] = ""
+            result["address_extraction_method"] = "none"
+            result["reasoning"] = "No complete address found on website or through external search"
+            
+            warning("No address found in website or external search")
             return result
             
         except Exception as e:
@@ -1091,7 +1176,7 @@ Focus on finding the PRIMARY business headquarters for {company_name}, especiall
             with open(output_path, 'w', encoding='utf-8') as f:
                 json.dump(address_result, f, indent=2, ensure_ascii=False)
             
-            success(f"Address extraction results saved: {os.path.basename(output_path)}")
+            # Address extraction results saved silently
             return output_path
             
         except Exception as e:

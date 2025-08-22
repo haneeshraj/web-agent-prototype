@@ -64,7 +64,7 @@ class MCCClassifier:
                 return False
             
             self.mcc_df = pd.read_csv(self.mcc_data_path)
-            info(f"Loaded {len(self.mcc_df)} MCC codes from {self.mcc_data_path}")
+            # Load MCC data silently - no need to log count
             return True
             
         except Exception as e:
@@ -386,8 +386,6 @@ IMPORTANT:
             else:
                 system_prompt = "You are an expert at selecting specific MCC codes for businesses. Analyze the website and return JSON."
             
-            processing(f"Querying {self.model_config['model']}...")
-            
             response = self.llm_client.query(
                 model=self.model_config['model'],
                 system_prompt=system_prompt,
@@ -398,8 +396,8 @@ IMPORTANT:
                 temperature=self.model_config.get('temperature', 0.3)
             )
             
-            info(f"{self.model_config['model']} query completed successfully")
-            return response['content'].strip()
+            content = response.get('content') if response else None
+            return content.strip() if content else ""
             
         except Exception as e:
             error_str = str(e)
@@ -471,6 +469,9 @@ IMPORTANT:
             Dict[str, Any]: Parsed JSON response
         """
         try:
+            if not response:
+                return {"error": "Empty response from LLM"}
+                
             # Clean response - remove markdown formatting if present
             response = response.strip()
             if response.startswith('```json'):
@@ -539,8 +540,6 @@ IMPORTANT:
         Returns:
             Dict[str, Any]: Complete MCC classification results
         """
-        processing(f"Starting MCC classification for {domain_name}")
-        
         # Initialize result structure
         result = {
             "domain": domain_name,
@@ -579,10 +578,8 @@ IMPORTANT:
                 return result
             
             result["processing_metadata"]["text_extraction_success"] = True
-            info(f"Extracted {len(text_content)} characters of text")
             
             # 3. Stage 1: Category Classification
-            info("Stage 1: Determining MCC category...")
             stage1_prompt = self._create_stage1_prompt(text_content)
             stage1_response = self._query_llm_with_retry(stage1_prompt, screenshot_path, "stage1")
             stage1_result = self._parse_json_response(stage1_response)
@@ -646,14 +643,13 @@ IMPORTANT:
             success(f"Stage 1 complete: {selected_range} - {stage1_result.get('selected_category_name')}")
             
             # 4. Stage 2: Exact MCC Code Determination
-            info("Stage 2: Determining exact MCC code...")
             candidate_mccs = self._get_category_range_codes(selected_range)
             
             if candidate_mccs.empty:
                 result["error"] = f"No MCC codes found for category {selected_range}"
                 return result
             
-            info(f"Found {len(candidate_mccs)} candidate MCC codes in category")
+            # Found candidate MCC codes (count tracked internally)
             
             stage2_prompt = self._create_stage2_prompt(text_content, selected_range, candidate_mccs)
             stage2_response = self._query_llm_with_retry(stage2_prompt, screenshot_path, "stage2")
@@ -697,9 +693,6 @@ IMPORTANT:
                 stage2_result.get("confidence", 0.0)
             )
             result["classification_success"] = True
-            
-            success(f"MCC Classification complete: {final_mcc} - {result['final_mcc_description']}")
-            success(f"Final confidence: {result['final_confidence']:.2f}")
             
             return result
             

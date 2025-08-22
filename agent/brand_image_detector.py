@@ -86,13 +86,14 @@ VALIDATION RULES:
     - Only select images representing business/brand identity
 
 RESPONSE FORMAT:
-Return a JSON object with this exact structure:
+Return ONLY a valid JSON object with this exact structure - no other text before or after:
 {
-    "brand_image_found": true/false,
+    "brand_image_found": true,
     "confidence": 0.95,
     "selected_image": {
-        // If brand image found, include the exact image object from images array
-        // If not found, use empty object {}
+        "src": "image_url_here",
+        "alt": "alt_text_here",
+        "class": "class_name_here"
     },
     "reasoning": "Detailed explanation of brand image selection or why no brand image found",
     "visual_description": "Description of what the brand image looks like in the screenshot",
@@ -100,44 +101,53 @@ Return a JSON object with this exact structure:
     "company_name_source": "Where the company name was found",
     "company_name_confidence": 0.95,
     "alternative_names": ["other possible business names found"],
-    
-    // NEW: Address Analysis Results
     "address_analysis": {
         "addresses_found": ["list of addresses found on the website"],
-        "confidence": "high|medium|low|none",
+        "confidence": 0.85,
         "primary_address": "Main business address if found",
         "address_components": {
-            "house_number_street": "House number and street name (e.g., '225 Delaware Avenue')",
-            "city": "City name in full form (e.g., 'New York' not 'NYC')",
+            "house_number_street": "House number and street name",
+            "city": "City name in full form",
             "county": "County/District if applicable",
-            "state": "State/Province in full form (e.g., 'New York' not 'NY')",
-            "country": "Country in full form (e.g., 'United States' not 'USA')",
+            "state": "State/Province in full form",
+            "country": "Country in full form",
             "postal_code": "Postal/ZIP code if applicable"
         },
-        "clean_address": "Address without suite numbers or secondary identifiers",
-        "source": "Where address was found (e.g., 'contact page', 'footer', 'about section')",
-        "reasoning": "Explanation of why this address was selected or why none found"
+        "clean_address": "Address without suite numbers",
+        "source": "Where address was found",
+        "reasoning": "Explanation of address selection"
     },
-    
-    // NEW: Location Context Results
     "location_context": {
-        "primary_country": "Country where business was founded/primarily based",
-        "primary_state_province": "State/province of primary location",
-        "primary_city": "City of primary location",
-        "additional_locations": ["other countries/regions mentioned"],
-        "location_confidence": 0.85,
-        "location_reasoning": "Explanation of why this location was identified as primary"
+        "city": "Primary city",
+        "state": "Primary state/province",
+        "country": "Primary country",
+        "region": "Regional context",
+        "local_references": ["local landmarks or references"],
+        "confidence": 0.80
     }
 }
 
+CRITICAL JSON REQUIREMENTS:
+- Return ONLY valid JSON - no markdown code blocks, no explanatory text
+- Use double quotes for all strings
+- No trailing commas
+- All fields must be present with appropriate default values
+- String values cannot be null - use empty string "" if no value
+- Confidence values: use decimal numbers between 0.0 and 1.0 (not strings)
+- If no brand image found, set selected_image to {}
+- All address components must be strings, not null
+
 IMPORTANT:
-- Only return valid JSON
-- If no brand image found, set brand_image_found to false and explain why
-- If no address found, set address_found_on_website to false
+- Return ONLY valid JSON - no markdown, no explanations, no code blocks
+- Use proper JSON syntax with double quotes and no trailing commas
+- All fields must be present - use empty strings "" instead of null
+- If no brand image found, set brand_image_found to false and selected_image to {}
+- If no address found, use empty strings for address fields
 - If no location context found, use empty strings for location fields
 - Always attempt to extract company name even if no brand image found
 - Focus on ORIGINAL/PRIMARY business locations, not expansion markets
-- Confidence scores should be between 0.0 and 1.0"""
+- Use decimal confidence values between 0.0 and 1.0 (e.g., 0.95, 0.75, 0.50)
+"""
 
     def _load_screenshot(self, screenshot_path: str) -> Optional[bytes]:
         """
@@ -351,7 +361,7 @@ Remember to ignore any cookie overlays, popups, or modal dialogs - focus on the 
     
     def _parse_llm_response(self, response_content: str) -> Dict[str, Any]:
         """
-        Parse LLM response and extract JSON.
+        Parse LLM response with robust JSON handling and comprehensive defaults.
         
         Args:
             response_content (str): Raw LLM response
@@ -360,84 +370,165 @@ Remember to ignore any cookie overlays, popups, or modal dialogs - focus on the 
             Dict[str, Any]: Parsed brand image detection result
         """
         try:
-            # Try to find JSON in the response
-            import re
+            # Save raw response for debugging
+            debug_response = response_content[:1000] + "..." if len(response_content) > 1000 else response_content
             
-            # Look for JSON block
+            # Try multiple JSON extraction strategies
+            result = None
+            
+            # Strategy 1: Look for complete JSON block
+            import re
             json_match = re.search(r'\{.*\}', response_content, re.DOTALL)
             if json_match:
                 json_str = json_match.group(0)
-                result = json.loads(json_str)
-                
-                # Validate required keys and add defaults for new fields
-                required_keys = ['brand_image_found', 'confidence', 'selected_image', 'reasoning']
-                
-                new_keys = ['company_name', 'company_name_source', 'company_name_confidence', 'alternative_names']
-                address_keys = ['address_analysis', 'location_context']
-                
-                for key in required_keys:
-                    if key not in result:
-                        result[key] = None
-                
-                # Add default values for company name fields if missing
-                if 'company_name' not in result:
-                    result['company_name'] = ""
-                if 'company_name_source' not in result:
-                    result['company_name_source'] = ""
-                if 'company_name_confidence' not in result:
-                    result['company_name_confidence'] = 0.0
-                if 'alternative_names' not in result:
-                    result['alternative_names'] = []
-                
-                # Add default values for address analysis fields if missing
-                if 'address_analysis' not in result:
-                    result['address_analysis'] = {
-                        'addresses_found': [],
-                        'confidence': 'none',
-                        'primary_address': '',
-                        'address_components': {
-                            'house_number_street': '',
-                            'city': '',
-                            'county': '',
-                            'state': '',
-                            'country': '',
-                            'postal_code': ''
-                        },
-                        'clean_address': '',
-                        'source': '',
-                        'reasoning': 'No address information found'
-                    }
-                elif 'address_components' not in result['address_analysis']:
-                    # Ensure address_components exists in existing address_analysis
-                    result['address_analysis']['address_components'] = {
-                        'house_number_street': '',
-                        'city': '',
-                        'county': '',
-                        'state': '',
-                        'country': '',
-                        'postal_code': ''
-                    }
-                if 'clean_address' not in result.get('address_analysis', {}):
-                    result['address_analysis']['clean_address'] = ''
-                if 'location_context' not in result:
-                    result['location_context'] = {
-                        'city': '',
-                        'state': '',
-                        'country': '',
-                        'region': '',
-                        'local_references': [],
-                        'confidence': 'none'
-                    }
-                
+                try:
+                    result = json.loads(json_str)
+                except json.JSONDecodeError:
+                    # Strategy 2: Try to fix common JSON issues
+                    json_str = self._fix_json_format(json_str)
+                    try:
+                        result = json.loads(json_str)
+                    except json.JSONDecodeError:
+                        # Strategy 3: Extract partial valid JSON
+                        result = self._extract_partial_json(json_str)
+            
+            if result is None:
+                # Strategy 4: Try to extract key information manually
+                result = self._extract_manual_parsing(response_content)
+            
+            # Validate and populate with defaults
+            if result:
+                result = self._ensure_complete_structure(result)
                 return result
             else:
-                # No JSON found, create error result
-                return self._create_error_result("LLM response did not contain valid JSON")
+                return self._create_error_result(f"Failed to parse JSON response. Debug: {debug_response}")
                 
-        except json.JSONDecodeError as e:
-            return self._create_error_result(f"Invalid JSON in response: {str(e)}")
         except Exception as e:
             return self._create_error_result(f"Response parsing failed: {str(e)}")
+    
+    def _fix_json_format(self, json_str: str) -> str:
+        """Fix common JSON formatting issues."""
+        import re
+        # Remove trailing commas
+        json_str = re.sub(r',(\s*[}\]])', r'\1', json_str)
+        # Fix unescaped quotes in strings
+        json_str = re.sub(r'(?<!\\)"(?=[^:,}\]]*")', '\\"', json_str)
+        # Ensure proper quote consistency
+        json_str = re.sub(r"'([^']*)':", r'"\1":', json_str)
+        return json_str
+    
+    def _extract_partial_json(self, json_str: str) -> Dict[str, Any]:
+        """Extract valid JSON from a potentially corrupted response."""
+        try:
+            # Try to find valid JSON blocks within the string
+            brace_count = 0
+            for i, char in enumerate(json_str):
+                if char == '{':
+                    brace_count += 1
+                elif char == '}':
+                    brace_count -= 1
+                    if brace_count == 0:
+                        # Found a complete JSON block
+                        partial_json = json_str[:i+1]
+                        try:
+                            return json.loads(partial_json)
+                        except json.JSONDecodeError:
+                            continue
+        except Exception:
+            pass
+        return None
+    
+    def _extract_manual_parsing(self, response_content: str) -> Dict[str, Any]:
+        """Manually extract key information when JSON parsing fails."""
+        import re
+        result = {}
+        
+        # Extract company name manually
+        company_patterns = [
+            r'"company_name":\s*"([^"]+)"',
+            r"'company_name':\s*'([^']+)'",
+            r'company name.*?[:\-]\s*([A-Za-z0-9\s&.-]+)',
+            r'business name.*?[:\-]\s*([A-Za-z0-9\s&.-]+)'
+        ]
+        
+        for pattern in company_patterns:
+            match = re.search(pattern, response_content, re.IGNORECASE)
+            if match:
+                result['company_name'] = match.group(1).strip()
+                result['company_name_source'] = 'manual_extraction'
+                result['company_name_confidence'] = 0.7
+                break
+        
+        # Extract brand detection result
+        if re.search(r'brand.*found|logo.*detected|brand.*present', response_content, re.IGNORECASE):
+            result['brand_image_found'] = True
+            result['confidence'] = 0.6
+        else:
+            result['brand_image_found'] = False
+            result['confidence'] = 0.2
+        
+        return result if result else None
+    
+    def _ensure_complete_structure(self, result: Dict[str, Any]) -> Dict[str, Any]:
+        """Ensure the result has all required fields with proper defaults."""
+        # Validate required keys and add defaults for new fields
+        required_keys = ['brand_image_found', 'confidence', 'selected_image', 'reasoning']
+        
+        for key in required_keys:
+            if key not in result:
+                result[key] = None
+        
+        # Add default values for company name fields if missing
+        if 'company_name' not in result:
+            result['company_name'] = ""
+        if 'company_name_source' not in result:
+            result['company_name_source'] = ""
+        if 'company_name_confidence' not in result:
+            result['company_name_confidence'] = 0.0
+        if 'alternative_names' not in result:
+            result['alternative_names'] = []
+        
+        # Add default values for address analysis fields if missing
+        if 'address_analysis' not in result:
+            result['address_analysis'] = {
+                'addresses_found': [],
+                'confidence': 0.0,
+                'primary_address': '',
+                'address_components': {
+                    'house_number_street': '',
+                    'city': '',
+                    'county': '',
+                    'state': '',
+                    'country': '',
+                    'postal_code': ''
+                },
+                'clean_address': '',
+                'source': '',
+                'reasoning': 'No address information found'
+            }
+        elif 'address_components' not in result['address_analysis']:
+            # Ensure address_components exists in existing address_analysis
+            result['address_analysis']['address_components'] = {
+                'house_number_street': '',
+                'city': '',
+                'county': '',
+                'state': '',
+                'country': '',
+                'postal_code': ''
+            }
+        if 'clean_address' not in result.get('address_analysis', {}):
+            result['address_analysis']['clean_address'] = ''
+        if 'location_context' not in result:
+            result['location_context'] = {
+                'city': '',
+                'state': '',
+                'country': '',
+                'region': '',
+                'local_references': [],
+                'confidence': 0.0
+            }
+        
+        return result
     
     def _create_error_result(self, reason: str) -> Dict[str, Any]:
         """
@@ -451,7 +542,7 @@ Remember to ignore any cookie overlays, popups, or modal dialogs - focus on the 
         """
         return {
             'brand_image_found': False,
-            'confidence': 'none',
+            'confidence': 0.0,
             'selected_image': {},
             'reasoning': reason,
             'visual_description': 'Analysis failed',
@@ -461,7 +552,7 @@ Remember to ignore any cookie overlays, popups, or modal dialogs - focus on the 
             'alternative_names': [],
             'address_analysis': {
                 'addresses_found': [],
-                'confidence': 'none',
+                'confidence': 0.0,
                 'primary_address': '',
                 'address_components': {
                     'house_number_street': '',
@@ -481,7 +572,7 @@ Remember to ignore any cookie overlays, popups, or modal dialogs - focus on the 
                 'country': '',
                 'region': '',
                 'local_references': [],
-                'confidence': 'none'
+                'confidence': 0.0
             },
             'analysis_metadata': {
                 'error': True,
