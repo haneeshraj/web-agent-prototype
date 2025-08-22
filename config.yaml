@@ -1,5 +1,9 @@
 agent:
   classifier-agent:
     model: "gemini-2.5-flash"
-    max_tokens: 4096
+    max_tokens: 8192
     temperature: 0.3
+
+processing:
+  website_delay_seconds: 50 # Delay between processing each website (in seconds)
+  rate_limit_delay_seconds: 10 # Rate limiting delay within each website processing

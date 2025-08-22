@@ -23,6 +23,7 @@ import requests
 # Import your utility functions
 from utils.file_utils import load_website_data
 from utils.terminal_prettify import success, error, warning, info, processing, completed, header
+from utils.config import get_config
 from agent.brand_image_detector import BrandImageDetector
 from agent.mcc_classifier import MCCClassifier
 from agent.address_extractor import AddressExtractor
@@ -112,6 +113,11 @@ class WebsiteInformationExtractor:
         self.base_data_dir = None  # Will be set from loaded data
         self.summary_data = []
         self.download_images_dir = None  # Will be set when needed
+        
+        # Load configuration
+        self.config = get_config()
+        self.website_delay = self.config.get('processing.website_delay_seconds', 60)
+        self.rate_limit_delay = self.config.get('processing.rate_limit_delay_seconds', 10)
         
         # Initialize brand image detector and MCC classifier
         self.brand_image_detector = BrandImageDetector()
@@ -776,8 +782,8 @@ class WebsiteInformationExtractor:
                 extraction_data["files_created"].append("address_extraction.json")
             
             # Rate limiting with better display
-            print_tree_item("Rate limit delay (10 seconds)", level=1, status="info")
-            time.sleep(10)
+            print_tree_item(f"Rate limit delay ({self.rate_limit_delay} seconds)", level=1, status="info")
+            time.sleep(self.rate_limit_delay)
             
             extraction_data["status"] = "success"
             extraction_data["load_time_seconds"] = round(time.time() - start_time, 2)
@@ -1099,9 +1105,11 @@ class WebsiteInformationExtractor:
                 extract_result = self.extract_website_information(url)
                 self.summary_data.append(extract_result)
                 
-                # Small delay between requests to be respectful
+                # Delay between website processing (configurable)
                 if i < len(websites_data):
-                    time.sleep(2)
+                    if self.website_delay > 0:
+                        print_tree_item(f"Website processing delay ({self.website_delay} seconds)", level=1, status="info")
+                        time.sleep(self.website_delay)
             
             # Save summary
             summary_path = self.save_summary()
