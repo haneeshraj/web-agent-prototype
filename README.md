@@ -175,7 +175,99 @@ This guide will walk you through setting up Business Insights locally, from clon
 
 ---
 
-## 🛠️ Local Setup Instructions
+## 🛠️ Setup Instructions
+
+### 🐳 **Docker Setup (Recommended)**
+
+Docker provides the most reliable and consistent setup experience across all platforms.
+
+#### **Prerequisites**
+
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running
+
+#### **Quick Start with Docker**
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/haneeshraj/business-insights.git
+cd business-insights
+
+# 2. Create environment file
+cp .env.example .env
+# Edit .env with your API keys (see Environment Variables section below)
+
+# 3. Build and run with Docker
+docker build -t business-insights .
+docker run -d -p 8000:8000 --name business-insights-app business-insights
+
+# 4. Access the API
+# API Documentation: http://localhost:8000/docs
+# Health Check: http://localhost:8000/health
+```
+
+#### **Docker Compose (Alternative)**
+
+Create a `docker-compose.yml` file:
+
+```yaml
+version: "3.8"
+services:
+  business-insights:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - SERPAPI_KEY=${SERPAPI_KEY}
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
+```
+
+```bash
+# Run with Docker Compose
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop the service
+docker-compose down
+```
+
+#### **Docker Commands Reference**
+
+```bash
+# Build image
+docker build -t business-insights .
+
+# Run container
+docker run -d -p 8000:8000 --name business-insights-app business-insights
+
+# Run with environment file
+docker run -d -p 8000:8000 --env-file .env business-insights
+
+# Run with mounted data directory
+docker run -d -p 8000:8000 -v $(pwd)/data:/app/data business-insights
+
+# View logs
+docker logs business-insights-app
+
+# Stop container
+docker stop business-insights-app
+
+# Remove container
+docker rm business-insights-app
+
+# Access container shell
+docker exec -it business-insights-app bash
+```
+
+---
+
+## 🛠️ Local Development Setup
 
 ### 1️⃣ **Clone the Repository**
 
@@ -471,6 +563,131 @@ Experience Business Insights in action with our live demonstration featuring:
 <!-- Add Sample Results Screenshot Here -->
 
 ![Sample Results Dashboard](assets/sample-results.png)
+
+---
+
+## 🚀 Deployment
+
+### **Docker Production Deployment**
+
+For production deployments, use the optimized Docker setup:
+
+```bash
+# 1. Clone and setup
+git clone https://github.com/haneeshraj/business-insights.git
+cd business-insights
+
+# 2. Create production environment file
+cp .env.example .env
+# Add your production API keys to .env
+
+# 3. Build and deploy
+docker build -t business-insights:latest .
+docker run -d \
+  --name business-insights-prod \
+  -p 8000:8000 \
+  --env-file .env \
+  --restart unless-stopped \
+  business-insights:latest
+
+# 4. Verify deployment
+curl http://localhost:8000/health
+```
+
+### **Hugging Face Spaces Deployment**
+
+Deploy directly to Hugging Face Spaces for cloud hosting:
+
+```bash
+# 1. Create HF Spaces repository
+# Visit: https://huggingface.co/new-space
+# Choose: Docker SDK
+
+# 2. Clone your HF Spaces repo
+git clone https://huggingface.co/spaces/YOUR_USERNAME/YOUR_SPACE_NAME
+cd YOUR_SPACE_NAME
+
+# 3. Copy project files
+cp -r /path/to/business-insights/* .
+
+# 4. Add HF Spaces configuration to README.md
+---
+title: Business Insights API
+emoji: 🔍
+colorFrom: blue
+colorTo: purple
+sdk: docker
+pinned: false
+license: mit
+---
+
+# 5. Configure secrets in HF Spaces settings:
+# - OPENAI_API_KEY
+# - ANTHROPIC_API_KEY
+# - GEMINI_API_KEY
+# - SERPAPI_KEY
+
+# 6. Deploy
+git add .
+git commit -m "Deploy Business Insights API"
+git push origin main
+```
+
+### **Cloud Platform Deployment**
+
+#### **AWS ECS/Fargate**
+
+```bash
+# Build and push to ECR
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin YOUR_ECR_URI
+docker build -t business-insights .
+docker tag business-insights:latest YOUR_ECR_URI:latest
+docker push YOUR_ECR_URI:latest
+```
+
+#### **Google Cloud Run**
+
+```bash
+# Deploy to Cloud Run
+gcloud run deploy business-insights \
+  --image gcr.io/YOUR_PROJECT/business-insights \
+  --platform managed \
+  --region us-central1 \
+  --allow-unauthenticated
+```
+
+#### **Azure Container Instances**
+
+```bash
+# Deploy to Azure
+az container create \
+  --resource-group myResourceGroup \
+  --name business-insights \
+  --image YOUR_REGISTRY/business-insights:latest \
+  --ports 8000
+```
+
+### **Environment Variables for Production**
+
+```bash
+# Required API Keys
+OPENAI_API_KEY=your_openai_key
+ANTHROPIC_API_KEY=your_anthropic_key
+GEMINI_API_KEY=your_gemini_key
+SERPAPI_KEY=your_serpapi_key
+
+# Production Configuration
+API_HOST=0.0.0.0
+API_PORT=8000
+API_LOG_LEVEL=info
+API_TIMEOUT=600
+API_MAX_REQUESTS=10
+API_CORS_ORIGINS=https://yourdomain.com
+
+# Chrome Configuration (for containers)
+CHROME_BIN=/usr/bin/chromium
+DISPLAY=:99
+```
 
 ---
 

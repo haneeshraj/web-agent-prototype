@@ -1,0 +1,58 @@
+version: "3.8"
+
+services:
+  business-insights:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      # AI Provider API Keys
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+
+      # Search API Key
+      - SERPAPI_KEY=${SERPAPI_KEY}
+
+      # API Configuration
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+      - API_LOG_LEVEL=info
+      - API_TIMEOUT=600
+      - API_MAX_REQUESTS=5
+      - API_CORS_ORIGINS=*
+
+      # Chrome Configuration
+      - CHROME_BIN=/usr/bin/chromium
+      - DISPLAY=:99
+    volumes:
+      # Mount data directory to persist results
+      - ./data:/app/data
+
+      # Mount configuration files
+      - ./config.yaml:/app/config.yaml
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Optional: Development setup with live reload
+  business-insights-dev:
+    build: .
+    ports:
+      - "8001:8000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - SERPAPI_KEY=${SERPAPI_KEY}
+    volumes:
+      - .:/app
+      - ./data:/app/data
+    command: uvicorn app:app --host 0.0.0.0 --port 8000 --reload
+    restart: unless-stopped
+    profiles:
+      - dev

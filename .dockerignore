@@ -1,0 +1,84 @@
+# Git and version control
+.git
+.gitignore
+.gitattributes
+README.md
+LICENSE
+
+# Environment and configuration
+.env
+.env.*
+!.env.example
+
+# Python cache and compiled files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+.coverage
+.pytest_cache/
+*.egg-info/
+build/
+dist/
+
+# Runtime data and logs (should not be in container)
+data/runs/
+data/api_runs/
+data/stats/
+logs/
+*.log
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+.tmp/
+
+# Development files
+docker-compose.yml
+docker-compose.override.yml
+Dockerfile.dev
+
+# Documentation and assets (optional - remove if you want them in container)
+assets/
+docs/
+
+# Test files (optional)
+test_*.py
+*_test.py
+tests/
+
+# Node modules (if any)
+node_modules/
+
+# Virtual environments
+venv/
+env/
+.venv/
+.env/
+
+# Jupyter notebooks
+*.ipynb
+.ipynb_checkpoints/
+
+# Large data files (keep only essential data)
+*.zip
+*.tar.gz
+*.rar
